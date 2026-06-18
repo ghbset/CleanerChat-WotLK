@@ -309,7 +309,7 @@ ns.AddMessageFiltered = function(self, chatFrame, msg, r, g, b, chatID, ...)
 		end
 	end
 
-	return self.MethodCache[chatFrame](chatFrame, msg, r, g, b, chatID, ...)
+	return self.MethodCache[chatFrame](chatFrame, msg, r, g, b)
 end
 
 ns.CacheMessageMethod = function(self, chatFrame)

@@ -80,7 +80,7 @@ Module.SpecialFrameWasHidden = function(self)
 
 		local info = ChatTypeInfo["SYSTEM"]
 
-		DEFAULT_CHAT_FRAME:AddMessage(msg, info.r, info.g, info.b, info.id)
+		DEFAULT_CHAT_FRAME:AddMessage(msg, info.r, info.g, info.b)
 	end
 
 	if (self.queuedStarted) then
@@ -90,7 +90,7 @@ Module.SpecialFrameWasHidden = function(self)
 
 		local info = ChatTypeInfo["SYSTEM"]
 
-		DEFAULT_CHAT_FRAME:AddMessage(msg, info.r, info.g, info.b, info.id)
+		DEFAULT_CHAT_FRAME:AddMessage(msg, info.r, info.g, info.b)
 	end
 end
 

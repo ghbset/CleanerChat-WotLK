@@ -61,38 +61,22 @@ local G = {
 local CURRENT_CHAT_FRAME
 
 -- Return a coin texture string.
+-- Note: In 3.3.5, always use Blizzard coin icons for reliability
 local Coin = setmetatable({}, { __index = function(t,k)
-	local useBlizz = ns.db.useBlizzardCoins
 	local frame = CURRENT_CHAT_FRAME or DEFAULT_CHAT_FRAME or ChatFrame1
 	local _,size = frame:GetFont()
 
 	size = size or 20
-	if (size > 15) then
-		size = math_floor(size * (useBlizz and .6 or .8))
-	else
-		size = math_floor(size * (useBlizz and 1 or 1.25))
-	end
+	size = math_floor(size * 0.8)
+	if size < 10 then size = 10 end
 
+	-- Use Blizzard coin textures (always available in 3.3.5)
 	if (k == "Gold") then
-		if (useBlizz) then
-			return string_format([[|TInterface\MoneyFrame\UI-GoldIcon:%d:%d:2:0|t]], size, size)
-		else
-			return string_format([[|TInterface\AddOns\%s\Assets\coins.tga:%d:%d:-2:0:64:64:0:32:0:32|t]], Addon, size, size)
-		end
-
+		return string_format([[|TInterface\MoneyFrame\UI-GoldIcon:%d:%d:2:0|t]], size, size)
 	elseif (k == "Silver") then
-		if (useBlizz) then
-			return string_format([[|TInterface\MoneyFrame\UI-SilverIcon:%d:%d:2:0|t]], size, size)
-		else
-			return string_format([[|TInterface\AddOns\%s\Assets\coins.tga:%d:%d:-2:0:64:64:32:64:0:32|t]], Addon, size, size)
-		end
-
+		return string_format([[|TInterface\MoneyFrame\UI-SilverIcon:%d:%d:2:0|t]], size, size)
 	elseif (k == "Copper") then
-		if (useBlizz) then
-			return string_format([[|TInterface\MoneyFrame\UI-CopperIcon:%d:%d:2:0|t]], size, size)
-		else
-			return string_format([[|TInterface\AddOns\%s\Assets\coins.tga:%d:%d:-2:0:64:64:0:32:32:64|t]], Addon, size, size)
-		end
+		return string_format([[|TInterface\MoneyFrame\UI-CopperIcon:%d:%d:2:0|t]], size, size)
 	end
 end })
 
@@ -158,14 +142,18 @@ end
 local formatMoney = function(gold, silver, copper, colorCode)
 	colorCode = colorCode or "|cfff0f0f0"
 	local msg
-	if (gold > 0) then
+	if (gold and gold > 0) then
 		msg = string_format(colorCode.."%s|r%s", prettify(gold), Coin["Gold"])
 	end
-	if (silver > 0) then
+	if (silver and silver > 0) then
 		msg = (msg and msg.." " or "") .. string_format(colorCode.."%d|r%s", silver, Coin["Silver"])
 	end
-	if (copper > 0) then
+	if (copper and copper > 0) then
 		msg = (msg and msg.." " or "") .. string_format(colorCode.."%d|r%s", copper, Coin["Copper"])
+	end
+	-- Fallback if all values are 0
+	if (not msg or msg == "") then
+		msg = colorCode.."0|r"..Coin["Copper"]
 	end
 	return msg
 end
@@ -306,18 +294,21 @@ Module.OnReplacementSet = function(self, msg, r, g, b, chatID, ...)
 end
 
 -- Output the message only to windows with the MONEY channel enabled.
+-- Note: We need to bypass the addon's hooked AddMessage to avoid infinite loops
 Module.AddMessage = function(self, msg, r, g, b, chatID, ...)
-	local chatWindow
-	for _,chatFrameName in pairs(CHAT_FRAMES) do
-		chatWindow = _G[chatFrameName]
+	if (not msg) or (msg == "") then return end
 
-		-- Don't use ChatFrame_ContainsChannel,
-		-- that only registers manually joined channels,
-		-- it does not apply to message groups.
-		if (chatWindow and ChatFrame_ContainsMessageGroup(chatWindow, "MONEY")) then
-			CURRENT_CHAT_FRAME = chatWindow
-			chatWindow:AddMessage(msg, r, g, b, chatID, ...)
-			CURRENT_CHAT_FRAME = nil
+	-- In 3.3.5, just print to the default chat frame
+	-- The hooked AddMessage causes issues, so we use the raw print method
+	local chatFrame = DEFAULT_CHAT_FRAME or ChatFrame1
+	if (chatFrame) then
+		-- Use the cached original method if available, otherwise use raw AddMessage
+		local originalMethod = ns.MethodCache and ns.MethodCache[chatFrame]
+		if (originalMethod) then
+			originalMethod(chatFrame, msg, r, g, b)
+		else
+			-- Fallback: print is always safe
+			print(msg)
 		end
 	end
 end
@@ -347,22 +338,27 @@ Module.OnEvent = function(self, event, ...)
 		if (self.playerMoney) then
 			local money = currentMoney - self.playerMoney
 
-			local value = math_abs(money)
-			local g = math_floor(value / 1e4)
-			local s = math_floor((value - (g*1e4)) / 100)
-			local c = math_mod(value, 100)
+			if (money ~= 0) then
+				local value = math_abs(money)
+				local g = math_floor(value / 1e4)
+				local s = math_floor((value - (g*1e4)) / 100)
+				local c = math_mod(value, 100)
 
-			if (money > 0) then
-				local msg = string_format(ns.out.money, formatMoney(g,s,c))
-				local info = ChatTypeInfo["MONEY"]
+				-- Get chat color info (with fallback)
+				local info = ChatTypeInfo and ChatTypeInfo["MONEY"]
+				local r = info and info.r or 1
+				local gb = info and info.g or 1
+				local b = info and info.b or 0
 
-				self:AddMessage(msg, info.r, info.g, info.b, info.id)
+				if (money > 0) then
+					local msg = string_format(ns.out.money, formatMoney(g,s,c))
+					self:AddMessage(msg, r, gb, b)
 
-			elseif (money < 0) then
-				local msg = string_format(ns.out.money_deficit, formatMoney(g,s,c, ns.Colors.palered.colorCode))
-				local info = ChatTypeInfo["MONEY"]
-
-				self:AddMessage(msg, info.r, info.g, info.b, info.id)
+				elseif (money < 0) then
+					local palered = ns.Colors and ns.Colors.palered and ns.Colors.palered.colorCode or "|cffcc4444"
+					local msg = string_format(ns.out.money_deficit, formatMoney(g,s,c, palered))
+					self:AddMessage(msg, r, gb, b)
+				end
 			end
 		end
 

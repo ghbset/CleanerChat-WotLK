@@ -134,15 +134,15 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 				local msg
 				local learned = self.abilities + self.passives + self.spells
 				if (learned > 1) then
-					DEFAULT_CHAT_FRAME:AddMessage(string_format(ns.out.item_multiple, G.SPELLS, learned), info.r, info.g, info.b, info.id)
+					DEFAULT_CHAT_FRAME:AddMessage(string_format(ns.out.item_multiple, G.SPELLS, learned), info.r, info.g, info.b)
 				elseif (learned > 0) then
-					DEFAULT_CHAT_FRAME:AddMessage(string_format(ns.out.item_single, G.SPELLS), info.r, info.g, info.b, info.id)
+					DEFAULT_CHAT_FRAME:AddMessage(string_format(ns.out.item_single, G.SPELLS), info.r, info.g, info.b)
 				end
 
 				if (self.unlearned > 1) then
-					DEFAULT_CHAT_FRAME:AddMessage(string_format(ns.out.item_deficit_multiple, G.SPELLS, self.unlearned), info.r, info.g, info.b, info.id)
+					DEFAULT_CHAT_FRAME:AddMessage(string_format(ns.out.item_deficit_multiple, G.SPELLS, self.unlearned), info.r, info.g, info.b)
 				elseif (self.unlearned > 0) then
-					DEFAULT_CHAT_FRAME:AddMessage(string_format(ns.out.item_deficit, G.SPELLS), info.r, info.g, info.b, info.id)
+					DEFAULT_CHAT_FRAME:AddMessage(string_format(ns.out.item_deficit, G.SPELLS), info.r, info.g, info.b)
 				end
 
 				self.abilities = 0
@@ -150,7 +150,7 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 				self.spells = 0
 				self.unlearned = 0
 
-				self.timer:CancelTimer()
+				self.timer:Cancel()
 				self.timer = nil
 				self.latest = nil
 			end
