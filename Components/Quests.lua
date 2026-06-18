@@ -39,18 +39,18 @@ local string_format = string.format
 local string_gsub = string.gsub
 local string_match = string.match
 
--- WoW Globals
+-- WoW Globals (some may be nil in older clients like 3.3.5)
 local G = {
-	SET_COMPLETE = ERR_COMPLETED_TRANSMOG_SET_S, -- "You've completed the set %s."
-	QUEST_ACCEPTED = ERR_QUEST_ACCEPTED_S, -- "Quest accepted: %s"
-	QUEST_ALREADY_DONE = ERR_QUEST_ALREADY_DONE, -- "You have completed that quest.";
-	QUEST_ALREADY_DONE_DAILY = ERR_QUEST_ALREADY_DONE_DAILY, -- "You have completed that daily quest today."
-	QUEST_FAILED_TOO_MANY_DAILY = ERR_QUEST_FAILED_TOO_MANY_DAILY_QUESTS_I, -- "You have already completed %d daily quests today"
-	NO_DAILY_QUESTS_REMAINING = NO_DAILY_QUESTS_REMAINING, -- "You cannot complete any more daily quests today."
-	QUEST_COMPLETE = ERR_QUEST_COMPLETE_S, -- "%s completed."
-	QUEST = BATTLE_PET_SOURCE_2, -- "Quest"
-	ACCEPTED = CALENDAR_STATUS_ACCEPTED, -- "Accepted"
-	COMPLETE = COMPLETE -- "Complete"
+	SET_COMPLETE = ERR_COMPLETED_TRANSMOG_SET_S or "", -- "You've completed the set %s."
+	QUEST_ACCEPTED = ERR_QUEST_ACCEPTED_S or "", -- "Quest accepted: %s"
+	QUEST_ALREADY_DONE = ERR_QUEST_ALREADY_DONE or "", -- "You have completed that quest.";
+	QUEST_ALREADY_DONE_DAILY = ERR_QUEST_ALREADY_DONE_DAILY or "", -- "You have completed that daily quest today."
+	QUEST_FAILED_TOO_MANY_DAILY = ERR_QUEST_FAILED_TOO_MANY_DAILY_QUESTS_I or "", -- "You have already completed %d daily quests today"
+	NO_DAILY_QUESTS_REMAINING = NO_DAILY_QUESTS_REMAINING or "", -- "You cannot complete any more daily quests today."
+	QUEST_COMPLETE = ERR_QUEST_COMPLETE_S or "", -- "%s completed."
+	QUEST = BATTLE_PET_SOURCE_2 or QUEST_LOG or "Quest", -- "Quest" (BATTLE_PET_SOURCE_2 doesn't exist in 3.3.5)
+	ACCEPTED = CALENDAR_STATUS_ACCEPTED or "Accepted", -- "Accepted"
+	COMPLETE = COMPLETE or "Complete" -- "Complete"
 }
 
 -- Convert a WoW global string to a search pattern

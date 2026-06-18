@@ -38,13 +38,13 @@ local string_gsub = string.gsub
 local string_match = string.match
 local table_insert = table.insert
 
--- WoW Globals
+-- WoW Globals (some may be nil in older clients like 3.3.5)
 local G = {
 	CHAT_BATTLEGROUND_GET = CHAT_BATTLEGROUND_GET,
 	CHAT_BATTLEGROUND_LEADER_GET = CHAT_BATTLEGROUND_LEADER_GET,
 	CHAT_GUILD_GET = CHAT_GUILD_GET,
-	CHAT_INSTANCE_CHAT_GET = CHAT_INSTANCE_CHAT_GET,
-	CHAT_INSTANCE_CHAT_LEADER_GET = CHAT_INSTANCE_CHAT_LEADER_GET,
+	CHAT_INSTANCE_CHAT_GET = CHAT_INSTANCE_CHAT_GET, -- May be nil in 3.3.5
+	CHAT_INSTANCE_CHAT_LEADER_GET = CHAT_INSTANCE_CHAT_LEADER_GET, -- May be nil in 3.3.5
 	CHAT_PARTY_GET = CHAT_PARTY_GET,
 	CHAT_PARTY_LEADER_GET = CHAT_PARTY_LEADER_GET,
 	CHAT_RAID_GET = CHAT_RAID_GET,
@@ -52,7 +52,7 @@ local G = {
 	CHAT_RAID_WARNING_GET = CHAT_RAID_WARNING_GET,
 	CHAT_OFFICER_GET = CHAT_OFFICER_GET,
 	CHAT_YOU_CHANGED_NOTICE =  CHAT_YOU_CHANGED_NOTICE, -- "Changed Channel: |Hchannel:%d|h[%s]|h"
-	CHAT_YOU_CHANGED_NOTICE_BN =  CHAT_YOU_CHANGED_NOTICE_BN -- "Changed Channel: |Hchannel:CHANNEL:%d|h[%s]|h"
+	CHAT_YOU_CHANGED_NOTICE_BN =  CHAT_YOU_CHANGED_NOTICE_BN -- "Changed Channel: |Hchannel:CHANNEL:%d|h[%s]|h" (may be nil in 3.3.5)
 }
 
 Module.OnInitialize = function(self)
@@ -68,8 +68,15 @@ Module.OnInitialize = function(self)
 	table_insert(self.replacements, {"%["..string_match(G.CHAT_PARTY_GET, "%[(.-)%]") .. "%]", L["P"]})
 	table_insert(self.replacements, {"%["..string_match(G.CHAT_RAID_LEADER_GET, "%[(.-)%]") .. "%]", L["RL"]})
 	table_insert(self.replacements, {"%["..string_match(G.CHAT_RAID_GET, "%[(.-)%]") .. "%]", L["R"]})
-	table_insert(self.replacements, {"%["..string_match(G.CHAT_INSTANCE_CHAT_LEADER_GET, "%[(.-)%]") .. "%]", L["IL"]})
-	table_insert(self.replacements, {"%["..string_match(G.CHAT_INSTANCE_CHAT_GET, "%[(.-)%]") .. "%]", L["I"]})
+
+	-- Instance chat didn't exist in 3.3.5 - only add these replacements if the globals exist
+	if (G.CHAT_INSTANCE_CHAT_LEADER_GET) then
+		table_insert(self.replacements, {"%["..string_match(G.CHAT_INSTANCE_CHAT_LEADER_GET, "%[(.-)%]") .. "%]", L["IL"]})
+	end
+	if (G.CHAT_INSTANCE_CHAT_GET) then
+		table_insert(self.replacements, {"%["..string_match(G.CHAT_INSTANCE_CHAT_GET, "%[(.-)%]") .. "%]", L["I"]})
+	end
+
 	table_insert(self.replacements, {"%["..string_match(G.CHAT_GUILD_GET, "%[(.-)%]") .. "%]", L["G"]})
 	table_insert(self.replacements, {"%["..string_match(G.CHAT_OFFICER_GET, "%[(.-)%]") .. "%]", L["O"]})
 	table_insert(self.replacements, {"%["..string_match(G.CHAT_RAID_WARNING_GET, "%[(.-)%]") .. "%]", "|cffff0000!|r"})

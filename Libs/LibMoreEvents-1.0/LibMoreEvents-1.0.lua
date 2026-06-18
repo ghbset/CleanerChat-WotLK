@@ -59,9 +59,12 @@ local validator = lib.validator
 
 -- Frame Methods
 local registerEvent = frame.RegisterEvent
-local registerUnitEvent = frame.RegisterUnitEvent
+local registerUnitEvent = frame.RegisterUnitEvent -- May be nil in 3.3.5
 local unregisterEvent = frame.UnregisterEvent
 local isEventRegistered = frame.IsEventRegistered
+
+-- 3.3.5 Compatibility: RegisterUnitEvent doesn't exist
+local hasRegisterUnitEvent = (registerUnitEvent ~= nil)
 
 -- Event Handling
 --------------------------------------------------
@@ -139,6 +142,10 @@ local validateEvent = function(event)
 end
 
 local validateUnit = function(unit)
+	-- 3.3.5 Compatibility: RegisterUnitEvent doesn't exist
+	if (not hasRegisterUnitEvent) then
+		return true -- Assume all units are valid
+	end
 	local isOK, _ = pcall(validator.RegisterUnitEvent, validator, "UNIT_HEALTH", unit)
 	if (isOK) then
 		_, unit = validator:IsEventRegistered("UNIT_HEALTH")
@@ -148,6 +155,10 @@ local validateUnit = function(unit)
 end
 
 local isUnitEvent = function(event, unit)
+	-- 3.3.5 Compatibility: RegisterUnitEvent doesn't exist
+	if (not hasRegisterUnitEvent) then
+		return false
+	end
 	local isOK = pcall(validator.RegisterUnitEvent, validator, event, unit)
 	if (isOK) then
 		validator:UnregisterEvent(event)
@@ -210,6 +221,11 @@ You must unregister the event in order to switch to or from an Frame:RegisterEve
 * unit2     - second unitID to deliver the event for (string,nil)
 --]]
 lib.RegisterUnitEvent = function(self, event, callback, unit1, unit2)
+	-- 3.3.5 Compatibility: Fall back to RegisterEvent if RegisterUnitEvent doesn't exist
+	if (not hasRegisterUnitEvent) then
+		return lib.RegisterEvent(self, event, callback)
+	end
+
 	local curev = events[event][self]
 	if (curev) then
 		local kind = type(curev)

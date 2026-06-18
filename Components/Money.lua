@@ -43,7 +43,7 @@ local string_gsub = string.gsub
 local string_match = string.match
 local tonumber = tonumber
 
--- WoW Globals
+-- WoW Globals (some may be nil in older clients like 3.3.5)
 local G = {
 	GOLD_AMOUNT = GOLD_AMOUNT,
 	GOLD_AMOUNT_SYMBOL = GOLD_AMOUNT_SYMBOL,
@@ -51,10 +51,10 @@ local G = {
 	SILVER_AMOUNT_SYMBOL = SILVER_AMOUNT_SYMBOL,
 	COPPER_AMOUNT = COPPER_AMOUNT,
 	COPPER_AMOUNT_SYMBOL = COPPER_AMOUNT_SYMBOL,
-	LARGE_NUMBER_SEPERATOR = LARGE_NUMBER_SEPERATOR,
-	ANIMA = POWER_TYPE_ANIMA,
-	ANIMA_V2 = POWER_TYPE_ANIMA_V2,
-	ANIMA_LABEL = ns.Colors.quality.Rare.colorCode .. POWER_TYPE_ANIMA .. "|r"
+	LARGE_NUMBER_SEPERATOR = LARGE_NUMBER_SEPERATOR or ",",
+	ANIMA = POWER_TYPE_ANIMA, -- May be nil (Shadowlands+)
+	ANIMA_V2 = POWER_TYPE_ANIMA_V2, -- May be nil (Shadowlands+)
+	ANIMA_LABEL = POWER_TYPE_ANIMA and (ns.Colors.quality.Rare.colorCode .. POWER_TYPE_ANIMA .. "|r") or nil
 }
 
 -- To correctly track frame and font sizes

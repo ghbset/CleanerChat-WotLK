@@ -45,28 +45,29 @@ local table_insert = table.insert
 local table_remove = table.remove
 local tonumber = tonumber
 
--- WoW Globals
+-- WoW Globals (some may be nil in older clients like 3.3.5)
 local G = {
 
-	LEARN_BATTLE_PET = BATTLE_PET_NEW_PET, -- "%s has been added to your pet journal!"
-	LEARN_COMPANION = ERR_LEARN_COMPANION_S, -- "You have added the pet %s to your collection."
-	LEARN_HEIRLOOM = ERR_LEARN_HEIRLOOM_S, -- "%s has been added to your heirloom collection."
-	LEARN_MOUNT = ERR_LEARN_MOUNT_S, -- "You have added the mount %s to your collection."
-	LEARN_TOY = ERR_LEARN_TOY_S, -- "%s has been added to your Toy Box."
-	LEARN_TRANSMOG = ERR_LEARN_TRANSMOG_S, -- "%s has been added to your appearance collection."
-	COMPANIONS = COMPANIONS, -- "Companions"
-	HEIRLOOMS = HEIRLOOMS, -- "Heirlooms"
-	MOUNTS = MOUNTS, -- "Mounts"
-	PETS = PETS, -- "Pets"
-	TOY_BOX = TOY_BOX, -- "Toy Box"
-	WARDROBE = WARDROBE, -- "Appearances"
-	LOOT_SPEC_CHANGED = ERR_LOOT_SPEC_CHANGED_S, -- "Loot Specialization set to: %s"
-	SELECT_LOOT_SPECIALIZATION = SELECT_LOOT_SPECIALIZATION, -- "Loot Specialization"
-	HONOR_POINTS = HONOR_POINTS, -- "Honor Points"
-	COMBATLOG_HONORAWARD = COMBATLOG_HONORAWARD, -- "You have been awarded %d honor points."
-	COMBATLOG_HONORGAIN  = COMBATLOG_HONORGAIN, -- "%s dies, honorable kill Rank: %s (%d Honor Points)"
-	COMBATLOG_HONORGAIN_NO_RANK  = COMBATLOG_HONORGAIN_NO_RANK, -- "%s dies, honorable kill (%d Honor Points)"
-	COMBATLOG_ARENAPOINTSAWARD = COMBATLOG_ARENAPOINTSAWARD -- "You have been awarded %d arena points."
+	-- These may not exist in 3.3.5
+	LEARN_BATTLE_PET = BATTLE_PET_NEW_PET or "", -- "%s has been added to your pet journal!"
+	LEARN_COMPANION = ERR_LEARN_COMPANION_S or "", -- "You have added the pet %s to your collection."
+	LEARN_HEIRLOOM = ERR_LEARN_HEIRLOOM_S or "", -- "%s has been added to your heirloom collection."
+	LEARN_MOUNT = ERR_LEARN_MOUNT_S or "", -- "You have added the mount %s to your collection."
+	LEARN_TOY = ERR_LEARN_TOY_S or "", -- "%s has been added to your Toy Box."
+	LEARN_TRANSMOG = ERR_LEARN_TRANSMOG_S or "", -- "%s has been added to your appearance collection."
+	COMPANIONS = COMPANIONS or "Companions", -- "Companions"
+	HEIRLOOMS = HEIRLOOMS or "Heirlooms", -- "Heirlooms"
+	MOUNTS = MOUNTS or "Mounts", -- "Mounts"
+	PETS = PETS or "Pets", -- "Pets"
+	TOY_BOX = TOY_BOX or "", -- "Toy Box"
+	WARDROBE = WARDROBE or "", -- "Appearances"
+	LOOT_SPEC_CHANGED = ERR_LOOT_SPEC_CHANGED_S or "", -- "Loot Specialization set to: %s"
+	SELECT_LOOT_SPECIALIZATION = SELECT_LOOT_SPECIALIZATION or "", -- "Loot Specialization"
+	HONOR_POINTS = HONOR_POINTS or "Honor Points", -- "Honor Points"
+	COMBATLOG_HONORAWARD = COMBATLOG_HONORAWARD or "", -- "You have been awarded %d honor points."
+	COMBATLOG_HONORGAIN  = COMBATLOG_HONORGAIN or "", -- "%s dies, honorable kill Rank: %s (%d Honor Points)"
+	COMBATLOG_HONORGAIN_NO_RANK  = COMBATLOG_HONORGAIN_NO_RANK or "", -- "%s dies, honorable kill (%d Honor Points)"
+	COMBATLOG_ARENAPOINTSAWARD = COMBATLOG_ARENAPOINTSAWARD or "" -- "You have been awarded %d arena points."
 
 }
 

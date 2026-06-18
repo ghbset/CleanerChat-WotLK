@@ -40,12 +40,12 @@ local string_match = string.match
 local table_insert = table.insert
 local tonumber = tonumber
 
--- WoW Globals
+-- WoW Globals (some may be nil in older clients like 3.3.5)
 local G = {
 	SKILL_RANK_UP = SKILL_RANK_UP, -- "Your skill in %s has increased to %d."
 	LEARN_RECIPE = ERR_LEARN_RECIPE_S, -- "You have learned how to create a new item: %s."
-	LEARNED = TRADE_SKILLS_LEARNED_TAB, -- "Learned"
-	UNLEARNED = TRADE_SKILLS_UNLEARNED_TAB -- "Unlearned"
+	LEARNED = TRADE_SKILLS_LEARNED_TAB or "Learned", -- "Learned"
+	UNLEARNED = TRADE_SKILLS_UNLEARNED_TAB or "Unlearned" -- "Unlearned"
 }
 
 -- Convert a WoW global string to a search pattern

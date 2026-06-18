@@ -63,6 +63,7 @@ ns.Private.ClientMicro = tonumber(micro)
 ns.Private.ClientBuild = tonumber(build)
 
 -- Simple flags for client version checks
+-- Note: 3.3.5 compatibility shims are added in Compatibility.lua
 ns.Private.IsRetail = (WOW_PROJECT_ID == WOW_PROJECT_MAINLINE)
 ns.Private.IsClassic = (WOW_PROJECT_ID == WOW_PROJECT_CLASSIC)
 ns.Private.IsTBC = (WOW_PROJECT_ID == WOW_PROJECT_BURNING_CRUSADE_CLASSIC)
@@ -70,6 +71,11 @@ ns.Private.IsWrath = (WOW_PROJECT_ID == WOW_PROJECT_WRATH_CLASSIC)
 --ns.Private.IsCata = WOW_PROJECT_ID == (WOW_PROJECT_CATA_CLASSIC or 99) -- NYI in first build
 ns.Private.IsCata = (version >= 40400) and (version < 50000)
 ns.Private.WoW10 = version >= 100000
+
+-- 3.3.5 specific detection (private server)
+-- Interface 30300 is 3.3.5a, Classic Wrath uses 30400+
+ns.Private.Is335 = (version >= 30300) and (version < 30400)
+ns.Private.IsClassicWrath = (version >= 30400) and (version < 40000)
 
 -- Prefix for frame names
 ------------------------------------------------------
