@@ -72,6 +72,7 @@ local G = {
 	-- 3.3.5 Quest reward items (no trailing period in Ascension client)
 	QUEST_LOG_RECEIVED_ITEM = "Received item: %s", -- Quest reward item message
 	QUEST_LOG_RECEIVED_ITEM_MULTIPLE = "Received item: %sx%d", -- Quest reward item message with count
+	QUEST_LOG_RECEIVED_COUNT_OF_ITEM = "Received %d of item: %s", -- "Received 125 of item: [Rune of Ascension]"
 
 	-- Loot roll messages (3.3.5)
 	LOOT_ROLL_YOU_WON = LOOT_ROLL_YOU_WON, -- "You won: %s"
@@ -373,8 +374,20 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 
 	elseif (event == "CHAT_MSG_SYSTEM") then
 
-		-- 3.3.5 Quest reward items: "Received item: [Item Name]"
-		local item, count = safeMatch(message, P[G.QUEST_LOG_RECEIVED_ITEM_MULTIPLE])
+		-- 3.3.5 Quest reward items: "Received 125 of item: [Item Name]"
+		local count, item = safeMatch(message, P[G.QUEST_LOG_RECEIVED_COUNT_OF_ITEM])
+		if (count and item) then
+			item = string_gsub(item, "[%[/%]]", "") -- kill brackets
+			count = tonumber(count)
+			if (count) and (count > 1) then
+				return false, string_format(ns.out.item_multiple, item, count), author, ...
+			else
+				return false, string_format(ns.out.item_single, item), author, ...
+			end
+		end
+
+		-- 3.3.5 Quest reward items: "Received item: [Item Name]x5"
+		item, count = safeMatch(message, P[G.QUEST_LOG_RECEIVED_ITEM_MULTIPLE])
 		if (item) then
 			item = string_gsub(item, "[%[/%]]", "") -- kill brackets
 			count = tonumber(count)
@@ -503,6 +516,7 @@ Module.OnInitialize = function(self)
 	-- These use "Received item:" instead of "You receive item:"
 	table_insert(self.patterns, makePattern(G.QUEST_LOG_RECEIVED_ITEM))
 	table_insert(self.patterns, makePattern(G.QUEST_LOG_RECEIVED_ITEM_MULTIPLE))
+	table_insert(self.patterns, makePattern(G.QUEST_LOG_RECEIVED_COUNT_OF_ITEM))
 
 end
 
