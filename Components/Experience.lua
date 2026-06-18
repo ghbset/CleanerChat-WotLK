@@ -35,6 +35,7 @@ local next = next
 local rawget = rawget
 local rawset = rawset
 local setmetatable = setmetatable
+local string_find = string.find
 local string_format = string.format
 local string_gsub = string.gsub
 local string_match = string.match
@@ -79,7 +80,7 @@ local G = {
 	GAINED_TALENT = "You have gained %d talent point.",
 	GAINED_TALENTS = "You have gained %d talent points.",
 	STAT_INCREASE = "Your %s increases by %d.",
-	UNSPENT_TALENT_ESSENCE = "You have unspent Talent Essence!"
+	UNSPENT_TALENT_ESSENCE = "Unspent Talent Essence"
 }
 
 
@@ -147,43 +148,53 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 		end
 
 		-- Level up (retail format with clickable link)
-		value = safeMatch(message, P[G.LEVEL_UP])
-		if (value) then
-			value = string_gsub(value, "[%[/%]]", "")
-			return false, string_format(ns.out.xp_levelup, value), author, ...
+		if (G.LEVEL_UP) then
+			value = safeMatch(message, P[G.LEVEL_UP])
+			if (value) then
+				value = string_gsub(value, "[%[/%]]", "")
+				return false, string_format(ns.out.xp_levelup, value), author, ...
+			end
 		end
 
-		-- Level up (3.3.5 plain text format)
-		value = safeMatch(message, P[G.LEVEL_UP_335])
-		if (value) then
-			return false, string_format(ns.out.levelup_ding, tonumber(value)), author, ...
+		-- Level up (3.3.5 plain text format) - use string.find for robustness
+		if (string_find(message, "Congratulations, you have reached level")) then
+			local level = string_match(message, "level (%d+)")
+			if (level) then
+				return false, string_format(ns.out.levelup_ding, tonumber(level)), author, ...
+			end
 		end
 
 		-- Hit points gained on level up
-		value = safeMatch(message, P[G.GAINED_HP])
-		if (value) then
-			return false, string_format(ns.out.levelup_hp, tonumber(value)), author, ...
+		if (string_find(message, "You have gained") and string_find(message, "hit points")) then
+			local hp = string_match(message, "gained (%d+)")
+			if (hp) then
+				return false, string_format(ns.out.levelup_hp, tonumber(hp)), author, ...
+			end
 		end
 
 		-- Talent point(s) gained on level up
-		value = safeMatch(message, P[G.GAINED_TALENTS])
-		if (value) then
-			return false, string_format(ns.out.levelup_talents, tonumber(value)), author, ...
+		if (string_find(message, "You have gained") and string_find(message, "talent point")) then
+			local points = string_match(message, "gained (%d+)")
+			if (points) then
+				local num = tonumber(points)
+				if (num > 1) then
+					return false, string_format(ns.out.levelup_talents, num), author, ...
+				else
+					return false, string_format(ns.out.levelup_talent, num), author, ...
+				end
+			end
 		end
 
-		value = safeMatch(message, P[G.GAINED_TALENT])
-		if (value) then
-			return false, string_format(ns.out.levelup_talent, tonumber(value)), author, ...
-		end
-
-		-- Stat increases on level up
-		local stat, amount = safeMatch(message, P[G.STAT_INCREASE])
-		if (stat and amount) then
-			return false, string_format(ns.out.levelup_stat, tonumber(amount), stat), author, ...
+		-- Stat increases on level up: "Your Strength increases by 1."
+		if (string_find(message, "increases by")) then
+			local stat, amount = string_match(message, "Your (%a+) increases by (%d+)")
+			if (stat and amount) then
+				return false, string_format(ns.out.levelup_stat, tonumber(amount), stat), author, ...
+			end
 		end
 
 		-- Unspent Talent Essence (Ascension-specific)
-		if (message == G.UNSPENT_TALENT_ESSENCE) then
+		if (string_find(message, "Unspent Talent Essence")) then
 			return false, ns.out.levelup_essence, author, ...
 		end
 
