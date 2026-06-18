@@ -113,7 +113,7 @@ local optionDB = {
 }
 
 local filterDB = {
-	achievements = (ns.IsWrath or ns.IsRetail) and {
+	achievements = {
 		name = L["Achievements"],
 		desc = L["Simplify Achievement messages."],
 		width = "full",
@@ -140,14 +140,6 @@ local filterDB = {
 	experience = {
 		name = L["Experience"],
 		desc = L["Abbreviate and simplify experience- and level gains."],
-		width = "full",
-		type = "toggle",
-		set = setter,
-		get = getter
-	},
-	followers = ns.IsRetail and {
-		name = L["Garrison Followers"],
-		desc = L["Abbreviate and simplify garrison- and mission table messages related to gained or lost followers."],
 		width = "full",
 		type = "toggle",
 		set = setter,

@@ -48,21 +48,13 @@ local tonumber = tonumber
 -- WoW Globals (keep nil if missing - empty string patterns match everything!)
 local G = {
 
-	-- These may not exist in 3.3.5
-	LEARN_BATTLE_PET = BATTLE_PET_NEW_PET, -- "%s has been added to your pet journal!"
-	LEARN_COMPANION = ERR_LEARN_COMPANION_S, -- "You have added the pet %s to your collection."
+	-- Retail-only features kept for potential future use
 	LEARN_HEIRLOOM = ERR_LEARN_HEIRLOOM_S, -- "%s has been added to your heirloom collection."
-	LEARN_MOUNT = ERR_LEARN_MOUNT_S, -- "You have added the mount %s to your collection."
-	LEARN_TOY = ERR_LEARN_TOY_S, -- "%s has been added to your Toy Box."
 	LEARN_TRANSMOG = ERR_LEARN_TRANSMOG_S, -- "%s has been added to your appearance collection."
-	COMPANIONS = COMPANIONS or "Companions", -- "Companions"
 	HEIRLOOMS = HEIRLOOMS or "Heirlooms", -- "Heirlooms"
-	MOUNTS = MOUNTS or "Mounts", -- "Mounts"
-	PETS = PETS or "Pets", -- "Pets"
-	TOY_BOX = TOY_BOX, -- "Toy Box"
 	WARDROBE = WARDROBE, -- "Appearances"
-	LOOT_SPEC_CHANGED = ERR_LOOT_SPEC_CHANGED_S, -- "Loot Specialization set to: %s"
-	SELECT_LOOT_SPECIALIZATION = SELECT_LOOT_SPECIALIZATION, -- "Loot Specialization"
+
+	-- 3.3.5 globals
 	HONOR_POINTS = HONOR_POINTS or "Honor Points", -- "Honor Points"
 	COMBATLOG_HONORAWARD = COMBATLOG_HONORAWARD, -- "You have been awarded %d honor points."
 	COMBATLOG_HONORGAIN  = COMBATLOG_HONORGAIN, -- "%s dies, honorable kill Rank: %s (%d Honor Points)"
@@ -401,69 +393,23 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 			return false, string_format(ns.out.item_single, item), author, ...
 		end
 
-		-- When new toys are learned and put into the toy box.
-		local toy = safeMatch(message, P[G.LEARN_TOY])
-		if (toy) then
-			return false, string_format(ns.out.item_transfer, G.TOY_BOX or "Toy Box", toy), author, ...
-		end
-
 		-- When new transmogs are learned and put into the appearance collection.
 		local appearance = safeMatch(message, P[G.LEARN_TRANSMOG])
 		if (appearance) then
 			return false, string_format(ns.out.item_transfer, G.WARDROBE or "Appearances", appearance), author, ...
 		end
 
-		-- When a new mount is learned
-		local mount = safeMatch(message, P[G.LEARN_MOUNT])
-		if (mount) then
-			return false, string_format(ns.out.item_transfer, G.MOUNTS, mount), author, ...
-		end
-
-		-- When a new companion is learned
-		local companion = safeMatch(message, P[G.LEARN_COMPANION])
-		if (companion) then
-			return false, string_format(ns.out.item_transfer, G.COMPANIONS, companion), author, ...
-		end
-
-		-- When a new battle pet is learned
-		local pet = safeMatch(message, P[G.LEARN_BATTLE_PET])
-		if (pet) then
-			return false, string_format(ns.out.item_transfer, G.PETS, pet), author, ...
-		end
-
-		-- When a new battle pet is learned
+		-- When a new heirloom is learned
 		local heirloom = safeMatch(message, P[G.LEARN_HEIRLOOM])
 		if (heirloom) then
 			return false, string_format(ns.out.item_transfer, G.HEIRLOOMS, heirloom), author, ...
-		end
-
-		-- Loot spec changed, or just reported
-		-- This one fires on manual changes after login.
-		-- The initial message on reloads or login is not captured here,
-		-- as the chat frames haven't yet been registered for user events at that point.
-		local lootspec = safeMatch(message, P[G.LOOT_SPEC_CHANGED])
-		if (lootspec) then
-			--lootspec = ns.Colors.class[playerClass].colorCode .. lootspec .. "|r"
-			--return false, string_format(ns.out.item_transfer, SELECT_LOOT_SPECIALIZATION, lootspec), author, ...
-			return false, string_format(ns.out.achievement2, G.SELECT_LOOT_SPECIALIZATION or "Loot Specialization", lootspec), author, ...
 		end
 
 	end
 end
 
 Module.OnReplacementSet = function(self, msg, r, g, b, chatID, ...)
-
-	-- Loot spec changed, or just reported
-	-- This one will fire at the initial PLAYER_ENTERING_WORLD,
-	-- as the chat frames haven't yet been registered for user events at that point.
-	local lootspec = safeMatch(msg, P[G.LOOT_SPEC_CHANGED])
-	if (lootspec) then
-
-		--lootspec = ns.Colors.class[playerClass].colorCode .. lootspec .. "|r"
-		--return string_format(ns.out.item_transfer, SELECT_LOOT_SPECIALIZATION, lootspec)
-		return string_format(ns.out.achievement2, G.SELECT_LOOT_SPECIALIZATION or "Loot Specialization", lootspec)
-	end
-
+	-- Nothing needed for 3.3.5
 end
 
 Module.OnInitialize = function(self)

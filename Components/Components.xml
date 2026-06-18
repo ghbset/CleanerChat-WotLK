@@ -1,15 +1,12 @@
 <Ui xmlns="http://www.blizzard.com/wow/ui/">
 
-	<Script file="Development.lua"/>
 	<Script file="Achievements.lua"/>
 	<Script file="Auctions.lua"/>
 	<Script file="Blacklist.lua"/>
 	<Script file="Channels.lua"/>
 	<Script file="ColorClass.lua"/>
 	<Script file="ColorQuality.lua"/>
-	<Script file="Creatures.lua"/>
 	<Script file="Experience.lua"/>
-	<Script file="Followers.lua"/>
 	<Script file="Loot.lua"/>
 	<Script file="Money.lua"/>
 	<Script file="PlayerNames.lua"/>

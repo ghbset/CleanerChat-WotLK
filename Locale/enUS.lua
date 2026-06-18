@@ -33,9 +33,6 @@ L["Abbreviate and simplify chat channel display names."] = true
 L["Experience"] = true
 L["Abbreviate and simplify experience- and level gains."] = true
 
-L["Garrison Followers"] = true
-L["Abbreviate and simplify garrison- and mission table messages related to gained or lost followers."] = true
-
 L["Loot"] = true
 L["Abbreviate and simplify loot-, currency- and received item messages."] = true
 
