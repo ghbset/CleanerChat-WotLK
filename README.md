@@ -7,12 +7,14 @@ A World of Warcraft addon that cleans up the chat, making it prettier and easier
 ChatCleaner filters and reformats chat messages to reduce clutter and improve readability. It handles:
 
 - **Loot messages** - Consolidates multiple loot pickups into cleaner summaries
+- **Loot rolls** - Cleans up Need, Greed, Disenchant, and Pass roll messages
 - **Money** - Formats gold/silver/copper with icons
 - **Experience & Reputation** - Cleaner XP and rep gain messages
 - **Achievements** - Streamlined achievement notifications
 - **Spells & Abilities** - Consolidated spell learning messages
 - **Auctions** - Cleaner auction house notifications
 - **Quest updates** - Simplified quest progress messages
+- **Quest rewards** - Formats "Received item:" messages
 - **Channel names** - Shortened channel prefixes
 - **Player names** - Class-colored names in chat
 - **Item quality** - Color-coded item names by rarity
@@ -63,3 +65,5 @@ This version has been modified to work with the 3.3.5a WotLK client. Changes inc
 - Disabled TaintLess library (retail-only)
 - Fixed AddMessage parameters for 3.3.5 compatibility
 - Safe pattern matching with nil checks
+- Added loot roll formatting (Need/Greed/Disenchant/Pass)
+- Added quest reward item formatting ("Received item:" messages)
