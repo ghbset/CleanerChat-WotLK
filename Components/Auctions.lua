@@ -39,7 +39,6 @@ local rawset = rawset
 local setmetatable = setmetatable
 local string_find = string.find
 local string_format = string.format
-local string_gsub = string.gsub
 local string_match = string.match
 
 -- WoW Globals
@@ -51,12 +50,7 @@ local G = {
 }
 
 -- Convert a WoW global string to a search pattern
-local makePattern = function(msg)
-	if (not msg) or (msg == "") then return nil end
-	msg = string_gsub(msg, "%%([%d%$]-)d", "(%%d+)")
-	msg = string_gsub(msg, "%%([%d%$]-)s", "(.+)")
-	return msg
-end
+local makePattern = ns.MakePattern
 
 -- Search Pattern Cache.
 -- This will generate the pattern on the first lookup.

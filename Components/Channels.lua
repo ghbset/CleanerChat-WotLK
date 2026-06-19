@@ -34,7 +34,6 @@ local L = LibStub("AceLocale-3.0"):GetLocale((...))
 local rawget = rawget
 local rawset = rawset
 local setmetatable = setmetatable
-local string_gsub = string.gsub
 local string_match = string.match
 local string_sub = string.sub
 local string_upper = string.upper
@@ -95,11 +94,6 @@ local G = {
 Module.OnInitialize = function(self)
 
 	self.replacements = {}
-
-	if (ns.IsClassic) then
-		table_insert(self.replacements, {"%["..string_match(G.CHAT_BATTLEGROUND_LEADER_GET, "%[(.-)%]") .. "%]", L["BGL"]})
-		table_insert(self.replacements, {"%["..string_match(G.CHAT_BATTLEGROUND_GET, "%[(.-)%]") .. "%]", L["BG"]})
-	end
 
 	table_insert(self.replacements, {"%["..string_match(G.CHAT_PARTY_LEADER_GET, "%[(.-)%]") .. "%]", L["PL"]})
 	table_insert(self.replacements, {"%["..string_match(G.CHAT_PARTY_GET, "%[(.-)%]") .. "%]", L["P"]})

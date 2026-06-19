@@ -44,10 +44,10 @@ local select = select
 local table_sort = table.sort
 local type = type
 
--- WoW API Compatibility (3.3.5 / Retail)
-local GetAddOnEnableState = GetAddOnEnableState or (C_AddOns and function(character, name) return C_AddOns.GetAddOnEnableState(name, character) end) or function() return 2 end
-local GetAddOnInfo = GetAddOnInfo or (C_AddOns and C_AddOns.GetAddOnInfo)
-local GetNumAddOns = GetNumAddOns or (C_AddOns and C_AddOns.GetNumAddOns)
+-- WoW API (GetAddOnEnableState is shimmed for 3.3.5 in Common/Compatibility.lua)
+local GetAddOnEnableState = GetAddOnEnableState
+local GetAddOnInfo = GetAddOnInfo
+local GetNumAddOns = GetNumAddOns
 
 -- Utility
 -------------------------------------------------------

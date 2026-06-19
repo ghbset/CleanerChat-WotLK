@@ -100,6 +100,12 @@ if (not _G.UnitEffectiveLevel) then
 	_G.UnitEffectiveLevel = UnitLevel
 end
 
+-- 3.3.5 Compatibility: GetAddOnEnableState doesn't exist
+-- (added in a later expansion). On 3.3.5 we default every addon to "enabled" (2).
+if (not _G.GetAddOnEnableState) then
+	_G.GetAddOnEnableState = function() return 2 end
+end
+
 -- Functions that would always return false when not present.
 for _,global in next,{
 	"IsXPUserDisabled",

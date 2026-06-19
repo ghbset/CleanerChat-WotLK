@@ -23,31 +23,17 @@
 	SOFTWARE.
 
 --]]
-local Addon, ns = ...
-
-local Module = ns:NewModule("ClassColors")
+local _, ns = ...
 
 -- Lua API
-local pairs = pairs
-local table_insert = table.insert
+local string_gsub = string.gsub
 
-Module.OnInitialize = function(self)
-	self.replacements = {}
-
-	local Colors = ns.Colors
-	for class,color in pairs(Colors.blizzclass) do
-		if color and color.colorCode and Colors.class[class] and Colors.class[class].colorCode then
-			table_insert(self.replacements, { color.colorCode, Colors.class[class].colorCode })
-		end
-	end
+-- Converts a WoW global string (containing %d / %s tokens) into a Lua
+-- search pattern with capture groups. Previously duplicated verbatim in
+-- every Components module; centralized here as ns.MakePattern.
+ns.MakePattern = function(msg)
+	if (not msg) or (msg == "") then return nil end
+	msg = string_gsub(msg, "%%([%d%$]-)d", "(%%d+)")
+	msg = string_gsub(msg, "%%([%d%$]-)s", "(.+)")
+	return msg
 end
-
-Module.OnEnable = function(self)
-	self:RegisterMessageReplacement(self.replacements, true)
-end
-
-Module.OnDisable = function(self)
-	self:UnregisterMessageReplacement(self.replacements)
-end
-
-

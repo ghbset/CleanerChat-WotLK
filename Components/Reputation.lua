@@ -29,7 +29,7 @@ local Module = ns:NewModule("Reputation")
 
 -- Addon Localization
 local L = LibStub("AceLocale-3.0"):GetLocale((...))
--- GLOBALS: GetNumFactions, GetFactionInfo, GetFriendshipReputation, CollapseFactionHeader, ExpandFactionHeader
+-- GLOBALS: GetNumFactions, GetFactionInfo, CollapseFactionHeader, ExpandFactionHeader
 
 -- Lua API
 local ipairs = ipairs
@@ -38,7 +38,6 @@ local rawget = rawget
 local rawset = rawset
 local setmetatable = setmetatable
 local string_format = string.format
-local string_gsub = string.gsub
 local string_match = string.match
 local table_insert = table.insert
 local tonumber = tonumber
@@ -54,12 +53,7 @@ local G = {
 }
 
 -- Convert a WoW global string to a search pattern
-local makePattern = function(msg)
-	if (not msg) or (msg == "") then return nil end
-	msg = string_gsub(msg, "%%([%d%$]-)d", "(%%d+)")
-	msg = string_gsub(msg, "%%([%d%$]-)s", "(.+)")
-	return msg
-end
+local makePattern = ns.MakePattern
 
 -- Search Pattern Cache.
 -- This will generate the pattern on the first lookup.
@@ -93,13 +87,6 @@ Module.GetFactionColored = function(self, faction)
 			standingID = standingId
 			factionID = factionId
 
-			if (ns.IsRetail) then
-				local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID)
-				if (friendID) then
-					isFriend = true
-				end
-			end
-
 			if (factionID) and (standingID) then
 				faction = Colors[isFriend and "friendship" or "reaction"][standingID].colorCode .. faction .. "|r"
 			end
@@ -125,13 +112,6 @@ Module.GetFactionColored = function(self, faction)
 			if (factionName == faction) then
 				standingID = standingId
 				factionID = factionId
-
-				if (ns.IsRetail) then
-					local friendID, friendRep, friendMaxRep, friendName, friendText, friendTexture, friendTextLevel, friendThreshold, nextFriendThreshold = GetFriendshipReputation(factionID)
-					if (friendID) then
-						isFriend = true
-					end
-				end
 
 				if (factionID) and (standingID) then
 					faction = Colors[isFriend and "friendship" or "reaction"][standingID].colorCode .. faction .. "|r"
