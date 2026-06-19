@@ -297,8 +297,6 @@ end
 Options.OnInitialize = function(self)
 	self:RegisterChatCommand("cc", "OpenOptionsMenu")
 	self:RegisterChatCommand("chatcleaner", "OpenOptionsMenu")
-	-- DEBUG: confirm the options module initialized and commands registered.
-	print("|cffff7d0aChatCleaner|r: commands |cff00ff00/cc|r and |cff00ff00/chatcleaner|r registered.")
 end
 
 Options.OnEnable = function(self)
