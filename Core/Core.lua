@@ -42,6 +42,7 @@ local string_gsub = string.gsub
 local string_lower = string.lower
 local string_upper = string.upper
 local table_insert = table.insert
+local table_remove = table.remove
 local type = type
 local unpack = unpack
 
@@ -253,7 +254,6 @@ ns:SetDefaultModulePrototype(modulePrototype)
 -- Addon default settings.
 local defaults = {
 	styling = true, -- will be ignored when conflicting addons are detected
-	useBlizzardCoins = nil, -- not used
 	filters = {
 		achievements = true,
 		auctions = true,
@@ -337,9 +337,9 @@ ns.AddBlacklistMethod = function(self, func)
 end
 
 ns.RemoveBlacklistMethod = function(self, func)
-	for k,infunc in next,blacklist do
-		if (infunc == func) then
-			blacklist[k] = nil
+	for k = #blacklist, 1, -1 do
+		if (blacklist[k] == func) then
+			table_remove(blacklist, k)
 			break
 		end
 	end
@@ -359,15 +359,15 @@ ns.AddReplacementSet = function(self, set, ignoreBlacklist)
 end
 
 ns.RemoveReplacementSet = function(self, set)
-	for k,inset in next,replacements do
-		if (inset == set) then
-			replacements[k] = nil
+	for k = #replacements, 1, -1 do
+		if (replacements[k] == set) then
+			table_remove(replacements, k)
 			break
 		end
 	end
-	for k,inset in next,specialreplacements do
-		if (inset == set) then
-			replacements[k] = nil
+	for k = #specialreplacements, 1, -1 do
+		if (specialreplacements[k] == set) then
+			table_remove(specialreplacements, k)
 			break
 		end
 	end
@@ -386,10 +386,16 @@ ns.CacheAllMessageMethods = function(self)
 	end
 end
 
+-- Convert a stored filter key (e.g. "achievements") to its
+-- corresponding module name (e.g. "Achievements").
+ns.GetModuleNameFromFilter = function(self, key)
+	return (string_gsub(key, "^%l", string_upper))
+end
+
 ns.UpgradeSettings = function(self)
 
 	-- Have the db been upgraded?
-	if (not ChatCleaner_DB.configversion or ChatCleaner_DB.configversion ~= -1) then
+	if (not ChatCleaner_DB.configversion or ChatCleaner_DB.configversion < 2) then
 
 		-- Work on a clone.
 		local old = CopyTable(ChatCleaner_DB)
@@ -448,7 +454,7 @@ ns.OnEnable = function(self)
 
 	-- Enable modules.
 	for setting,value in next,self.db.filters do
-		local moduleName = string_gsub(setting, "^%l", string_upper)
+		local moduleName = self:GetModuleNameFromFilter(setting)
 		local module = ns:GetModule(moduleName, true)
 		if (module) then
 			if (value and not module:IsEnabled()) then

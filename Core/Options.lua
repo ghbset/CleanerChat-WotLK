@@ -41,8 +41,6 @@ local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 local ipairs = ipairs
 local next = next
 local select = select
-local string_gsub = string.gsub
-local string_upper = string.upper
 local table_sort = table.sort
 local type = type
 
@@ -67,7 +65,7 @@ end
 
 local setter = function(info,val)
 	ns.db.filters[info[#info]] = val
-	local moduleName = string_gsub(info[#info], "^%l", string_upper)
+	local moduleName = ns:GetModuleNameFromFilter(info[#info])
 	local module = ns:GetModule(moduleName, true)
 	if (module) then
 		if (val and not module:IsEnabled()) then
