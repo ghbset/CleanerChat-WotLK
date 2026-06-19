@@ -260,6 +260,7 @@ local defaults = {
 		achievements = true,
 		auctions = true,
 		channels = true,
+		empty = true,
 		experience = true,
 		loot = true,
 		names = true,

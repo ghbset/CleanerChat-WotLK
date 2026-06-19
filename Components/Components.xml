@@ -6,6 +6,7 @@
 	<Script file="Channels.lua"/>
 	<Script file="ColorClass.lua"/>
 	<Script file="ColorQuality.lua"/>
+	<Script file="Empty.lua"/>
 	<Script file="Experience.lua"/>
 	<Script file="Loot.lua"/>
 	<Script file="Money.lua"/>

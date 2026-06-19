@@ -38,6 +38,9 @@ L["Suppress auction messages while auction frame is open, display summary after.
 L["Chat Channel Names"] = true
 L["Abbreviate and simplify chat channel display names."] = true
 
+L["Empty Messages"] = true
+L["Hide chat messages that contain no text (empty or whitespace only)."] = true
+
 L["Experience"] = true
 L["Abbreviate and simplify experience- and level gains."] = true
 
