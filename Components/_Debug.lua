@@ -3,14 +3,14 @@
 	TEMPORARY DIAGNOSTIC FILE - SAFE TO DELETE
 
 	Captures, for every chat line:
-	  [RAW] = the exact text the chat frame receives BEFORE ChatCleaner
+	  [RAW] = the exact text the chat frame receives BEFORE CleanerChat
 	          modifies it (escaped so color codes / hyperlinks are visible).
 	  [EVT] = the underlying CHAT_MSG_* event, including the `author` field,
 	          IF the line actually arrives as a normal chat event.
 
 	Use this to find where a player name goes missing:
 	  * If [EVT] shows a populated author but the displayed line has no name,
-	    ChatCleaner is stripping it.
+	    CleanerChat is stripping it.
 	  * If [EVT] never appears for the line (only [RAW]), the line is being
 	    printed straight to the chat frame (e.g. a server relay) and never
 	    came through a real event.
@@ -56,8 +56,8 @@ local isDuplicate = function(sig)
 	return false
 end
 
--- Wrap each chat frame's AddMessage ON TOP of ChatCleaner's hook so we see
--- the unmodified text. Done lazily on first enable, after ChatCleaner has
+-- Wrap each chat frame's AddMessage ON TOP of CleanerChat's hook so we see
+-- the unmodified text. Done lazily on first enable, after CleanerChat has
 -- already installed its own hook.
 local ensureHooks = function()
 	for _,name in ipairs(CHAT_FRAMES) do
@@ -109,12 +109,12 @@ SlashCmdList["CCDEBUG"] = function()
 		for _,event in ipairs(watchedEvents) do
 			ChatFrame_AddMessageEventFilter(event, eventFilter)
 		end
-		print("|cffff7d0aChatCleaner|r raw debug: |cff00ff00ON|r - say something in the affected channel.")
+		print("|cffff7d0aCleanerChat|r raw debug: |cff00ff00ON|r - say something in the affected channel.")
 	else
 		for _,event in ipairs(watchedEvents) do
 			ChatFrame_RemoveMessageEventFilter(event, eventFilter)
 		end
-		print("|cffff7d0aChatCleaner|r raw debug: |cffff0000OFF|r")
+		print("|cffff7d0aCleanerChat|r raw debug: |cffff0000OFF|r")
 	end
 end
 

@@ -274,7 +274,7 @@ local defaults = {
 	}
 }
 
-ChatCleaner_DB = CopyTable(defaults)
+CleanerChat_DB = CopyTable(defaults)
 
 ns.IsProtectedMessage = function(self, msg)
 	if (not msg or msg == "") then return end
@@ -400,15 +400,15 @@ end
 ns.UpgradeSettings = function(self)
 
 	-- Have the db been upgraded?
-	if (not ChatCleaner_DB.configversion or ChatCleaner_DB.configversion < 2) then
+	if (not CleanerChat_DB.configversion or CleanerChat_DB.configversion < 2) then
 
 		-- Work on a clone.
-		local old = CopyTable(ChatCleaner_DB)
+		local old = CopyTable(CleanerChat_DB)
 
 		-- Replace missing entries with the defaults
 		for setting,value in next,defaults do
-			if (ChatCleaner_DB[setting] == nil) then
-				ChatCleaner_DB[setting] = value
+			if (CleanerChat_DB[setting] == nil) then
+				CleanerChat_DB[setting] = value
 			end
 		end
 
@@ -422,40 +422,40 @@ ns.UpgradeSettings = function(self)
 				-- Old settings are true when the filter is disabled,
 				-- new settings are true when filter is enabled.
 				-- Also, old naming scheme was horrible.
-				ChatCleaner_DB[setting] = nil
-				ChatCleaner_DB.filters[string_lower(moduleName)] = not value
+				CleanerChat_DB[setting] = nil
+				CleanerChat_DB.filters[string_lower(moduleName)] = not value
 			end
 		end
 
 		-- Replace missing filter settings with their defaults.
 		for setting,value in next,defaults.filters do
-			if (ChatCleaner_DB.filters[setting] == nil) then
-				ChatCleaner_DB.filters[setting] = value
+			if (CleanerChat_DB.filters[setting] == nil) then
+				CleanerChat_DB.filters[setting] = value
 			end
 		end
 
 		-- Store the new settings version
 		-- so we never have to do this again.
-		ChatCleaner_DB.configversion = 2
+		CleanerChat_DB.configversion = 2
 	end
 
 	-- Always backfill any newly added default settings,
 	-- so existing users get sane values for new options.
 	for setting,value in next,defaults do
-		if (type(value) ~= "table" and ChatCleaner_DB[setting] == nil) then
-			ChatCleaner_DB[setting] = value
+		if (type(value) ~= "table" and CleanerChat_DB[setting] == nil) then
+			CleanerChat_DB[setting] = value
 		end
 	end
-	if (ChatCleaner_DB.filters) then
+	if (CleanerChat_DB.filters) then
 		for setting,value in next,defaults.filters do
-			if (ChatCleaner_DB.filters[setting] == nil) then
-				ChatCleaner_DB.filters[setting] = value
+			if (CleanerChat_DB.filters[setting] == nil) then
+				CleanerChat_DB.filters[setting] = value
 			end
 		end
 	end
 
 	-- Return a more sane db.
-	return ChatCleaner_DB
+	return CleanerChat_DB
 end
 
 ns.OnInitialize = function(self)

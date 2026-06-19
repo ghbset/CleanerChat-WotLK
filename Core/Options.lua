@@ -336,7 +336,7 @@ Options.OpenOptionsMenu = function(self)
 	if (not AceConfigRegistry:GetOptionsTable(Addon)) then
 		local ok, err = pcall(self.GenerateOptionsMenu, self)
 		if (not ok) then
-			print("|cffff7d0aChatCleaner|r: failed to build the options menu.")
+			print("|cffff7d0aCleanerChat|r: failed to build the options menu.")
 			print("|cffff0000"..tostring(err).."|r")
 			return
 		end
@@ -345,12 +345,12 @@ Options.OpenOptionsMenu = function(self)
 	if (AceConfigRegistry:GetOptionsTable(Addon)) then
 		local ok, err = pcall(AceConfigDialog.Open, AceConfigDialog, Addon)
 		if (not ok) then
-			print("|cffff7d0aChatCleaner|r: failed to open the options window.")
+			print("|cffff7d0aCleanerChat|r: failed to open the options window.")
 			print("|cffff0000"..tostring(err).."|r")
 			return
 		end
 	else
-		print("|cffff7d0aChatCleaner|r: the options table is missing after generation.")
+		print("|cffff7d0aCleanerChat|r: the options table is missing after generation.")
 		return
 	end
 
@@ -377,7 +377,7 @@ Options.OnEvent = function(self, event, ...)
 		if (isInitialLogin or isReloadingUi) then
 			local ok, err = pcall(self.GenerateOptionsMenu, self)
 			if (not ok) then
-				print("|cffff7d0aChatCleaner|r: failed to build the options menu.")
+				print("|cffff7d0aCleanerChat|r: failed to build the options menu.")
 				print("|cffff0000"..tostring(err).."|r")
 			end
 			self:UnregisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
@@ -387,7 +387,7 @@ end
 
 Options.OnInitialize = function(self)
 	self:RegisterChatCommand("cc", "OpenOptionsMenu")
-	self:RegisterChatCommand("chatcleaner", "OpenOptionsMenu")
+	self:RegisterChatCommand("cleanerchat", "OpenOptionsMenu")
 	-- TEMPORARY DIAGNOSTIC command (see Components/_Debug.lua).
 	self:RegisterChatCommand("ccdebug", function() if (ns.ToggleRawDebug) then ns.ToggleRawDebug() end end)
 end

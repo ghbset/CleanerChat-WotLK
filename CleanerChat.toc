@@ -1,0 +1,27 @@
+## Interface: 30300
+
+## Title: Cleaner|cffffd200Chat|r
+## Notes: Cleans up the chat, making it prettier and easier on the eye.
+## Version: 2.0.59-335
+## Author: migwynkriid
+
+## X-Category: Interface Enhancements
+## X-License: Custom
+
+## SavedVariables: CleanerChat_DB
+## OptionalDeps: TaintLess, Ace3, LibMoreEvents-1.0
+
+# Compatibility (must load before libraries for 3.3.5)
+Core\Common\Compatibility.lua
+
+# Libraries
+Embeds.xml
+
+# Addon localization
+Locale\Locale.xml
+
+# Addon core
+Core\Core.xml
+
+# Filters & Modules
+Components\Components.xml
