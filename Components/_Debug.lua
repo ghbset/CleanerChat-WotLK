@@ -92,6 +92,13 @@ local watchedEvents = {
 	"CHAT_MSG_PARTY_LEADER",
 	"CHAT_MSG_RAID",
 	"CHAT_MSG_RAID_LEADER",
+	-- Reward / system events (to trace duplicated quest rewards)
+	"CHAT_MSG_LOOT",
+	"CHAT_MSG_CURRENCY",
+	"CHAT_MSG_MONEY",
+	"CHAT_MSG_SYSTEM",
+	"CHAT_MSG_COMBAT_XP_GAIN",
+	"CHAT_MSG_COMBAT_FACTION_CHANGE",
 }
 
 SLASH_CCDEBUG1 = "/ccdebug"

@@ -363,34 +363,28 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 
 	elseif (event == "CHAT_MSG_SYSTEM") then
 
-		-- 3.3.5 Quest reward items: "Received 125 of item: [Item Name]"
+		-- 3.3.5 / Ascension quest rewards are announced TWICE: once as a real
+		-- CHAT_MSG_LOOT ("You receive item/currency...") and once as this
+		-- CHAT_MSG_SYSTEM echo ("Received N of item: [X].").  We suppress the
+		-- system echo so each reward only shows once. The CHAT_MSG_LOOT copy
+		-- (cleaner, no trailing period) is the one kept, and normal looting -
+		-- which only ever fires CHAT_MSG_LOOT - is unaffected.
+
+		-- "Received 125 of item: [Item Name]"
 		local count, item = safeMatch(message, P[G.QUEST_LOG_RECEIVED_COUNT_OF_ITEM])
 		if (count and item) then
-			item = string_gsub(item, "[%[/%]]", "") -- kill brackets
-			count = tonumber(count)
-			if (count) and (count > 1) then
-				return false, string_format(ns.out.item_multiple, item, count), author, ...
-			else
-				return false, string_format(ns.out.item_single, item), author, ...
-			end
+			return true
 		end
 
-		-- 3.3.5 Quest reward items: "Received item: [Item Name]x5"
+		-- "Received item: [Item Name]x5"
 		item, count = safeMatch(message, P[G.QUEST_LOG_RECEIVED_ITEM_MULTIPLE])
 		if (item) then
-			item = string_gsub(item, "[%[/%]]", "") -- kill brackets
-			count = tonumber(count)
-			if (count) and (count > 1) then
-				return false, string_format(ns.out.item_multiple, item, count), author, ...
-			else
-				return false, string_format(ns.out.item_single, item), author, ...
-			end
+			return true
 		end
 
 		item = safeMatch(message, P[G.QUEST_LOG_RECEIVED_ITEM])
 		if (item) then
-			item = string_gsub(item, "[%[/%]]", "") -- kill brackets
-			return false, string_format(ns.out.item_single, item), author, ...
+			return true
 		end
 
 		-- When new transmogs are learned and put into the appearance collection.
