@@ -17,8 +17,16 @@ L["O"] = true 		-- Officer
 L["Style Chat Windows"] = true
 L["Will apply a clean, minimalistic styling to the chat windows."] = true
 
-L["Channel Initials"] = true
-L["Show the channel's first letter in brackets, e.g. \"1. [G]\". Requires the Chat Channel Names filter."] = true
+L["Channel Name Style"] = true
+L["Choose whether to show the channel's full name or just its first letter. Requires the Chat Channel Names filter."] = true
+L["Shortened (e.g. \"[G]\")"] = true
+L["Full name (e.g. \"General\")"] = true
+
+L["Show Channel Number"] = true
+L["Prefix the channel display with its number, e.g. \"1. \". Requires the Chat Channel Names filter."] = true
+
+L["Capitalize Channel Name"] = true
+L["Capitalize the first letter of the channel name or initial. Requires the Chat Channel Names filter."] = true
 
 L["Capitalize Player Names"] = true
 L["Capitalize the first letter of player names shown in chat. Requires the Player Names filter."] = true

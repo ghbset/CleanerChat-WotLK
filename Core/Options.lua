@@ -103,15 +103,39 @@ local optionDB = {
 		--	end,
 		--	get = function(info) return ns.db.styling end,
 		--},
-		channelInitials = {
+		channelNameMode = {
 			order = 10,
-			name = L["Channel Initials"],
-			desc = L["Show the channel's first letter in brackets, e.g. \"1. [G]\". Requires the Chat Channel Names filter."],
+			name = L["Channel Name Style"],
+			desc = L["Choose whether to show the channel's full name or just its first letter. Requires the Chat Channel Names filter."],
+			width = "full",
+			type = "select",
+			values = {
+				initial = L["Shortened (e.g. \"[G]\")"],
+				full = L["Full name (e.g. \"General\")"],
+			},
+			disabled = function(info) return not ns.db.filters.channels end,
+			set = function(info,value) ns.db.channelNameMode = value; Options:UpdateReloadStatus() end,
+			get = function(info) return ns.db.channelNameMode end,
+		},
+		channelNumber = {
+			order = 11,
+			name = L["Show Channel Number"],
+			desc = L["Prefix the channel display with its number, e.g. \"1. \". Requires the Chat Channel Names filter."],
 			width = "full",
 			type = "toggle",
 			disabled = function(info) return not ns.db.filters.channels end,
-			set = function(info,value) ns.db.channelInitials = value; Options:UpdateReloadStatus() end,
-			get = function(info) return ns.db.channelInitials end,
+			set = function(info,value) ns.db.channelNumber = value; Options:UpdateReloadStatus() end,
+			get = function(info) return ns.db.channelNumber end,
+		},
+		channelCapitalize = {
+			order = 12,
+			name = L["Capitalize Channel Name"],
+			desc = L["Capitalize the first letter of the channel name or initial. Requires the Chat Channel Names filter."],
+			width = "full",
+			type = "toggle",
+			disabled = function(info) return not ns.db.filters.channels end,
+			set = function(info,value) ns.db.channelCapitalize = value; Options:UpdateReloadStatus() end,
+			get = function(info) return ns.db.channelCapitalize end,
 		},
 		capitalizeNames = {
 			order = 20,
@@ -260,8 +284,8 @@ Options.GenerateOptionsMenu = function(self)
 	end
 
 	AceConfigRegistry:RegisterOptionsTable(Addon, options)
-	-- Account for the two extra toggles shown above the filter header.
-	AceConfigDialog:SetDefaultSize(Addon, 400, 180 + (count + 2)*24)
+	-- Account for the four extra controls shown above the filter header.
+	AceConfigDialog:SetDefaultSize(Addon, 400, 180 + (count + 4)*24)
 end
 
 -- Reload-on-close tracking
@@ -270,7 +294,9 @@ end
 -- Used to detect whether the user actually changed anything.
 Options.TakeSettingsSnapshot = function(self)
 	self.snapshot = {
-		channelInitials = ns.db.channelInitials,
+		channelNameMode = ns.db.channelNameMode,
+		channelNumber = ns.db.channelNumber,
+		channelCapitalize = ns.db.channelCapitalize,
 		capitalizeNames = ns.db.capitalizeNames,
 		filters = CopyTable(ns.db.filters)
 	}
@@ -281,7 +307,9 @@ end
 Options.IsDirty = function(self)
 	local snapshot = self.snapshot
 	if (not snapshot) then return false end
-	if (snapshot.channelInitials ~= ns.db.channelInitials) then return true end
+	if (snapshot.channelNameMode ~= ns.db.channelNameMode) then return true end
+	if (snapshot.channelNumber ~= ns.db.channelNumber) then return true end
+	if (snapshot.channelCapitalize ~= ns.db.channelCapitalize) then return true end
 	if (snapshot.capitalizeNames ~= ns.db.capitalizeNames) then return true end
 	for key,value in next,snapshot.filters do
 		if (ns.db.filters[key] ~= value) then return true end

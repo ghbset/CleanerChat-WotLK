@@ -254,7 +254,9 @@ ns:SetDefaultModulePrototype(modulePrototype)
 -- Addon default settings.
 local defaults = {
 	styling = true, -- will be ignored when conflicting addons are detected
-	channelInitials = true, -- show the channel's first letter, e.g. "1. [G]"
+	channelNameMode = "initial", -- "initial" shows the first letter (e.g. "[G]"), "full" shows the whole name
+	channelNumber = true, -- prefix the channel display with its number, e.g. "1. "
+	channelCapitalize = true, -- capitalize the channel name/initial
 	capitalizeNames = true, -- capitalize the first letter of player names
 	filters = {
 		achievements = true,

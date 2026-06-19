@@ -40,15 +40,39 @@ local string_sub = string.sub
 local string_upper = string.upper
 local table_insert = table.insert
 
--- Rebuilds a channel link as "N. [X]" where N is the channel number
--- and X is the uppercased first letter of the channel name.
+-- Rebuilds a channel link from its captured pieces according to the
+-- user's preferences:
+--   * channelNameMode  -> "initial" shows the first letter (e.g. "[G]"),
+--                         "full" shows the whole name (e.g. "General").
+--   * channelNumber    -> when true, prefixes the channel number, e.g. "1. ".
+--   * channelCapitalize-> when true, capitalizes the first letter.
 -- e.g. "|Hchannel:CHANNEL:1|h[1. General - The Barrens]|h" -> "1. [G]"
--- When the option is disabled it falls back to just the number, e.g. "1.".
 local formatChannelTag = function(channel, number, displaynum, name)
-	if (ns.db and ns.db.channelInitials) then
-		return "|Hchannel:"..channel..":"..number.."|h"..displaynum..". ["..string_upper(string_sub(name, 1, 1)).."]|h"
+	local db = ns.db
+	local mode = (db and db.channelNameMode) or "initial"
+	local showNumber = (db == nil) or db.channelNumber
+	local capitalize = (db == nil) or db.channelCapitalize
+
+	local label
+	if (mode == "full") then
+		label = name or ""
+		if (capitalize and label ~= "") then
+			label = string_upper(string_sub(label, 1, 1))..string_sub(label, 2)
+		end
+	else
+		label = string_sub(name or "", 1, 1)
+		if (capitalize) then
+			label = string_upper(label)
+		end
+		label = "["..label.."]"
 	end
-	return "|Hchannel:"..channel..":"..number.."|h"..displaynum..".|h"
+
+	local prefix = ""
+	if (showNumber) then
+		prefix = displaynum..". "
+	end
+
+	return "|Hchannel:"..channel..":"..number.."|h"..prefix..label.."|h"
 end
 
 -- WoW Globals (some may be nil in older clients like 3.3.5)
