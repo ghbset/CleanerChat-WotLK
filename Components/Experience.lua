@@ -205,6 +205,54 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 	end
 end
 
+-- Replacement-layer handler for level up lines.
+-- On some servers these are printed directly to the chat frame instead of
+-- firing CHAT_MSG_SYSTEM, so the event filter above never sees them. Handling
+-- them here (at the AddMessage layer) catches them no matter how they arrive.
+local levelupReplacement = function(msg)
+	if (not msg) then return end
+
+	-- "Congratulations, you have reached level 21!"
+	if (string_find(msg, "Congratulations, you have reached level")) then
+		local level = string_match(msg, "level (%d+)")
+		if (level) then
+			return string_format(ns.out.levelup_ding, tonumber(level))
+		end
+	end
+
+	-- "You have gained 15 hit points."
+	if (string_find(msg, "gained") and string_find(msg, "hit points")) then
+		local hp = string_match(msg, "gained (%d+)")
+		if (hp) then
+			return string_format(ns.out.levelup_hp, tonumber(hp))
+		end
+	end
+
+	-- "You have gained 1 talent point(s)."
+	if (string_find(msg, "talent point")) then
+		local points = string_match(msg, "gained (%d+)")
+		if (points) then
+			local num = tonumber(points)
+			return string_format(num > 1 and ns.out.levelup_talents or ns.out.levelup_talent, num)
+		end
+	end
+
+	-- "Your Strength increases by 1."
+	if (string_find(msg, "increases by")) then
+		local stat, amount = string_match(msg, "Your (%a+) increases by (%d+)")
+		if (stat and amount) then
+			return string_format(ns.out.levelup_stat, tonumber(amount), stat)
+		end
+	end
+
+	-- "You have unspent Talent Essence!" (case varies, Ascension-specific)
+	if (string_find(msg, "nspent Talent Essence")) then
+		return ns.out.levelup_essence
+	end
+
+	return msg
+end
+
 local onChatEventProxy = function(...)
 	return Module:OnChatEvent(...)
 end
@@ -212,9 +260,11 @@ end
 Module.OnEnable = function(self)
 	self:RegisterMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", onChatEventProxy)
 	self:RegisterMessageEventFilter("CHAT_MSG_SYSTEM", onChatEventProxy)
+	self:RegisterMessageReplacement(levelupReplacement, true)
 end
 
 Module.OnDisable = function(self)
 	self:UnregisterMessageEventFilter("CHAT_MSG_COMBAT_XP_GAIN", onChatEventProxy)
 	self:UnregisterMessageEventFilter("CHAT_MSG_SYSTEM", onChatEventProxy)
+	self:UnregisterMessageReplacement(levelupReplacement)
 end
