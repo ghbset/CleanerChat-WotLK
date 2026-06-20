@@ -77,7 +77,7 @@ function UIManager:OnEnable()
 
   -- Create tabs for active chat windows
   -- Use a small delay to ensure Blizzard chat system is fully ready
-  local function SetupTabs()
+  local function SetupTabs(reveal)
     local activeTabs = {}
     for i=1, NUM_CHAT_WINDOWS do
       local chatFrame = _G["ChatFrame"..i]
@@ -136,10 +136,17 @@ function UIManager:OnEnable()
     
     -- Don't auto-select - just show all frames for now
     -- Tab switching will be handled by click
-    
-    -- Ensure dock is shown
-    if self.dock then
+
+    -- Only reveal the dock on an explicit initial setup. Re-asserts triggered by
+    -- Blizzard's FCF_DockUpdate fire constantly while the combat log streams
+    -- during combat; if those forced the dock visible, the idle-faded tabs would
+    -- pop back up and then never fade again. On a real reveal we also re-arm the
+    -- idle fade-out so the tabs always disappear again when left alone.
+    if reveal and self.dock then
       self.dock:Show()
+      if self.dock.FadeOutTabs then
+        self.dock:FadeOutTabs()
+      end
     end
   end
   
@@ -148,11 +155,11 @@ function UIManager:OnEnable()
   -- re-dock the tabs, pulling them back into the now-hidden dock manager so
   -- they appear to vanish. Re-running SetupTabs re-parents the tabs into the
   -- Glass dock and shows them; it is idempotent (frames and tabs are reused).
-  SetupTabs()
+  SetupTabs(true)
 
   if (C_Timer and C_Timer.After) then
-    C_Timer.After(0.5, SetupTabs)
-    C_Timer.After(2, SetupTabs)
+    C_Timer.After(0.5, function () SetupTabs(true) end)
+    C_Timer.After(2, function () SetupTabs(true) end)
   end
 
   -- Keep the tabs in the Glass dock whenever Blizzard re-lays out its chat dock.
@@ -171,11 +178,11 @@ function UIManager:OnEnable()
       if (C_Timer and C_Timer.After) then
         C_Timer.After(0, function ()
           reassertScheduled = false
-          SetupTabs()
+          SetupTabs(false)
         end)
       else
         reassertScheduled = false
-        SetupTabs()
+        SetupTabs(false)
       end
     end
 
