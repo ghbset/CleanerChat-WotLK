@@ -20,6 +20,14 @@ local GetCursorPosition = GetCursorPosition
 local UIParent = UIParent
 -- luacheck: pop
 
+-- Raw native Hide, bypassing the animated FadingFrameMixin:Hide() that this
+-- frame mixes in. The tab dock runs its OWN LibEasing fade-out; when that fade
+-- finishes it must hide the frame for real. Calling self:Hide() there invoked
+-- FadingFrameMixin:Hide(), which started a SECOND alpha fade, and the following
+-- SetAlpha(1) then flashed the fully-opaque tabs back for a frame before they
+-- disappeared again. Use the raw Hide so the dock just hides, no re-fade.
+local Frame_Hide = getmetatable(CreateFrame("Frame")).__index.Hide
+
 local ChatDockMixin = {}
 
 function ChatDockMixin:Init(parent)
@@ -143,12 +151,12 @@ function ChatDockMixin:FadeOutTabs()
         LibEasing.OutCubic,
         function ()
           self.fadeHandle = nil
-          self:Hide()
+          Frame_Hide(self)
           self:SetAlpha(1)
         end
       )
     else
-      self:Hide()
+      Frame_Hide(self)
       self:SetAlpha(1)
     end
   end)
