@@ -54,8 +54,8 @@ function C:OnEnable()
                   order = 2.2,
                 },
                 slashCmd = {
-                  name = "|c00DFBA69/glass|r  |cff808080...............|r  Open config window\n"..
-                         "|c00DFBA69/glass lock|r  |cff808080.......|r  Unlock Glass frame\n",
+                  name = "|c00DFBA69/cc|r  |cff808080...............|r  Open config window\n"..
+                         "|c00DFBA69/cc lock|r  |cff808080.......|r  Unlock Glass frame\n",
                   type = "description",
                   width = "double",
                   order = 2.3,
@@ -652,7 +652,13 @@ function C:OnEnable()
   AceConfig:RegisterOptionsTable("Glass", options)
   AceConfigDialog:SetDefaultSize("Glass", 780, 500)
 
-  self:RegisterChatCommand("glass", "OnSlashCommand")
+  -- Glass no longer owns a slash command -- its settings are embedded as
+  -- categories in CleanerChat's /cc window. Expose the config groups for that,
+  -- plus a helper so "/cc lock" can still unlock the Glass frame.
+  Core.configGroups = options.args
+  function Core.UnlockFrame()
+    Core:Dispatch(UnlockMover())
+  end
 
   Core.db.RegisterCallback(self, "OnProfileChanged", "RefreshConfig")
   Core.db.RegisterCallback(self, "OnProfileCopied", "RefreshConfig")
