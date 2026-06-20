@@ -196,13 +196,26 @@ function UIManager:OnEnable()
     ChatAlertFrame:SetPoint("BOTTOMLEFT", self.container, "TOPLEFT", 15, 10)
   end
 
-  -- Hide other chat elements
+  -- Hide the native chat buttons (chat menu "speech bubble", channel button and
+  -- the voice mute/deafen mic buttons). Blizzard re-shows some of these on chat
+  -- updates, so pin them hidden with a Show hook (installed once).
   -- Note: QuickJoinToastButton doesn't exist in WotLK 3.3.5
-  if ChatFrameChannelButton then
-    ChatFrameChannelButton:Hide()
-  end
-  if ChatFrameMenuButton then
-    ChatFrameMenuButton:Hide()
+  if (not self.chatButtonsHidden) then
+    self.chatButtonsHidden = true
+    for _, buttonName in ipairs({
+      "ChatFrameChannelButton",
+      "ChatFrameMenuButton",
+      "ChatFrameToggleVoiceDeafenButton",
+      "ChatFrameToggleVoiceMuteButton",
+    }) do
+      local button = _G[buttonName]
+      if button then
+        button:Hide()
+        if _G.hooksecurefunc then
+          _G.hooksecurefunc(button, "Show", function (b) b:Hide() end)
+        end
+      end
+    end
   end
   
   -- Hide Blizzard chat frame backgrounds and scroll buttons
