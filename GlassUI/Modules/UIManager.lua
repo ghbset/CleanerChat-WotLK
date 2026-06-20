@@ -105,10 +105,12 @@ function UIManager:OnEnable()
           -- them. The Combat Log is now rendered by Glass as well.
           chatFrame:SetAlpha(0)
         else
-          -- Hide unused chat frame and tab
+          -- Hide unused chat frame and tab, and drop any stale tab reference so
+          -- a closed window's tab is not re-shown later by SelectChatTab.
           if chatTab then
             chatTab:Hide()
           end
+          self.state.tabs[i] = nil
         end
       end
     end
@@ -313,9 +315,32 @@ function UIManager:OnEnable()
   self:RawHook("FCF_Close", function (chatFrame)
     self.hooks["FCF_Close"](chatFrame)
 
-    self.slidingMessageFramePool:Release(self.state.temporaryFrames[chatFrame:GetName()])
-    self.state.temporaryFrames[chatFrame:GetName()] = nil
-    self.state.temporaryTabs[chatFrame:GetName()] = nil
+    local name = chatFrame:GetName()
+
+    -- Temporary (whisper/popout) frame cleanup, only if this was one. The old
+    -- code called Release() unconditionally, which passed nil for user-created
+    -- windows.
+    local tempSMF = self.state.temporaryFrames[name]
+    if tempSMF then
+      self.slidingMessageFramePool:Release(tempSMF)
+      self.state.temporaryFrames[name] = nil
+      self.state.temporaryTabs[name] = nil
+    end
+
+    -- If the closed window was the selected tab, drop the stale selection so the
+    -- re-assert below falls back to the default (General) tab.
+    if Core.Components.selectedTab and Core.Components.selectedTab.chatFrame == chatFrame then
+      Core.Components.selectedTab = nil
+    end
+
+    -- Closing a window re-docks the remaining frames through Blizzard's dock
+    -- (FCFDock_UpdateTabs), which re-parents EVERY tab into the hidden native
+    -- GeneralDockManager -- and that path does not call FCF_DockUpdate, so our
+    -- normal re-assert hook never fires. Without this, all tabs vanish until a
+    -- /reload. Re-assert now to pull the remaining tabs back into the Glass dock.
+    if SetupTabs then
+      SetupTabs(true)
+    end
   end, true)
 
   -- Start rendering
