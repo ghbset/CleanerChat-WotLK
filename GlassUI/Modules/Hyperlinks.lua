@@ -125,8 +125,15 @@ function Hyperlinks:OnEnable()
     end
 
     -- Use global reference in case some addon has hooked into it for custom
-    -- hyperlinks (e.g. Mythic Dungeon Tools, Prat)
-    _G.SetItemRef(link, text, button)
+    -- hyperlinks (e.g. Mythic Dungeon Tools, Prat).
+    --
+    -- pcall it: our clickable overlays make EVERY |H...|h link clickable, and
+    -- some chat link types ("trial:", "uierror:", custom server links) aren't
+    -- understood by SetItemRef -> ItemRefTooltip:SetHyperlink and throw
+    -- "Unknown link type". There's nothing useful to show for those, so a
+    -- failed click is silently ignored instead of erroring (mass-clicking
+    -- otherwise spammed the error frame). Valid/addon-handled links still work.
+    pcall(_G.SetItemRef, link, text, button)
   end)
 
   Core:Subscribe(HYPERLINK_ENTER, function (payload)
