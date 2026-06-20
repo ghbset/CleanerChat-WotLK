@@ -60,20 +60,10 @@ function SlidingMessageFrameMixin:Init(chatFrame)
   }
   self.chatFrame = chatFrame
 
-  -- Skip combat log FIRST - don't modify it at all to avoid breaking Blizzard_CombatLog
-  -- The combat log needs its positioning intact for FCF_DockUpdate to work
-  if chatFrame == _G.ChatFrame2 then
-    self.state.isCombatLog = true
-    -- Still hide the button frame for combat log
-    local buttonFrame = _G[chatFrame:GetName().."ButtonFrame"]
-    if buttonFrame then
-      buttonFrame:Hide()
-    end
-    -- Don't modify anything else - let Blizzard handle it completely
-    return
-  end
-
-  -- Hide Blizzard UI elements (but don't modify chatFrame parent/position)
+  -- Hide Blizzard UI elements (but don't modify chatFrame parent/position).
+  -- The Combat Log (ChatFrame2) is treated like any other chat frame so its
+  -- messages render inside the Glass UI. We never change chatFrame's parent or
+  -- position, so Blizzard_CombatLog / FCF_DockUpdate keep working.
   local buttonFrame = _G[chatFrame:GetName().."ButtonFrame"]
   if buttonFrame then
     buttonFrame:Hide()
@@ -82,6 +72,16 @@ function SlidingMessageFrameMixin:Init(chatFrame)
   -- Make the original chat frame invisible but don't change its parent
   -- This preserves Blizzard's internal state
   chatFrame:SetAlpha(0)
+
+  -- Keep it invisible. Blizzard fades a docked frame back in when its tab is
+  -- selected (e.g. clicking the Combat Log tab), which resets the alpha and
+  -- makes the native frame reappear on top of the Glass display. Force the
+  -- alpha to stay at 0 so only the Glass rendering is ever visible.
+  if not self:IsHooked(chatFrame, "SetAlpha") then
+    self:RawHook(chatFrame, "SetAlpha", function ()
+      self.hooks[chatFrame].SetAlpha(chatFrame, 0)
+    end, true)
+  end
 
   -- Chat scroll frame for our custom messages
   self:SetHeight(self.config.height + self.config.overflowHeight)
@@ -456,11 +456,13 @@ local function CreateSlidingMessageFramePool(parent)
       smf:Hide()
 
       if smf.chatFrame and not smf.state.isCombatLog then
-        -- Only unhook if we actually hooked (combat log returns early, no hooks)
+        -- Only unhook if we actually hooked
         if smf:IsHooked(smf.chatFrame, "AddMessage") then
           smf:Unhook(smf.chatFrame, "AddMessage")
         end
-        -- Note: We no longer hook Show/Hide/SetPoint
+        if smf:IsHooked(smf.chatFrame, "SetAlpha") then
+          smf:Unhook(smf.chatFrame, "SetAlpha")
+        end
         -- Note: historyBuffer doesn't exist in WotLK 3.3.5
       end
 

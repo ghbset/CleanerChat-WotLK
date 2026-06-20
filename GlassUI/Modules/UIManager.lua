@@ -101,14 +101,9 @@ function UIManager:OnEnable()
             table.insert(activeTabs, tab)
           end
           
-          -- Hide the original Blizzard chat frame visuals so Glass can render
-          -- them. Exception: the Combat Log (ChatFrame2). Glass deliberately
-          -- does not render it (to avoid breaking Blizzard_CombatLog), so it
-          -- must keep its normal alpha to show combat events. Blizzard shows
-          -- and hides it natively based on which dock tab is selected.
-          if not (smf.state and smf.state.isCombatLog) then
-            chatFrame:SetAlpha(0)
-          end
+          -- Hide the original Blizzard chat frame visuals so Glass renders
+          -- them. The Combat Log is now rendered by Glass as well.
+          chatFrame:SetAlpha(0)
         else
           -- Hide unused chat frame and tab
           if chatTab then
@@ -122,6 +117,21 @@ function UIManager:OnEnable()
     local UpdateTabPositions = Core.Components.UpdateTabPositions
     if UpdateTabPositions then
       UpdateTabPositions(activeTabs)
+    end
+
+    -- Hide the native Combat Log filter quick-button bar ("Self / Everything /
+    -- What happened to me?"). It is Blizzard combat log UI that floats above the
+    -- Glass chat. Blizzard re-shows it when the combat log is selected, so pin it
+    -- hidden with a Show hook (installed once).
+    local combatLogButtons = _G["CombatLogQuickButtonFrame"]
+    if combatLogButtons then
+      combatLogButtons:Hide()
+      if not self.combatLogButtonsHooked then
+        self.combatLogButtonsHooked = true
+        if _G.hooksecurefunc then
+          _G.hooksecurefunc(combatLogButtons, "Show", function (f) f:Hide() end)
+        end
+      end
     end
     
     -- Don't auto-select - just show all frames for now
