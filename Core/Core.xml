@@ -17,6 +17,7 @@
 
 	<!-- Core -->
 	<Script file="Core.lua"/>
+	<Script file="OptionsSkin.lua"/>
 	<Script file="Options.lua"/>
 
 	<!-- Finalize the environment -->

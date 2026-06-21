@@ -74,13 +74,14 @@ local function Constructor()
 	titletext:SetPoint("TOPRIGHT", -14, 0)
 	titletext:SetJustifyH("LEFT")
 	titletext:SetHeight(18)
+	titletext:SetTextColor(223 / 255, 186 / 255, 105 / 255) -- CleanerChat gold accent
 
 	local border = CreateFrame("Frame", nil, frame, "BackdropTemplate")
 	border:SetPoint("TOPLEFT", 0, -17)
 	border:SetPoint("BOTTOMRIGHT", -1, 3)
 	border:SetBackdrop(PaneBackdrop)
-	border:SetBackdropColor(0.1, 0.1, 0.1, 0.5)
-	border:SetBackdropBorderColor(0.4, 0.4, 0.4)
+	border:SetBackdropColor(0.05, 0.05, 0.06, 0.55)
+	border:SetBackdropBorderColor(223 / 255, 186 / 255, 105 / 255, 0.22)
 
 	--Container Support
 	local content = CreateFrame("Frame", nil, border)

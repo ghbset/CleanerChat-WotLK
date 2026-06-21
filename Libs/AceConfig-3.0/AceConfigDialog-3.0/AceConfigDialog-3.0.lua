@@ -1441,7 +1441,16 @@ local function FeedOptions(appName, options,container,rootframe,path,group,inlin
 						elseif width == "half" then
 							control:SetWidth(width_multiplier / 2)
 						elseif (type(width) == "number") then
-							control:SetWidth(width_multiplier * width)
+							-- A fractional width (0 < width <= 1) is treated as a
+							-- RELATIVE fraction of the container so options can form
+							-- real columns that reflow with the window (e.g.
+							-- width = 0.5 -> two per row, 1/3 -> three per row).
+							-- Values > 1 keep the legacy fixed pixel-multiplier.
+							if width > 0 and width <= 1 then
+								control:SetRelativeWidth(width)
+							else
+								control:SetWidth(width_multiplier * width)
+							end
 						elseif width == "full" then
 							control.width = "fill"
 						else

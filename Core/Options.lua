@@ -72,7 +72,7 @@ local optionDB = {
 			order = 10,
 			name = L["Channel Name Style"],
 			desc = L["Choose whether to show the channel's full name or just its first letter. Requires the Chat Channel Names filter."],
-			width = "full",
+			width = 0.8,
 			type = "select",
 			values = {
 				initial = L["Shortened (e.g. \"[G]\")"],
@@ -389,6 +389,12 @@ Options.OpenOptionsMenu = function(self, input)
 	self:TakeSettingsSnapshot()
 
 	local frame = AceConfigDialog.OpenFrames[Addon]
+
+	-- Re-skin the window into the dark "Glass" theme (purely cosmetic, guarded).
+	if (frame and ns.SkinOptionsWindow) then
+		pcall(ns.SkinOptionsWindow, frame)
+	end
+
 	if (frame and frame.frame and not frame.frame.ccReloadHooked) then
 		frame.frame.ccReloadHooked = true
 		frame.frame:HookScript("OnHide", function()
