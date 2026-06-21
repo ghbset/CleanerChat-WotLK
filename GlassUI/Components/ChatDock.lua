@@ -91,19 +91,6 @@ function ChatDockMixin:Init(parent)
           self:FadeOutTabs()
         end
       end),
-      -- Edit focus also reveals tabs (when showOnEditFocus is enabled)
-      Core:Subscribe(EDIT_FOCUS_GAINED, function ()
-        self.state.mouseOver = true
-        if Core.db.profile.tabsOnHover then
-          self:ShowTabs()
-        end
-      end),
-      Core:Subscribe(EDIT_FOCUS_LOST, function ()
-        self.state.mouseOver = false
-        if Core.db.profile.tabsOnHover then
-          self:FadeOutTabs()
-        end
-      end),
       Core:Subscribe(UPDATE_CONFIG, function (key)
         if key == "frameWidth" then
           self:SetWidth(Core.db.profile.frameWidth)
