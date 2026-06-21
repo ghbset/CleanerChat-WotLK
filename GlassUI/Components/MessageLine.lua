@@ -135,6 +135,12 @@ function MessageLineMixin:Init()
   self.text:SetPoint("LEFT", leftPadding, 0)
   self.text:SetWidth(Core.db.profile.frameWidth - leftPadding - Constants.TEXT_XPADDING)
   self.text:SetIndentedWordWrap(Core.db.profile.indentWordWrap)
+  -- Allow a single very long run of non-space characters (e.g. spammed
+  -- "AAAA...") to break across lines at the frame width. Without this WoW
+  -- leaves the whole "word" on one overflowing line and reserves empty space.
+  if self.text.SetNonSpaceWrap then
+    self.text:SetNonSpaceWrap(true)
+  end
 
   -- Hyperlink handling.
   -- WotLK 3.3.5 only fires OnHyperlinkClick/Enter/Leave on ScrollingMessageFrame
