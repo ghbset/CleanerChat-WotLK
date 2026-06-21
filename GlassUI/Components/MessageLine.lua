@@ -261,7 +261,9 @@ function MessageLineMixin:UpdateIcons()
     local icon = icons[i]
     local t = pool[i]
     if not t then
-      t = self:CreateTexture(nil, "OVERLAY")
+      -- Use ARTWORK layer (same as text) so icons are clipped with the line
+      -- and don't bleed over messages below.
+      t = self:CreateTexture(nil, "ARTWORK")
       pool[i] = t
     end
 
@@ -295,12 +297,25 @@ function MessageLineMixin:UpdateIcons()
     -- From TOPLEFT, line N's center is at y = -lineHeight * (N - 0.5).
     local y = -lineHeight * (lineCount - 0.5)
 
-    -- Apply the icon's own offsets (e.g. :0:-4 for vertical adjustment).
-    local iconOffsetX = icon.offsetX or 0
-    local iconOffsetY = icon.offsetY or 0
+    -- Scale the icon to fit within the line height if it's too large.
+    -- This prevents icons from bleeding into adjacent messages.
+    local iconW, iconH = icon.w, icon.h
+    local wasScaled = false
+    if iconH > lineHeight then
+      local scale = lineHeight / iconH
+      iconW = iconW * scale
+      iconH = lineHeight
+      wasScaled = true
+    end
+
+    -- Apply the icon's own offsets only if not scaled.
+    -- When scaled, the icon is already centered properly within the line,
+    -- and the original offsets (meant for full-size icons) would throw it off.
+    local iconOffsetX = wasScaled and 0 or (icon.offsetX or 0)
+    local iconOffsetY = wasScaled and 0 or (icon.offsetY or 0)
 
     t:SetTexture(icon.path)
-    t:SetSize(icon.w, icon.h)
+    t:SetSize(iconW, iconH)
     t:ClearAllPoints()
     t:SetPoint("LEFT", self.text, "TOPLEFT", x + iconOffsetX, y + iconOffsetY)
     t:Show()

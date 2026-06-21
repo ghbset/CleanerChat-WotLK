@@ -446,9 +446,33 @@ function SlidingMessageFrameMixin:Update(incoming)
   -- Create new message frame for each message
   local newMessages = {}
 
+  -- Track the highest frame level to ensure newer messages render on top.
+  -- This fixes z-order issues when pooled frames are reused (their creation
+  -- order may not match visual order, causing icons to bleed through).
+  local baseLevel = (self.slider:GetFrameLevel() or 1) + 1
+  if not self.state.nextFrameLevel then
+    self.state.nextFrameLevel = baseLevel
+  end
+
+  -- Reset frame levels if they get too high to avoid potential issues.
+  -- Re-normalize all existing messages from the base level.
+  if self.state.nextFrameLevel > 500 then
+    local level = baseLevel
+    for _, msg in ipairs(self.state.messages) do
+      msg:SetFrameLevel(level)
+      level = level + 1
+    end
+    self.state.nextFrameLevel = level
+  end
+
   for _, message in ipairs(incoming) do
     local messageFrame = self:CreateMessageFrame(unpack(message))
     messageFrame:SetPoint("BOTTOMLEFT")
+
+    -- Newer messages (at the bottom) get higher frame levels so their
+    -- backgrounds properly cover icons from older messages above.
+    messageFrame:SetFrameLevel(self.state.nextFrameLevel)
+    self.state.nextFrameLevel = self.state.nextFrameLevel + 1
 
     -- Attach previous messageFrame to this one
     if self.state.head then
@@ -572,6 +596,7 @@ local function CreateSlidingMessageFramePool(parent)
         smf.state.tail = nil
         smf.state.messages = {}
         smf.state.incomingMessages = {}
+        smf.state.nextFrameLevel = nil  -- Reset frame level counter
       end
 
       if smf.messageFramePool ~= nil then
