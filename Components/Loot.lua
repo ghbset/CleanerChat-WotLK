@@ -470,9 +470,10 @@ Module.OnEnable = function(self)
 
 	-- Track vendor sales so they show a "- item" line (see ReportItemSold).
 	-- Right-clicking a bag item while the merchant window is open sells it, so
-	-- we post-hook UseContainerItem. The slot still resolves inside the hook
-	-- because the server-confirmed removal happens a moment later. Hooked once;
-	-- gated on IsEnabled so disabling the Loot module also stops the tracking.
+	-- we post-hook UseContainerItem. We delay the check to confirm the item was
+	-- actually removed (vendor might reject unsellable items like "The merchant
+	-- doesn't want that item"). Hooked once; gated on IsEnabled so disabling
+	-- the Loot module also stops the tracking.
 	if (not self.merchantHooked) then
 		self.merchantHooked = true
 		hooksecurefunc("UseContainerItem", function(bag, slot)
@@ -482,8 +483,30 @@ Module.OnEnable = function(self)
 			local link = GetContainerItemLink(bag, slot)
 			if (not link) then return end
 
-			local _, count = GetContainerItemInfo(bag, slot)
-			Module:ReportItemSold(link, count or 1)
+			local _, countBefore = GetContainerItemInfo(bag, slot)
+			countBefore = countBefore or 1
+
+			-- Delay the check to let the server confirm the sale.
+			-- If the vendor rejects the item, it will still be in the slot.
+			if (C_Timer and C_Timer.After) then
+				C_Timer.After(0.1, function()
+					local linkAfter = GetContainerItemLink(bag, slot)
+					local _, countAfter = GetContainerItemInfo(bag, slot)
+					countAfter = countAfter or 0
+
+					-- Item completely gone = sold all
+					if (not linkAfter) then
+						Module:ReportItemSold(link, countBefore)
+					-- Same item but count decreased = sold some (shouldn't happen with vendors but be safe)
+					elseif (linkAfter == link and countAfter < countBefore) then
+						Module:ReportItemSold(link, countBefore - countAfter)
+					end
+					-- If item is still there with same count, vendor rejected it - don't report
+				end)
+			else
+				-- Fallback: immediate report (old behavior) if no timer available
+				Module:ReportItemSold(link, countBefore)
+			end
 		end)
 	end
 end
