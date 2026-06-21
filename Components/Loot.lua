@@ -30,37 +30,10 @@ local Module = ns:NewModule("Loot")
 -- Addon Localization
 local L = LibStub("AceLocale-3.0"):GetLocale((...))
 
--- GLOBALS: UnitClass, UseContainerItem
+-- GLOBALS: UnitClass
 -- GLOBALS: MerchantFrame, ChatTypeInfo, DEFAULT_CHAT_FRAME, ChatFrame1
 -- GLOBALS: hooksecurefunc, GetContainerItemLink, GetContainerItemInfo
 
--- Pending vendor sale info: stores {bag, slot, link, count} captured BEFORE
--- UseContainerItem runs. Set by the pre-hook, consumed by the post-hook.
-local pendingVendorSale = nil
-
--- Pre-hook: Replace UseContainerItem at file load time (earliest possible)
--- to capture item info BEFORE the original function removes it from the bag.
-do
-	local originalUseContainerItem = UseContainerItem
-	UseContainerItem = function(bag, slot, ...)
-		-- Capture item info BEFORE calling the original
-		pendingVendorSale = nil
-		if MerchantFrame and MerchantFrame:IsShown() then
-			local link = GetContainerItemLink(bag, slot)
-			if link then
-				local _, count = GetContainerItemInfo(bag, slot)
-				pendingVendorSale = {
-					bag = bag,
-					slot = slot,
-					link = link,
-					count = count or 1
-				}
-			end
-		end
-		-- Call the original function
-		return originalUseContainerItem(bag, slot, ...)
-	end
-end
 -- Lua API
 local ipairs = ipairs
 local rawget = rawget
@@ -497,23 +470,23 @@ Module.OnEnable = function(self)
 	self:RegisterMessageEventFilter("CHAT_MSG_SYSTEM", onChatEventProxy)
 
 	-- Track vendor sales so they show a "- item" line (see ReportItemSold).
-	-- The pre-hook (at file load) captures item info into pendingVendorSale.
-	-- This post-hook checks if the sale succeeded and reports it.
+	-- Right-clicking a bag item while the merchant window is open sells it.
+	-- We use hooksecurefunc (a SECURE post-hook) -- NOT a replacement of the
+	-- global UseContainerItem, which would taint the secure function and break
+	-- using items ("AddOn tainted the call of the secure function"). The item
+	-- removal is server-confirmed (async), so the item is still in the slot
+	-- during the post-hook; we capture it there, then poll to confirm the sale.
 	if (not self.merchantHooked) then
 		self.merchantHooked = true
 		hooksecurefunc("UseContainerItem", function(bag, slot)
 			if not Module:IsEnabled() then return end
-			if not pendingVendorSale then return end
+			if not MerchantFrame or not MerchantFrame:IsShown() then return end
 
-			-- Consume the pending sale info
-			local pending = pendingVendorSale
-			pendingVendorSale = nil
-
-			-- Verify this is the same bag/slot
-			if pending.bag ~= bag or pending.slot ~= slot then return end
-
-			local link = pending.link
-			local countBefore = pending.count
+			-- Capture the item (still present -- removal is async).
+			local link = GetContainerItemLink(bag, slot)
+			if not link then return end
+			local _, countBefore = GetContainerItemInfo(bag, slot)
+			countBefore = countBefore or 1
 
 			-- The server confirms the item removal asynchronously and latency
 			-- varies, so a single fixed delay is unreliable (it often checks
