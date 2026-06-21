@@ -131,6 +131,15 @@ local optionDB = {
 			set = function(info,value) ns.db.hideUIErrors = value; Options:UpdateReloadStatus() end,
 			get = function(info) return ns.db.hideUIErrors end,
 		},
+		showStartupMessage = {
+			order = 45,
+			name = L["Show Startup Message"],
+			desc = L["Print a message on login showing how to open CleanerChat settings."],
+			width = "full",
+			type = "toggle",
+			set = function(info,value) ns.db.showStartupMessage = value end,
+			get = function(info) return ns.db.showStartupMessage end,
+		},
 		filterHeader = {
 			order = 100,
 			type = "header",

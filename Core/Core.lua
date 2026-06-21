@@ -264,6 +264,7 @@ local defaults = {
 	moneyPrettify = true, -- use spaces in large gold amounts (e.g. "1 234" instead of "1234")
 	hideOtherCrafts = false, -- hide other players' "<name> creates <item>" craft broadcasts
 	hideUIErrors = true, -- hide the server's "UI Error: an interface error occured" chat notification
+	showStartupMessage = true, -- print "Use /cc for settings" on addon load
 	filters = {
 		achievements = true,
 		auctions = true,
@@ -515,6 +516,17 @@ ns.OnEnable = function(self)
 	if (ns.Version == "Development") then
 		self:GetModule("DevelopmentFilters"):Enable()
 		self:GetModule("Creatures"):Enable()
+	end
+
+	-- Print startup message (delayed so it's visible after login spam)
+	if (self.db.showStartupMessage) then
+		if (C_Timer and C_Timer.After) then
+			C_Timer.After(2, function()
+				print("|cffDFBA69CleanerChat|r: Use |cffffd200/cc|r for settings.")
+			end)
+		else
+			print("|cffDFBA69CleanerChat|r: Use |cffffd200/cc|r for settings.")
+		end
 	end
 
 end

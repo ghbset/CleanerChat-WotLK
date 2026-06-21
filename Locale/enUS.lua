@@ -37,6 +37,9 @@ L["Hide the \"<name> created: <item>\" messages shown when other players craft i
 L["Hide UI Error Messages on Login from CleanerChat"] = true
 L["Hide the \"UI Error: an interface error occurred\" notifications the server prints to chat when a UI error happens."] = true
 
+L["Show Startup Message"] = true
+L["Print a message on login showing how to open CleanerChat settings."] = true
+
 L["Settings changed - the UI will reload when you close this window."] = true
 
 L["Filter Selection"] = true
