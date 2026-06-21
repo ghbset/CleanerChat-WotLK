@@ -34,6 +34,9 @@ L["Capitalize the first letter of player names shown in chat. Requires the Playe
 L["Hide Crafting Broadcasts"] = true
 L["Hide the \"<name> created: <item>\" messages shown when other players craft items nearby. Requires the Learning (Crafting) filter."] = true
 
+L["Hide UI Error Messages"] = true
+L["Hide the \"UI Error: an interface error occurred\" notifications the server prints to chat when a UI error happens."] = true
+
 L["Settings changed - the UI will reload when you close this window."] = true
 
 L["Filter Selection"] = true

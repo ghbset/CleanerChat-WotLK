@@ -259,6 +259,7 @@ local defaults = {
 	channelCapitalize = true, -- capitalize the channel name/initial
 	capitalizeNames = true, -- capitalize the first letter of player names
 	hideOtherCrafts = false, -- hide other players' "<name> creates <item>" craft broadcasts
+	hideUIErrors = true, -- hide the server's "UI Error: an interface error occured" chat notification
 	filters = {
 		achievements = true,
 		auctions = true,
