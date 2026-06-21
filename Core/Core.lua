@@ -157,6 +157,7 @@ local blacklist = setmetatable({}, {
 
 local replacements = setmetatable({}, {
 	__call = function(self, msg, ...)
+		if not msg then return msg end
 
 		-- Iterate all registered replacement sets.
 		for i,set in next,self do
@@ -167,12 +168,13 @@ local replacements = setmetatable({}, {
 
 				-- The module has supplied a table, iterate it.
 				for k,data in ipairs(set) do
-					if (string_match(msg, data[1])) then
+					if data[1] and data[2] and (string_match(msg, data[1])) then
+						-- string_gsub handles function replacements by passing captures
 						msg = string_gsub(msg, data[1], data[2])
 					end
 				end
 
-			elseif (type(set == "func")) then
+			elseif (type(set) == "function") then
 				msg = set(msg, ...) or msg
 			end
 		end
@@ -184,6 +186,7 @@ local replacements = setmetatable({}, {
 local specialreplacements
 specialreplacements = setmetatable({}, {
 	__call = function(self, msg, ...)
+		if not msg then return msg end
 
 		-- Iterate all registered replacement sets.
 		for i,set in next,self do
@@ -194,12 +197,13 @@ specialreplacements = setmetatable({}, {
 
 				-- The module has supplied a table, iterate it.
 				for k,data in ipairs(set) do
-					if (string_match(msg, data[1])) then
+					if data[1] and data[2] and (string_match(msg, data[1])) then
+						-- string_gsub handles function replacements by passing captures
 						msg = string_gsub(msg, data[1], data[2])
 					end
 				end
 
-			elseif (type(set == "func")) then
+			elseif (type(set) == "function") then
 				msg = set(msg, ...) or msg
 			end
 		end

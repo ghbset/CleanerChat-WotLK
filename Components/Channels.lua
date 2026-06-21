@@ -47,6 +47,11 @@ local table_insert = table.insert
 --   * channelCapitalize-> when true, capitalizes the first letter.
 -- e.g. "|Hchannel:CHANNEL:1|h[1. General - The Barrens]|h" -> "1. [G]"
 local formatChannelTag = function(channel, number, displaynum, name)
+	-- Guard against nil captures - return nil to skip replacement
+	if not channel or not number or not displaynum or not name then
+		return nil
+	end
+
 	local db = ns.db
 	local mode = (db and db.channelNameMode) or "initial"
 	local showNumber = (db == nil) or db.channelNumber
@@ -69,7 +74,7 @@ local formatChannelTag = function(channel, number, displaynum, name)
 	label = "["..label.."]"
 
 	local prefix = ""
-	if (showNumber) then
+	if (showNumber and displaynum) then
 		prefix = displaynum..". "
 	end
 
@@ -97,22 +102,47 @@ Module.OnInitialize = function(self)
 
 	self.replacements = {}
 
-	table_insert(self.replacements, {"%["..string_match(G.CHAT_PARTY_LEADER_GET, "%[(.-)%]") .. "%]", L["PL"]})
-	table_insert(self.replacements, {"%["..string_match(G.CHAT_PARTY_GET, "%[(.-)%]") .. "%]", L["P"]})
-	table_insert(self.replacements, {"%["..string_match(G.CHAT_RAID_LEADER_GET, "%[(.-)%]") .. "%]", L["RL"]})
-	table_insert(self.replacements, {"%["..string_match(G.CHAT_RAID_GET, "%[(.-)%]") .. "%]", L["R"]})
+	-- Helper for channels that respects channelNameMode setting
+	-- fullName is the full channel name (e.g. "Guild"), shortName is the abbreviation (e.g. "G")
+	local function safeAddDynamicReplacement(chatGlobal, fullName, shortName)
+		if chatGlobal then
+			local match = string_match(chatGlobal, "%[(.-)%]")
+			if match then
+				table_insert(self.replacements, {"%["..match.."%]", function()
+					local mode = (ns.db and ns.db.channelNameMode) or "initial"
+					if mode == "full" then
+						return "[" .. fullName .. "]"
+					else
+						return "[" .. shortName .. "]"
+					end
+				end})
+			end
+		end
+	end
+
+	-- All channels respect the full/shortened channel name mode
+	safeAddDynamicReplacement(G.CHAT_PARTY_LEADER_GET, "Party Leader", L["PL"])
+	safeAddDynamicReplacement(G.CHAT_PARTY_GET, "Party", L["P"])
+	safeAddDynamicReplacement(G.CHAT_RAID_LEADER_GET, "Raid Leader", L["RL"])
+	safeAddDynamicReplacement(G.CHAT_RAID_GET, "Raid", L["R"])
+	safeAddDynamicReplacement(G.CHAT_BATTLEGROUND_LEADER_GET, "Battleground Leader", L["BGL"])
+	safeAddDynamicReplacement(G.CHAT_BATTLEGROUND_GET, "Battleground", L["BG"])
 
 	-- Instance chat didn't exist in 3.3.5 - only add these replacements if the globals exist
-	if (G.CHAT_INSTANCE_CHAT_LEADER_GET) then
-		table_insert(self.replacements, {"%["..string_match(G.CHAT_INSTANCE_CHAT_LEADER_GET, "%[(.-)%]") .. "%]", L["IL"]})
-	end
-	if (G.CHAT_INSTANCE_CHAT_GET) then
-		table_insert(self.replacements, {"%["..string_match(G.CHAT_INSTANCE_CHAT_GET, "%[(.-)%]") .. "%]", L["I"]})
-	end
+	safeAddDynamicReplacement(G.CHAT_INSTANCE_CHAT_LEADER_GET, "Instance Leader", L["IL"])
+	safeAddDynamicReplacement(G.CHAT_INSTANCE_CHAT_GET, "Instance", L["I"])
 
-	table_insert(self.replacements, {"%["..string_match(G.CHAT_GUILD_GET, "%[(.-)%]") .. "%]", L["G"]})
-	table_insert(self.replacements, {"%["..string_match(G.CHAT_OFFICER_GET, "%[(.-)%]") .. "%]", L["O"]})
-	table_insert(self.replacements, {"%["..string_match(G.CHAT_RAID_WARNING_GET, "%[(.-)%]") .. "%]", "|cffff0000!|r"})
+	-- Guild and Officer
+	safeAddDynamicReplacement(G.CHAT_GUILD_GET, "Guild", L["G"])
+	safeAddDynamicReplacement(G.CHAT_OFFICER_GET, "Officer", L["O"])
+	
+	-- Raid Warning gets special formatting - red exclamation mark (no brackets)
+	if G.CHAT_RAID_WARNING_GET then
+		local match = string_match(G.CHAT_RAID_WARNING_GET, "%[(.-)%]")
+		if match then
+			table_insert(self.replacements, {"%["..match.."%]", "|cffff0000!|r"})
+		end
+	end
 
 	-- Turns "[1. General - The Barrens]" into "General"
 	--table_insert(self.replacements, {"|Hchannel:(.-):(%d+)|h%[(%d)%. (.-)(%s%-%s.-)%]|h", "|Hchannel:%1:%2|h%4.|h"})

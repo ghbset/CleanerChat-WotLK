@@ -310,27 +310,20 @@ end
 -------------------------------------------------------
 -- Snapshot of the settings as they were when the window was opened.
 -- Used to detect whether the user actually changed anything.
+-- Note: Only include settings that REQUIRE a reload to take effect.
+-- Settings that apply immediately (like channelNameMode) should NOT be here.
 Options.TakeSettingsSnapshot = function(self)
 	self.snapshot = {
-		channelNameMode = ns.db.channelNameMode,
-		channelNumber = ns.db.channelNumber,
-		channelCapitalize = ns.db.channelCapitalize,
-		capitalizeNames = ns.db.capitalizeNames,
-		moneyPrettify = ns.db.moneyPrettify,
 		filters = CopyTable(ns.db.filters)
 	}
 end
 
 -- Returns true if the current settings differ from the snapshot.
 -- Reverting all changes back to the saved values makes this false again.
+-- Only checks settings that require a reload - dynamic settings are excluded.
 Options.IsDirty = function(self)
 	local snapshot = self.snapshot
 	if (not snapshot) then return false end
-	if (snapshot.channelNameMode ~= ns.db.channelNameMode) then return true end
-	if (snapshot.channelNumber ~= ns.db.channelNumber) then return true end
-	if (snapshot.channelCapitalize ~= ns.db.channelCapitalize) then return true end
-	if (snapshot.capitalizeNames ~= ns.db.capitalizeNames) then return true end
-	if (snapshot.moneyPrettify ~= ns.db.moneyPrettify) then return true end
 	for key,value in next,snapshot.filters do
 		if (ns.db.filters[key] ~= value) then return true end
 	end
