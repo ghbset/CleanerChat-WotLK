@@ -128,6 +128,12 @@ function ChatTabMixin:Init(slidingMessageFrame)
     -- Switch to this SlidingMessageFrame (our custom handler)
     Core.Components.SelectChatTab(self)
     
+    -- For Combat Log, skip the original Blizzard handler since we manage it ourselves
+    -- Otherwise Blizzard's handler interferes with our show/hide logic
+    if IsCombatLog(self.chatFrame) then
+      return
+    end
+    
     -- Also call original handler to let Blizzard know which chat is selected
     -- This keeps SELECTED_CHAT_FRAME in sync
     if originalOnClick then
@@ -325,9 +331,9 @@ Core.Components.SelectChatTab = function(selectedTab)
       combatLogFrame:SetAlpha(1)
       combatLogFrame:EnableMouse(true)
       combatLogFrame:EnableMouseWheel(true)
-      -- Position it to match Glass frame area
+      -- Position it below the Glass dock area (extra offset to avoid overlap)
       combatLogFrame:ClearAllPoints()
-      combatLogFrame:SetPoint("TOPLEFT", UIManager.container, "TOPLEFT", 0, -Constants.DOCK_HEIGHT - 5)
+      combatLogFrame:SetPoint("TOPLEFT", UIManager.container, "TOPLEFT", 0, -Constants.DOCK_HEIGHT - 30)
       combatLogFrame:SetPoint("BOTTOMRIGHT", UIManager.container, "BOTTOMRIGHT", 0, 0)
     else
       -- Hide native Combat Log when other tabs selected
