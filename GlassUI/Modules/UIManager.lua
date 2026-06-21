@@ -307,6 +307,61 @@ function UIManager:OnEnable()
     return chatFrame
   end, true)
 
+  -- Hook FCF_GetCurrentChatFrame to return a sensible fallback when it would return nil
+  -- This is the root cause of many dropdown callback errors - Glass doesn't keep
+  -- UIDROPDOWNMENU_INIT_MENU in sync, so this function returns nil.
+  -- Use direct function replacement for guaranteed interception.
+  if _G.FCF_GetCurrentChatFrame and not self.fcfGetCurrentHooked then
+    self.fcfGetCurrentHooked = true
+    local origFCF_GetCurrentChatFrame = _G.FCF_GetCurrentChatFrame
+    _G.FCF_GetCurrentChatFrame = function ()
+      local result = origFCF_GetCurrentChatFrame()
+      if not result then
+        -- Fallback: use our tracked selection, or SELECTED_CHAT_FRAME, or ChatFrame1
+        if Core.Components.selectedTab and Core.Components.selectedTab.chatFrame then
+          result = Core.Components.selectedTab.chatFrame
+        else
+          result = _G.SELECTED_CHAT_FRAME or _G.DEFAULT_CHAT_FRAME or _G.ChatFrame1
+        end
+      end
+      return result
+    end
+  end
+
+  -- Guard FCF_CopyChatSettings against nil copyFrom
+  -- When Glass tabs are selected, the Blizzard selection state may not be in sync,
+  -- causing "Move to new window" to pass nil as the source frame. Default to
+  -- DEFAULT_CHAT_FRAME (ChatFrame1) which always exists.
+  if _G.FCF_CopyChatSettings then
+    self:RawHook("FCF_CopyChatSettings", function (copyTo, copyFrom)
+      if not copyFrom then
+        copyFrom = _G.DEFAULT_CHAT_FRAME or _G.ChatFrame1
+      end
+      return self.hooks["FCF_CopyChatSettings"](copyTo, copyFrom)
+    end, true)
+  end
+
+  -- Guard ChatFrame_RemoveChannel against nil chatFrame
+  -- Dropdown callbacks use FCF_GetCurrentChatFrame() which may return nil
+  if _G.ChatFrame_RemoveChannel then
+    self:RawHook("ChatFrame_RemoveChannel", function (chatFrame, channel)
+      if not chatFrame then
+        chatFrame = _G.SELECTED_CHAT_FRAME or _G.DEFAULT_CHAT_FRAME or _G.ChatFrame1
+      end
+      return self.hooks["ChatFrame_RemoveChannel"](chatFrame, channel)
+    end, true)
+  end
+
+  -- Guard ChatFrame_AddChannel against nil chatFrame (same pattern)
+  if _G.ChatFrame_AddChannel then
+    self:RawHook("ChatFrame_AddChannel", function (chatFrame, channel)
+      if not chatFrame then
+        chatFrame = _G.SELECTED_CHAT_FRAME or _G.DEFAULT_CHAT_FRAME or _G.ChatFrame1
+      end
+      return self.hooks["ChatFrame_AddChannel"](chatFrame, channel)
+    end, true)
+  end
+
   -- Close window
   self:RawHook("FCF_Close", function (chatFrame)
     self.hooks["FCF_Close"](chatFrame)

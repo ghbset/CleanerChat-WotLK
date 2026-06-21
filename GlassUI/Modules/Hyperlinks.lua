@@ -133,7 +133,16 @@ function Hyperlinks:OnEnable()
     -- "Unknown link type". There's nothing useful to show for those, so a
     -- failed click is silently ignored instead of erroring (mass-clicking
     -- otherwise spammed the error frame). Valid/addon-handled links still work.
-    pcall(_G.SetItemRef, link, text, button)
+    --
+    -- IMPORTANT: Pass the chatFrame as 4th arg so channel dropdown callbacks
+    -- know which frame to operate on (fixes "Move to New Window" etc.)
+    local chatFrame
+    if Core.Components.selectedTab and Core.Components.selectedTab.chatFrame then
+      chatFrame = Core.Components.selectedTab.chatFrame
+    else
+      chatFrame = _G.SELECTED_CHAT_FRAME or _G.DEFAULT_CHAT_FRAME or _G.ChatFrame1
+    end
+    pcall(_G.SetItemRef, link, text, button, chatFrame)
   end)
 
   Core:Subscribe(HYPERLINK_ENTER, function (payload)

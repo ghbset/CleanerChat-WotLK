@@ -296,6 +296,14 @@ Core.Components.SelectChatTab = function(selectedTab)
   -- Get the chatFrame for the selected tab
   local selectedChatFrame = selectedTab.chatFrame
   
+  -- Sync to Blizzard's selection state so dropdown menu callbacks work correctly
+  -- Without this, "Move to new window" and similar actions fail because
+  -- FCF_GetCurrentChatFrame() returns nil or the wrong frame
+  if selectedChatFrame then
+    SELECTED_CHAT_FRAME = selectedChatFrame
+    SELECTED_DOCK_FRAME = selectedChatFrame
+  end
+  
   -- Show/hide SlidingMessageFrames based on selection
   for i, smf in pairs(frames) do
     if smf and smf.chatFrame and smf.Show and smf.Hide then
