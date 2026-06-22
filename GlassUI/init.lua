@@ -44,8 +44,8 @@ Core.defaults = {
     -- General
     font = "Friz Quadrata TT",
     fontFlags = "OUTLINE",
-    frameWidth = 450,
-    frameHeight = 230,
+    frameWidth = 520,
+    frameHeight = 340,
     positionAnchor = {
       point = "BOTTOMLEFT",
       xOfs = 20,
