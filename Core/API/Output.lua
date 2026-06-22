@@ -132,3 +132,6 @@ out.arena_points = "*green*+** *white*%d** *green*Arena Points**"
 out.arena_points_status = "*gray*Current:** *white*%d** *gray*/ %d**"
 out.glory = "*green*+** *white*%d** *yellow*Glory**"
 out.glory_progress = "*gray*%d Glory needed to reach the next rank**"
+
+-- Death message
+out.died = "*red*-** *palered*Died**"
