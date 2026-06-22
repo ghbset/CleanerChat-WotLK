@@ -333,7 +333,7 @@ Options.GenerateOptionsMenu = function(self)
 	end
 
 	AceConfigRegistry:RegisterOptionsTable(Addon, options)
-	AceConfigDialog:SetDefaultSize(Addon, 800, 520)
+	AceConfigDialog:SetDefaultSize(Addon, 900, 650)
 end
 
 -- Reload-on-close tracking

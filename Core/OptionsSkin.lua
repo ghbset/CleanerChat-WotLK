@@ -26,6 +26,11 @@ local BTN_BG = { r = 0.12, g = 0.12, b = 0.14, a = 0.90 }
 
 local SOLID = "Interface\\Buttons\\WHITE8x8"
 
+-- Layout constants
+local EDGE_INSET = 8        -- Main content inset from window edge
+local TITLE_HEIGHT = 32     -- Title bar height
+local STATUS_HEIGHT = 24    -- Status bar height at bottom
+
 -- A clean 1px-bordered flat backdrop.
 local GlassBackdrop = {
 	bgFile = SOLID,
@@ -111,11 +116,18 @@ local function skinTreeButton(button)
 end
 
 -- Skin the left category tree + its content border.
-local function skinTree(tree)
+local function skinTree(tree, mainFrame)
 	if (not tree) then return end
 
-	applyGlass(tree.treeframe, INNER, 0.30)
-	applyGlass(tree.border, INNER, 0.30)
+	-- Apply glass styling to tree frame (left category list)
+	if (tree.treeframe) then
+		applyGlass(tree.treeframe, INNER, 0.50)
+	end
+
+	-- Apply glass styling to content border (right content area)
+	if (tree.border) then
+		applyGlass(tree.border, INNER, 0.50)
+	end
 
 	-- New buttons are pooled/created lazily; skin them as they appear.
 	if (not tree.ccButtonHook) and (tree.CreateButton) then
@@ -140,6 +152,33 @@ local function findTree(widget)
 	for _, child in ipairs(widget.children) do
 		if (type(child) == "table") and (child.treeframe) then
 			return child
+		end
+	end
+	return nil
+end
+
+-- Find specific child frames
+local function findCloseButton(frame)
+	for _, child in ipairs({ frame:GetChildren() }) do
+		if (child.GetObjectType) and (child:GetObjectType() == "Button") then
+			if (child.GetText) and (child:GetText() == CLOSE) then
+				return child
+			end
+		end
+	end
+	return nil
+end
+
+local function findSizerButton(frame)
+	for _, child in ipairs({ frame:GetChildren() }) do
+		if (child.GetObjectType) and (child:GetObjectType() == "Button") then
+			-- Sizer button usually has no text and is small
+			if (not child.GetText) or (child:GetText() == nil) or (child:GetText() == "") then
+				local w, h = child:GetSize()
+				if (w and w < 20 and h and h < 20) then
+					return child
+				end
+			end
 		end
 	end
 	return nil
@@ -174,16 +213,16 @@ function ns.SkinOptionsWindow(widget)
 	if (not f.ccTitleBar) then
 		local bar = f:CreateTexture(nil, "ARTWORK")
 		bar:SetTexture(SOLID)
-		bar:SetPoint("TOPLEFT", 2, -2)
-		bar:SetPoint("TOPRIGHT", -2, -2)
-		bar:SetHeight(30)
+		bar:SetPoint("TOPLEFT", f, "TOPLEFT", 1, -1)
+		bar:SetPoint("TOPRIGHT", f, "TOPRIGHT", -1, -1)
+		bar:SetHeight(TITLE_HEIGHT)
 		bar:SetVertexColor(GOLD.r * 0.16, GOLD.g * 0.14, GOLD.b * 0.09, 0.95)
 		f.ccTitleBar = bar
 
 		local line = f:CreateTexture(nil, "OVERLAY")
 		line:SetTexture(SOLID)
-		line:SetPoint("TOPLEFT", bar, "BOTTOMLEFT")
-		line:SetPoint("TOPRIGHT", bar, "BOTTOMRIGHT")
+		line:SetPoint("TOPLEFT", bar, "BOTTOMLEFT", 0, 0)
+		line:SetPoint("TOPRIGHT", bar, "BOTTOMRIGHT", 0, 0)
 		line:SetHeight(1)
 		line:SetVertexColor(GOLD.r, GOLD.g, GOLD.b, 0.90)
 		f.ccTitleLine = line
@@ -194,7 +233,7 @@ function ns.SkinOptionsWindow(widget)
 		local tt = widget.titletext
 		tt:SetParent(f)
 		tt:ClearAllPoints()
-		tt:SetPoint("TOP", f, "TOP", 0, -9)
+		tt:SetPoint("CENTER", f.ccTitleBar, "CENTER", 0, 0)
 		tt:SetDrawLayer("OVERLAY")
 		tt:SetTextColor(GOLD.r, GOLD.g, GOLD.b)
 		if (tt.GetFont and tt.SetFont) then
@@ -203,27 +242,85 @@ function ns.SkinOptionsWindow(widget)
 		end
 	end
 
-	-- Status text (reload notice) in gold; darken its little panel.
-	if (widget.statustext) then
-		widget.statustext:SetTextColor(GOLD.r, GOLD.g, GOLD.b)
-		local statusbg = widget.statustext:GetParent()
-		if (statusbg) and (statusbg.SetBackdrop) and (statusbg ~= f) then
-			applyGlass(statusbg, INNER, 0.25)
-		end
+	-- Create custom status bar at the bottom
+	if (not f.ccStatusBar) then
+		-- Status bar background
+		local statusBar = CreateFrame("Frame", nil, f)
+		statusBar:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", 1, 1)
+		statusBar:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -1, 1)
+		statusBar:SetHeight(STATUS_HEIGHT)
+		applyGlass(statusBar, INNER, 0.50)
+		f.ccStatusBar = statusBar
+
+		-- Horizontal divider line above status bar
+		local statusLine = f:CreateTexture(nil, "OVERLAY")
+		statusLine:SetTexture(SOLID)
+		statusLine:SetPoint("BOTTOMLEFT", statusBar, "TOPLEFT", 0, 0)
+		statusLine:SetPoint("BOTTOMRIGHT", statusBar, "TOPRIGHT", 0, 0)
+		statusLine:SetHeight(1)
+		statusLine:SetVertexColor(GOLD.r, GOLD.g, GOLD.b, 0.50)
+		f.ccStatusLine = statusLine
 	end
 
-	-- Close button (and any other UIPanel buttons on the frame).
-	if (not f.ccButtonsSkinned) then
-		f.ccButtonsSkinned = true
-		for _, child in ipairs({ f:GetChildren() }) do
-			if (child.GetObjectType) and (child:GetObjectType() == "Button") then
-				if (child.GetText) and (child:GetText() == CLOSE) then
-					styleButton(child)
-				end
+	-- Handle status text positioning
+	if (widget.statustext) then
+		widget.statustext:SetTextColor(GOLD.r, GOLD.g, GOLD.b)
+		widget.statustext:ClearAllPoints()
+		widget.statustext:SetPoint("LEFT", f.ccStatusBar, "LEFT", 10, 0)
+		widget.statustext:SetPoint("RIGHT", f.ccStatusBar, "RIGHT", -80, 0)
+
+		-- Hide the original status background if it exists
+		local origStatusBg = widget.statustext:GetParent()
+		if (origStatusBg) and (origStatusBg ~= f) and (origStatusBg ~= f.ccStatusBar) then
+			if (origStatusBg.SetBackdrop) then
+				origStatusBg:SetBackdrop(nil)
+			end
+			if (origStatusBg.Hide) then
+				-- Don't hide, just make it invisible
+				origStatusBg:SetAlpha(0)
 			end
 		end
+		-- Re-parent status text to our status bar
+		widget.statustext:SetParent(f.ccStatusBar)
+	end
+
+	-- Find and style the close button
+	local closeBtn = findCloseButton(f)
+	if (closeBtn) then
+		styleButton(closeBtn)
+		-- Reposition close button to bottom right of status bar
+		closeBtn:ClearAllPoints()
+		closeBtn:SetPoint("RIGHT", f.ccStatusBar, "RIGHT", -6, 0)
+		closeBtn:SetSize(60, STATUS_HEIGHT - 6)
+	end
+
+	-- Find and reposition the sizer/resize button
+	local sizerBtn = findSizerButton(f)
+	if (sizerBtn) and (not f.ccSizerMoved) then
+		f.ccSizerMoved = true
+		sizerBtn:ClearAllPoints()
+		sizerBtn:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -2, 2)
+		-- Make sure sizer is on top
+		sizerBtn:SetFrameLevel(f:GetFrameLevel() + 10)
 	end
 
 	-- Left category tree + content border.
-	skinTree(findTree(widget))
+	local tree = findTree(widget)
+	if (tree) then
+		skinTree(tree, f)
+
+		-- Adjust tree frame positioning to align with our custom elements
+		if (tree.treeframe) then
+			tree.treeframe:ClearAllPoints()
+			tree.treeframe:SetPoint("TOPLEFT", f, "TOPLEFT", EDGE_INSET, -(TITLE_HEIGHT + EDGE_INSET))
+			tree.treeframe:SetPoint("BOTTOMLEFT", f, "BOTTOMLEFT", EDGE_INSET, STATUS_HEIGHT + EDGE_INSET)
+		end
+
+		-- Adjust content border positioning
+		if (tree.border) then
+			tree.border:ClearAllPoints()
+			tree.border:SetPoint("TOPLEFT", tree.treeframe, "TOPRIGHT", 4, 0)
+			tree.border:SetPoint("BOTTOMRIGHT", f, "BOTTOMRIGHT", -EDGE_INSET, STATUS_HEIGHT + EDGE_INSET)
+		end
+	end
 end
