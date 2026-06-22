@@ -662,6 +662,79 @@ function C:OnEnable()
                     Core:Dispatch(UpdateConfig("messagesOnHover"))
                   end,
                 },
+                scrollIndicatorHeader = {
+                  name = "Scroll Indicator",
+                  type = "header",
+                  order = 3.5,
+                },
+                scrollIndicatorColor = {
+                  name = "Indicator text color",
+                  desc = "Color of the \"Unread messages\" and \"Bring me to the present\" text.",
+                  type = "color",
+                  hasAlpha = false,
+                  width = 1,
+                  order = 3.6,
+                  get = function ()
+                    local c = Core.db.profile.scrollIndicatorColor
+                    return c.r, c.g, c.b
+                  end,
+                  set = function (info, r, g, b)
+                    local c = Core.db.profile.scrollIndicatorColor
+                    c.r, c.g, c.b = r, g, b
+                    Core:Dispatch(UpdateConfig("scrollIndicatorColor"))
+                  end,
+                },
+                scrollIndicatorOpacity = {
+                  name = "Indicator text opacity",
+                  desc = "Default: "..Core.defaults.profile.scrollIndicatorOpacity.."\nOpacity of the scroll indicator text.",
+                  type = "range",
+                  width = 1.5,
+                  order = 3.65,
+                  min = 0,
+                  max = 1,
+                  step = 0.05,
+                  get = function ()
+                    return Core.db.profile.scrollIndicatorOpacity
+                  end,
+                  set = function (info, input)
+                    Core.db.profile.scrollIndicatorOpacity = input
+                    Core:Dispatch(UpdateConfig("scrollIndicatorOpacity"))
+                  end,
+                },
+                scrollIndicatorBgColor = {
+                  name = "Indicator background color",
+                  desc = "Background color behind the scroll indicator text.",
+                  type = "color",
+                  hasAlpha = false,
+                  width = 1,
+                  order = 3.7,
+                  get = function ()
+                    local c = Core.db.profile.scrollIndicatorBgColor
+                    return c.r, c.g, c.b
+                  end,
+                  set = function (info, r, g, b)
+                    local c = Core.db.profile.scrollIndicatorBgColor
+                    c.r, c.g, c.b = r, g, b
+                    Core:Dispatch(UpdateConfig("scrollIndicatorBgColor"))
+                  end,
+                },
+                scrollIndicatorBgOpacity = {
+                  name = "Indicator background opacity",
+                  desc = "Default: "..Core.defaults.profile.scrollIndicatorBgOpacity.."\nOpacity of the scroll indicator background.",
+                  type = "range",
+                  width = 1.5,
+                  order = 3.75,
+                  min = 0,
+                  max = 1,
+                  step = 0.05,
+                  get = function ()
+                    return Core.db.profile.scrollIndicatorBgOpacity
+                  end,
+                  set = function (info, input)
+                    Core.db.profile.scrollIndicatorBgOpacity = input
+                    Core:Dispatch(UpdateConfig("scrollIndicatorBgOpacity"))
+                  end,
+                },
               }
             },
           },
@@ -892,6 +965,10 @@ function C:RefreshConfig()
   Core:Dispatch(UpdateConfig("chatBackgroundColor"))
   Core:Dispatch(UpdateConfig("chatFadeInDuration"))
   Core:Dispatch(UpdateConfig("chatFadeOutDuration"))
+  Core:Dispatch(UpdateConfig("scrollIndicatorColor"))
+  Core:Dispatch(UpdateConfig("scrollIndicatorOpacity"))
+  Core:Dispatch(UpdateConfig("scrollIndicatorBgColor"))
+  Core:Dispatch(UpdateConfig("scrollIndicatorBgOpacity"))
 
   -- Top bar (dock)
   Core:Dispatch(UpdateConfig("dockFontSize"))

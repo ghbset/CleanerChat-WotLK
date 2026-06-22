@@ -383,6 +383,11 @@ function SlidingMessageFrameMixin:Init(chatFrame)
             self:SetVerticalScroll(self:GetVerticalScrollRange() + self.config.overflowHeight)
             self.overlay:Hide()
             self.overlay:HideNewMessageAlert()
+
+            -- Update overlay position when frame height changes
+            if self.overlay and self.overlay.UpdatePosition then
+              self.overlay:UpdatePosition()
+            end
           end
 
           if key == "chatBackgroundOpacity" or key == "chatBackgroundColor" then
@@ -415,6 +420,18 @@ function SlidingMessageFrameMixin:Init(chatFrame)
               for _, message in ipairs(self.state.messages) do
                 message:HideDelay(Core.db.profile.chatHoldTime)
               end
+            end
+          end
+
+          if key == "scrollIndicatorColor" or key == "scrollIndicatorOpacity" or key == "scrollIndicatorBgColor" or key == "scrollIndicatorBgOpacity" then
+            if self.overlay and self.overlay.UpdateIndicatorStyle then
+              self.overlay:UpdateIndicatorStyle()
+            end
+          end
+
+          if key == "editBoxAnchor" then
+            if self.overlay and self.overlay.UpdatePosition then
+              self.overlay:UpdatePosition()
             end
           end
         end

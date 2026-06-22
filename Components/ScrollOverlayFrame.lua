@@ -16,25 +16,35 @@ local Mixin = Mixin
 local ScrollOverlayFrame = {}
 
 function ScrollOverlayFrame:Init()
-    -- Fully solid background so the chat behind doesn't bleed through and the
-    -- gold label reads as solid (was 0.65, which looked transparent).
-    local overlayOpacity = 1
     -- Keep the overlay just tall enough for the snap-to-bottom arrow and the
-    -- "Unread messages" line. The "-2" keeps its bottom edge anchored in the
-    -- same place as the frame height changes (height - 2).
+    -- "Unread messages" line.
     local overlayHeight = 28
-    local topOffset = Core.db.profile.frameHeight - (Constants.DOCK_HEIGHT + 5 + (overlayHeight - 2))
 
     self:SetHeight(overlayHeight)
-    self:SetPoint("TOPLEFT", 0, -topOffset)
-    self:SetPoint("TOPRIGHT", 0, -topOffset)
+    self:ClearAllPoints()
+
+    -- Position indicator at the edit box location (outside the chat frame)
+    local mainContainer = self:GetParent():GetParent() -- SlidingMessageFrame's parent is MainContainerFrame
+    if Core.db.profile.editBoxAnchor.position == "ABOVE" then
+      -- Edit box is above the chat, so indicator is above the main container
+      self:SetPoint("BOTTOMLEFT", mainContainer, "TOPLEFT", 0, Core.db.profile.editBoxAnchor.yOfs or 5)
+      self:SetPoint("BOTTOMRIGHT", mainContainer, "TOPRIGHT", 0, Core.db.profile.editBoxAnchor.yOfs or 5)
+    else
+      -- Edit box is below the chat (default), so indicator is below the main container
+      self:SetPoint("TOPLEFT", mainContainer, "BOTTOMLEFT", 0, Core.db.profile.editBoxAnchor.yOfs or -5)
+      self:SetPoint("TOPRIGHT", mainContainer, "BOTTOMRIGHT", 0, Core.db.profile.editBoxAnchor.yOfs or -5)
+    end
+
     self:SetFadeInDuration(0.3)
     self:SetFadeOutDuration(0.15)
 
     -- Note: Mask textures are not available in WotLK 3.3.5
     -- We skip the mask functionality for this version
 
-    self:SetGradientBackground(15, 15, Core.db.profile.chatBackgroundColor or Colors.codGray, overlayOpacity)
+    -- Use customizable background color and opacity (defaults to codGray, fully solid)
+    local bgColor = Core.db.profile.scrollIndicatorBgColor or Colors.codGray
+    local bgOpacity = Core.db.profile.scrollIndicatorBgOpacity or 1
+    self:SetGradientBackground(15, 15, bgColor, bgOpacity)
 
     -- Note: AddMaskTexture not available in WotLK 3.3.5
 
@@ -75,11 +85,44 @@ function ScrollOverlayFrame:Init()
       self.snapToPresentText = self:CreateFontString(nil, "ARTWORK", "GlassMessageFont")
     end
     self.snapToPresentText:ClearAllPoints()
-    -- Same apache colour as the "Unread messages" text, fully solid.
-    self.snapToPresentText:SetTextColor(Colors.apache.r, Colors.apache.g, Colors.apache.b)
+    -- Use customizable color and opacity (defaults to apache gold, fully solid).
+    local indicatorColor = Core.db.profile.scrollIndicatorColor or Colors.apache
+    local indicatorOpacity = Core.db.profile.scrollIndicatorOpacity or 1
+    self.snapToPresentText:SetTextColor(indicatorColor.r, indicatorColor.g, indicatorColor.b, indicatorOpacity)
     self.snapToPresentText:SetPoint("BOTTOMLEFT", 30, 10)
     self.snapToPresentText:SetText("Bring me to the present")
     self.snapToPresentText:Show()
+end
+
+function ScrollOverlayFrame:UpdatePosition()
+  self:ClearAllPoints()
+
+  local mainContainer = self:GetParent():GetParent()
+  if Core.db.profile.editBoxAnchor.position == "ABOVE" then
+    -- Edit box is above the chat, so indicator is above the main container
+    self:SetPoint("BOTTOMLEFT", mainContainer, "TOPLEFT", 0, Core.db.profile.editBoxAnchor.yOfs or 5)
+    self:SetPoint("BOTTOMRIGHT", mainContainer, "TOPRIGHT", 0, Core.db.profile.editBoxAnchor.yOfs or 5)
+  else
+    -- Edit box is below the chat (default), so indicator is below the main container
+    self:SetPoint("TOPLEFT", mainContainer, "BOTTOMLEFT", 0, Core.db.profile.editBoxAnchor.yOfs or -5)
+    self:SetPoint("TOPRIGHT", mainContainer, "BOTTOMRIGHT", 0, Core.db.profile.editBoxAnchor.yOfs or -5)
+  end
+end
+
+function ScrollOverlayFrame:UpdateIndicatorStyle()
+  local indicatorColor = Core.db.profile.scrollIndicatorColor or Colors.apache
+  local indicatorOpacity = Core.db.profile.scrollIndicatorOpacity or 1
+  if self.snapToPresentText then
+    self.snapToPresentText:SetTextColor(indicatorColor.r, indicatorColor.g, indicatorColor.b, indicatorOpacity)
+  end
+  -- Update background
+  local bgColor = Core.db.profile.scrollIndicatorBgColor or Colors.codGray
+  local bgOpacity = Core.db.profile.scrollIndicatorBgOpacity or 1
+  self:SetGradientBackground(15, 15, bgColor, bgOpacity)
+  -- Update child alert frame
+  if self.newMessageAlertFrame and self.newMessageAlertFrame.UpdateIndicatorStyle then
+    self.newMessageAlertFrame:UpdateIndicatorStyle()
+  end
 end
 
 function ScrollOverlayFrame:SetScript(name, callback)

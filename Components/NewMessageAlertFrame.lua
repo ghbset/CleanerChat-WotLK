@@ -20,8 +20,10 @@ function NewMessageAlertFrameMixin:Init()
     if self.text == nil then
       self.text = self:CreateFontString(nil, "ARTWORK", "GlassMessageFont")
     end
-    -- apache, fully solid (matches the "Bring me to the present" hint).
-    self.text:SetTextColor(Colors.apache.r, Colors.apache.g, Colors.apache.b)
+    -- Use customizable color and opacity (defaults to apache gold, fully solid).
+    local indicatorColor = Core.db.profile.scrollIndicatorColor or Colors.apache
+    local indicatorOpacity = Core.db.profile.scrollIndicatorOpacity or 1
+    self.text:SetTextColor(indicatorColor.r, indicatorColor.g, indicatorColor.b, indicatorOpacity)
     self.text:SetPoint("BOTTOMLEFT", 30, 10)
     self.text:SetText("Unread messages")
 
@@ -36,7 +38,21 @@ function NewMessageAlertFrameMixin:Init()
       self.bottomLine:SetPoint("BOTTOMLEFT")
       self.bottomLine:SetPoint("BOTTOMRIGHT")
     end
-    self.bottomLine:SetGradientBackground(15, 15, Colors.apache, 0.65)
+    -- Use the same color for the line, with 0.65 alpha multiplied by the user opacity
+    local lineOpacity = 0.65 * indicatorOpacity
+    self.bottomLine:SetGradientBackground(15, 15, indicatorColor, lineOpacity)
+end
+
+function NewMessageAlertFrameMixin:UpdateIndicatorStyle()
+  local indicatorColor = Core.db.profile.scrollIndicatorColor or Colors.apache
+  local indicatorOpacity = Core.db.profile.scrollIndicatorOpacity or 1
+  if self.text then
+    self.text:SetTextColor(indicatorColor.r, indicatorColor.g, indicatorColor.b, indicatorOpacity)
+  end
+  if self.bottomLine then
+    local lineOpacity = 0.65 * indicatorOpacity
+    self.bottomLine:SetGradientBackground(15, 15, indicatorColor, lineOpacity)
+  end
 end
 
 local function CreateNewMessageAlertFrame(parent)

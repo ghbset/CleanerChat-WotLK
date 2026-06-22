@@ -95,6 +95,12 @@ Core.defaults = {
     mouseOverTooltips = true,
     iconTextureYOffset = 4,
     messagesOnHover = true, -- When ON (default), hovering reveals faded messages. When OFF, only scrolling reveals them.
+
+    -- Scroll indicator ("Unread messages" / "Bring me to the present")
+    scrollIndicatorColor = { r = 223 / 255, g = 186 / 255, b = 105 / 255 }, -- apache (gold)
+    scrollIndicatorOpacity = 1, -- fully solid
+    scrollIndicatorBgColor = { r = 17 / 255, g = 17 / 255, b = 17 / 255 }, -- codGray (same as chat bg)
+    scrollIndicatorBgOpacity = 1, -- fully solid so text is readable
   }
 }
 
