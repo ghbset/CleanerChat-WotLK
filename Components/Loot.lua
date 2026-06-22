@@ -129,6 +129,20 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 					-- Parse our way to the item count
 					local countString = string_sub(message, last + 1)
 					local count = tonumber(string_match(countString, "(%d+)"))
+
+					-- Check if we should buffer for one-line quest rewards
+					if (ns.db and ns.db.oneLineQuestRewards and chatFrame) then
+						local rewardText
+						if (count) and (count > 1) then
+							rewardText = string_format("%s |cff9d9d9d(%d)|r", item, count)
+						else
+							rewardText = item
+						end
+						if (ns:AddQuestReward(chatFrame, "item", rewardText)) then
+							return true -- Suppress, will be output with combined rewards
+						end
+					end
+
 					if (count) and (count > 1) then
 						return false, string_format(ns.out.item_multiple, item, count), author, ...
 					else
@@ -297,6 +311,19 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 				end
 
 				if (item) then
+					-- Self-received items (no name) can be buffered for one-line output
+					if (not name) and (ns.db and ns.db.oneLineQuestRewards and chatFrame) then
+						local rewardText
+						if (count) and (count > 1) then
+							rewardText = string_format("%s |cff9d9d9d(%d)|r", item, count)
+						else
+							rewardText = item
+						end
+						if (ns:AddQuestReward(chatFrame, "item", rewardText)) then
+							return true -- Suppress, will be output with combined rewards
+						end
+					end
+
 					if (count) and (count > 1) then
 						if (name) then
 							return false, string_format(ns.out.item_multiple_other, name, item, count), author, ...

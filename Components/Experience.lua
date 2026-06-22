@@ -98,6 +98,14 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 
 		value = string_match(message, P[G.UNNAMED])
 		if (value) then
+			-- Check if we should buffer for one-line quest rewards
+			-- Only buffer unnamed XP (quest rewards), not named XP (mob kills)
+			if (ns.db and ns.db.oneLineQuestRewards and chatFrame) then
+				local rewardText = string_format("|cffffffff%s|r |cffffffff%s|r", value, G.XP)
+				if (ns:AddQuestReward(chatFrame, "xp", rewardText)) then
+					return true -- Suppress, will be output with combined rewards
+				end
+			end
 			return false, string_format(ns.out.xp_unnamed, value, G.XP), author, ...
 		end
 

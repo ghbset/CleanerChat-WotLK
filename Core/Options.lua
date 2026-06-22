@@ -123,10 +123,19 @@ local optionDB = {
 			order = 105,
 			name = L["Prettify Money"],
 			desc = L["Display money gains and losses with coin icons (e.g. \"+ 28\"). When off, uses the default Blizzard text format."],
-			width = "full",
+			width = 1.5,
 			type = "toggle",
 			set = function(info,value) ns.db.moneyPrettify = value; Options:UpdateReloadStatus() end,
 			get = function(info) return ns.db.moneyPrettify end,
+		},
+		oneLineQuestRewards = {
+			order = 106,
+			name = L["One Line Quest Rewards"],
+			desc = L["Combine quest rewards (items, currency, experience) into a single line. Reputation gains remain separate per faction."],
+			width = 1.5,
+			type = "toggle",
+			set = function(info,value) ns.db.oneLineQuestRewards = value; Options:UpdateReloadStatus() end,
+			get = function(info) return ns.db.oneLineQuestRewards end,
 		}
 	}
 }

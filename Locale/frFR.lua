@@ -45,3 +45,6 @@ L["Player Status"] = "Statut du joueur"
 L["Simplify status messages about AFK, DND and being rested."] = "Simplifie les messages de statut concernant Absent, Ne pas déranger et le repos."
 L["Learning (Crafting)"] = "Apprentissage (Artisanat)"
 L["Simplify messages about new or improved trade skills."] = "Simplifie les messages concernant les métiers appris ou améliorés."
+
+L["One Line Quest Rewards"] = "Récompenses de quête sur une ligne"
+L["Combine quest rewards (items, currency, experience) into a single line. Reputation gains remain separate per faction."] = "Combine les récompenses de quête (objets, monnaie, expérience) sur une seule ligne. Les gains de réputation restent séparés par faction."

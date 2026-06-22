@@ -293,6 +293,18 @@ Module.OnEvent = function(self, event, ...)
 				local b = info and info.b or 0
 
 				if (money > 0) then
+					-- Check if we should buffer for one-line quest rewards
+					if (ns.db and ns.db.oneLineQuestRewards) then
+						local chatFrame = DEFAULT_CHAT_FRAME or ChatFrame1
+						if (chatFrame) then
+							local moneyText = formatMoney(g,s,c)
+							if (ns:AddQuestReward(chatFrame, "money", moneyText)) then
+								self.playerMoney = currentMoney
+								return -- Suppress, will be output with combined rewards
+							end
+						end
+					end
+
 					local msg = string_format(ns.out.money, formatMoney(g,s,c))
 					self:AddMessage(msg, r, gb, b)
 

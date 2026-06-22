@@ -82,3 +82,6 @@ L["Simplify status messages about AFK, DND and being rested."] = true
 
 L["Learning (Crafting)"] = true
 L["Simplify messages about new or improved trade skills."] = true
+
+L["One Line Quest Rewards"] = true
+L["Combine quest rewards (items, currency, experience) into a single line. Reputation gains remain separate per faction."] = true

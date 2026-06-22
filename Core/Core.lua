@@ -12,10 +12,12 @@ local pairs = pairs
 local rawset = rawset
 local setmetatable = setmetatable
 local string_find = string.find
+local string_format = string.format
 local string_match = string.match
 local string_gsub = string.gsub
 local string_lower = string.lower
 local string_upper = string.upper
+local table_concat = table.concat
 local table_insert = table.insert
 local table_remove = table.remove
 local type = type
@@ -241,6 +243,7 @@ local defaults = {
 	hideUIErrors = true, -- hide the server's "UI Error: an interface error occured" chat notification
 	showStartupMessage = true, -- print "Use /cc for settings" on addon load
 	rawDebug = false, -- /ccdebug chat raw/event capture (persists across /reload)
+	oneLineQuestRewards = true, -- combine quest rewards (items, currency, xp) into one line
 	filters = {
 		achievements = true,
 		auctions = true,
@@ -454,6 +457,108 @@ ns.UpgradeSettings = function(self)
 
 	-- Return a more sane db.
 	return CleanerChat_DB
+end
+
+-- Quest Reward Buffering System
+-- When oneLineQuestRewards is enabled, collect items, currency, and XP
+-- that fire in the same frame (e.g. quest turn-in) and output as one line.
+local questRewardBuffer = {} -- [chatFrame] = { items = {}, xp = nil, money = nil, scheduled = false }
+
+local function getQuestRewardBuffer(chatFrame)
+	local buf = questRewardBuffer[chatFrame]
+	if (not buf) then
+		buf = { items = {}, xp = nil, money = nil, scheduled = false }
+		questRewardBuffer[chatFrame] = buf
+	end
+	return buf
+end
+
+local function flushQuestRewardBuffer(chatFrame)
+	local buf = questRewardBuffer[chatFrame]
+	if (not buf) then return end
+
+	buf.scheduled = false
+
+	-- Snapshot and reset first, so anything printed below starts a fresh batch.
+	local items, xp, money = buf.items, buf.xp, buf.money
+	buf.items = {}
+	buf.xp = nil
+	buf.money = nil
+
+	-- Build the combined output
+	local parts = {}
+
+	-- Add items (already formatted with color and count)
+	for _, itemText in ipairs(items) do
+		parts[#parts + 1] = itemText
+	end
+
+	-- Add money (already formatted)
+	if (money) then
+		parts[#parts + 1] = money
+	end
+
+	-- Add XP
+	if (xp) then
+		parts[#parts + 1] = xp
+	end
+
+	if (#parts > 0) then
+		local text = ns.out.quest_rewards_combined
+		if (text) then
+			text = string_format(text, table_concat(parts, ", "))
+		else
+			-- Fallback if output format not yet loaded
+			text = "|cff00ff00+|r " .. table_concat(parts, ", ")
+		end
+
+		-- Match the colour these messages normally display with.
+		local info = ChatTypeInfo and ChatTypeInfo["LOOT"]
+		local r, g, b
+		if (info) then r, g, b = info.r, info.g, info.b end
+
+		if (r) then
+			chatFrame:AddMessage(text, r, g, b)
+		else
+			chatFrame:AddMessage(text)
+		end
+	end
+end
+
+-- Public API for modules to add rewards to the buffer
+ns.AddQuestReward = function(self, chatFrame, rewardType, rewardText)
+	if (not self.db or not self.db.oneLineQuestRewards) then
+		return false -- Not buffering, let module handle normally
+	end
+
+	if (not chatFrame or not chatFrame.AddMessage) then
+		return false
+	end
+
+	local buf = getQuestRewardBuffer(chatFrame)
+
+	if (rewardType == "item") then
+		buf.items[#buf.items + 1] = rewardText
+	elseif (rewardType == "xp") then
+		buf.xp = rewardText
+	elseif (rewardType == "money") then
+		buf.money = rewardText
+	else
+		return false
+	end
+
+	-- Schedule flush for next frame if not already scheduled
+	if (not buf.scheduled) then
+		buf.scheduled = true
+		if (C_Timer and C_Timer.After) then
+			C_Timer.After(0, function() flushQuestRewardBuffer(chatFrame) end)
+		else
+			-- Fallback: flush immediately (less ideal but works)
+			flushQuestRewardBuffer(chatFrame)
+		end
+	end
+
+	return true -- Reward was buffered
 end
 
 ns.OnInitialize = function(self)
