@@ -109,7 +109,7 @@ jobs:
           body: |
             ## CleanerChat v${{ steps.version.outputs.version }}
             
-            Chat cleanup addon for Ascension WoW (3.3.5a)
+            A modern chat UI overhaul with message filtering, animations, and extensive customization for WoW 3.3.5a.
             
             ### Changes
             ${{ steps.changelog.outputs.changelog }}
