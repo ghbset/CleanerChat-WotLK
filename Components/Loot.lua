@@ -106,26 +106,22 @@ Module.OnAddMessage = function(self, chatFrame, msg, r, g, b, chatID, ...)
 	-- Not sure any of these Honor entries are parsed, or even needed.
 
 	-- "%s dies, honorable kill Rank: %s (%d Honor Points)"
-	local honorpoints = safeMatch(msg,P[G.COMBATLOG_HONORGAIN])
-	if (honorpoints) then
+	if (safeMatch(msg,P[G.COMBATLOG_HONORGAIN])) then
 		return true
 	end
 
 	-- "%s dies, honorable kill (%d Honor Points)"
-	local honorpoints = safeMatch(msg,P[G.COMBATLOG_HONORGAIN_NO_RANK])
-	if (honorpoints) then
+	if (safeMatch(msg,P[G.COMBATLOG_HONORGAIN_NO_RANK])) then
 		return true
 	end
 
 	-- "You have been awarded %d honor points."
-	local honorpoints = safeMatch(msg,P[G.COMBATLOG_HONORAWARD])
-	if (honorpoints) then
+	if (safeMatch(msg,P[G.COMBATLOG_HONORAWARD])) then
 		return true
 	end
 
 	-- "You have been awarded %d arena points."
-	local arenapoints = safeMatch(msg,P[G.COMBATLOG_ARENAPOINTSAWARD])
-	if (arenapoints) then
+	if (safeMatch(msg,P[G.COMBATLOG_ARENAPOINTSAWARD])) then
 		return true
 	end
 

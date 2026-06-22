@@ -163,11 +163,9 @@ Module.OnAddMessage = function(self, chatFrame, msg, r, g, b, chatID, ...)
 			return true
 
 		else
-			local message = (self.queuedStarted > 1) and string_format(ns.out.auction_multiple, self.queuedStarted) or ns.out.auction_single
-
 			self.queuedStarted = nil
 
-			return message
+			return true
 		end
 
 	elseif (msg == G.AUCTION_REMOVED) then
@@ -183,11 +181,9 @@ Module.OnAddMessage = function(self, chatFrame, msg, r, g, b, chatID, ...)
 
 			return true
 		else
-			local message = (self.queuedRemoved > 1) and string_format(ns.out.auction_canceled_multiple, self.queuedRemoved) or ns.out.auction_canceled_single
-
 			self.queuedRemoved = nil
 
-			return message
+			return true
 		end
 	end
 
