@@ -104,48 +104,11 @@ function C:OnEnable()
               inline = true,
               order = 4,
               args = {
-                frameWidth = {
-                  name = "Width",
-                  desc = "Default: "..Core.defaults.profile.frameWidth..
-                    "\nMin: 100",
-                  type = "range",
-                  order = 4.1,
-                  min = 100,
-                  max = 9999,
-                  softMin = 300,
-                  softMax = 800,
-                  step = 1,
-                  get = function ()
-                    return Core.db.profile.frameWidth
-                  end,
-                  set = function (info, input)
-                    Core.db.profile.frameWidth = input
-                    Core:Dispatch(UpdateConfig("frameWidth"))
-                  end
-                },
-                frameHeight = {
-                  name = "Height",
-                  desc = "Default: "..Core.defaults.profile.frameHeight,
-                  type = "range",
-                  order = 4.2,
-                  min = 1,
-                  max = 9999,
-                  softMin = 200,
-                  softMax = 800,
-                  step = 1,
-                  get = function ()
-                    return Core.db.profile.frameHeight
-                  end,
-                  set = function (info, input)
-                    Core.db.profile.frameHeight = input
-                    Core:Dispatch(UpdateConfig("frameHeight"))
-                  end
-                },
                 frameXOfs = {
                   name = "X offset",
                   desc = "Default: "..Core.defaults.profile.positionAnchor.xOfs,
                   type = "range",
-                  order = 4.3,
+                  order = 4.1,
                   min = -9999,
                   max = 9999,
                   softMin = -2000,
@@ -157,6 +120,25 @@ function C:OnEnable()
                   set = function (_, input)
                     Core.db.profile.positionAnchor.xOfs = input
                     Core:Dispatch(UpdateConfig("framePosition"))
+                  end
+                },
+                frameWidth = {
+                  name = "Width",
+                  desc = "Default: "..Core.defaults.profile.frameWidth..
+                    "\nMin: 100",
+                  type = "range",
+                  order = 4.2,
+                  min = 100,
+                  max = 9999,
+                  softMin = 300,
+                  softMax = 800,
+                  step = 1,
+                  get = function ()
+                    return Core.db.profile.frameWidth
+                  end,
+                  set = function (info, input)
+                    Core.db.profile.frameWidth = input
+                    Core:Dispatch(UpdateConfig("frameWidth"))
                   end
                 },
                 frameYOfs = {
@@ -177,11 +159,29 @@ function C:OnEnable()
                     Core:Dispatch(UpdateConfig("framePosition"))
                   end
                 },
+                frameHeight = {
+                  name = "Height",
+                  desc = "Default: "..Core.defaults.profile.frameHeight,
+                  type = "range",
+                  order = 4.5,
+                  min = 1,
+                  max = 9999,
+                  softMin = 200,
+                  softMax = 800,
+                  step = 1,
+                  get = function ()
+                    return Core.db.profile.frameHeight
+                  end,
+                  set = function (info, input)
+                    Core.db.profile.frameHeight = input
+                    Core:Dispatch(UpdateConfig("frameHeight"))
+                  end
+                },
                 frameAnchor = {
                   name = "Anchor",
                   desc = "Default: "..Core.db.profile.positionAnchor.point,
                   type = "select",
-                  order = 4.5,
+                  order = 4.3,
                   values = ANCHORS,
                   get = function ()
                     return Core.db.profile.positionAnchor.point
@@ -228,7 +228,7 @@ function C:OnEnable()
                   name = "Font style",
                   desc = "Add an outline to the edit box text so it stands out instead of looking flat.",
                   type = "select",
-                  order = 1.15,
+                  order = 1.3,
                   values = FLAGS,
                   get = function ()
                     return Core.db.profile.editBoxFontFlags
@@ -242,7 +242,7 @@ function C:OnEnable()
                   name = "Background opacity",
                   desc = "Default: "..Core.defaults.profile.editBoxBackgroundOpacity,
                   type = "range",
-                  order = 1.3,
+                  order = 1.2,
                   min = 0,
                   max = 1,
                   softMin = 0,
@@ -284,7 +284,7 @@ function C:OnEnable()
                   name = "Position",
                   desc = "Default: "..Core.defaults.profile.editBoxAnchor.position,
                   type = "select",
-                  order = 2.1,
+                  order = 2.2,
                   values = {
                     ABOVE = "Above",
                     BELOW = "Below",
@@ -306,7 +306,7 @@ function C:OnEnable()
                   name = "Vertical offset",
                   desc = "Default: 5 or -5",
                   type = "range",
-                  order = 2.2,
+                  order = 2.1,
                   min = -9999,
                   max = 9999,
                   softMin = -10,
@@ -377,7 +377,7 @@ function C:OnEnable()
                   name = "Font style",
                   desc = "Add an outline to chat message text so it stands out instead of looking flat.",
                   type = "select",
-                  order = 1.25,
+                  order = 1.6,
                   values = FLAGS,
                   get = function ()
                     return Core.db.profile.messageFontFlags
@@ -391,7 +391,7 @@ function C:OnEnable()
                   name = "Background opacity",
                   desc = "Default: "..Core.defaults.profile.chatBackgroundOpacity,
                   type = "range",
-                  order = 1.3,
+                  order = 1.2,
                   min = 0,
                   max = 1,
                   softMin = 0,
@@ -410,7 +410,7 @@ function C:OnEnable()
                   desc = "The colour of the chat message background.",
                   type = "color",
                   hasAlpha = false,
-                  order = 1.35,
+                  order = 1.7,
                   get = function ()
                     local c = Core.db.profile.chatBackgroundColor
                     return c.r, c.g, c.b
@@ -437,7 +437,7 @@ function C:OnEnable()
                     Core.db.profile.messageLeading = input
                     Core:Dispatch(UpdateConfig("messageLeading"))
                   end,
-                  order = 1.4,
+                  order = 1.3,
                 },
                 messageLinePadding = {
                   name = "Line padding",
@@ -455,7 +455,7 @@ function C:OnEnable()
                     Core.db.profile.messageLinePadding = input
                     Core:Dispatch(UpdateConfig("messageLinePadding"))
                   end,
-                  order = 1.5,
+                  order = 1.4,
                 },
                 messageLeftPadding = {
                   name = "Left padding",
@@ -473,7 +473,7 @@ function C:OnEnable()
                     Core.db.profile.messageLeftPadding = input
                     Core:Dispatch(UpdateConfig("messageLeftPadding"))
                   end,
-                  order = 1.6,
+                  order = 1.5,
                 },
               },
             },
@@ -487,7 +487,6 @@ function C:OnEnable()
                   name = "Disable animations",
                   desc = "Show messages instantly with no slide or fade -- the chat becomes static. The timing sliders below have no effect while this is on.",
                   type = "toggle",
-                  width = "full",
                   order = 2.0,
                   get = function ()
                     return Core.db.profile.messageAnimations == false
@@ -501,8 +500,7 @@ function C:OnEnable()
                   name = "Keep messages visible",
                   desc = "Messages never fade out -- they stay on screen permanently. Overrides the fade out delay and duration below.",
                   type = "toggle",
-                  width = "full",
-                  order = 2.05,
+                  order = 2.01,
                   get = function ()
                     return Core.db.profile.messagesAlwaysVisible
                   end,
@@ -510,6 +508,12 @@ function C:OnEnable()
                     Core.db.profile.messagesAlwaysVisible = input
                     Core:Dispatch(UpdateConfig("messagesAlwaysVisible"))
                   end,
+                },
+                animationsSpacer = {
+                  name = "",
+                  type = "description",
+                  order = 2.05,
+                  width = "full",
                 },
                 chatHoldTime = {
                   name = "Fade out delay",
@@ -553,7 +557,7 @@ function C:OnEnable()
                   desc = "Default: "..Core.defaults.profile.chatFadeOutDuration..
                     "\nMin: 0\nMax:30",
                   type = "range",
-                  order = 2.3,
+                  order = 2.4,
                   min = 0,
                   max = 30,
                   softMin = 0,
@@ -571,7 +575,7 @@ function C:OnEnable()
                   name = "Slide in duration",
                   desc = "Default: "..Core.defaults.profile.chatSlideInDuration,
                   type = "range",
-                  order = 2.4,
+                  order = 2.3,
                   min = 0,
                   max = 30,
                   softMin = 0,
@@ -622,7 +626,7 @@ function C:OnEnable()
                   name = "Text icons Y offset",
                   desc = "Default: "..Core.defaults.profile.iconTextureYOffset..
                     "\nAdjust this if text icons aren't centered.",
-                  order = 3.3,
+                  order = 3.4,
                   min = 0,
                   max = 12,
                   softMin = 0,
@@ -640,7 +644,7 @@ function C:OnEnable()
                   name = "Show messages on hover",
                   desc = "When enabled, hovering over the chat reveals faded messages. When disabled, only scrolling reveals them.",
                   type = "toggle",
-                  order = 3.4,
+                  order = 3.3,
                   get = function ()
                     return Core.db.profile.messagesOnHover
                   end,
@@ -834,7 +838,6 @@ function C:OnEnable()
                   name = "Disable animations",
                   desc = "Show and hide the top bar instantly with no fade -- the tabs become static. The timing sliders below have no effect while this is on.",
                   type = "toggle",
-                  width = "full",
                   order = 2.0,
                   get = function ()
                     return Core.db.profile.dockAnimations == false
@@ -848,8 +851,7 @@ function C:OnEnable()
                   name = "Keep tabs visible",
                   desc = "Chat tabs never fade out -- they stay on screen permanently. Overrides the fade out delay and duration below.",
                   type = "toggle",
-                  width = "full",
-                  order = 2.05,
+                  order = 2.01,
                   get = function ()
                     return Core.db.profile.tabsAlwaysVisible
                   end,
@@ -857,6 +859,12 @@ function C:OnEnable()
                     Core.db.profile.tabsAlwaysVisible = input
                     Core:Dispatch(UpdateConfig("tabsAlwaysVisible"))
                   end,
+                },
+                topBarAnimationsSpacer = {
+                  name = "",
+                  type = "description",
+                  order = 2.05,
+                  width = "full",
                 },
                 dockHoldTime = {
                   name = "Fade out delay",
@@ -913,7 +921,7 @@ function C:OnEnable()
                   name = "Show tabs on hover",
                   desc = "When enabled, chat tabs fade out when idle and reappear on mouse hover. When disabled, tabs are always visible.",
                   type = "toggle",
-                  order = 2.4,
+                  order = 2.02,
                   get = function ()
                     return Core.db.profile.tabsOnHover
                   end,
