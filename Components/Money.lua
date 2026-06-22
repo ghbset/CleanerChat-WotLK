@@ -41,11 +41,11 @@ local Coin = setmetatable({}, { __index = function(t,k)
 
 	-- Use Blizzard coin textures (always available in 3.3.5)
 	if (k == "Gold") then
-		return string_format([[|TInterface\MoneyFrame\UI-GoldIcon:%d:%d:2:0|t]], size, size)
+		return string_format([[|TInterface\MoneyFrame\UI-GoldIcon:%d:%d:2:5|t]], size, size)
 	elseif (k == "Silver") then
-		return string_format([[|TInterface\MoneyFrame\UI-SilverIcon:%d:%d:2:0|t]], size, size)
+		return string_format([[|TInterface\MoneyFrame\UI-SilverIcon:%d:%d:2:5|t]], size, size)
 	elseif (k == "Copper") then
-		return string_format([[|TInterface\MoneyFrame\UI-CopperIcon:%d:%d:2:0|t]], size, size)
+		return string_format([[|TInterface\MoneyFrame\UI-CopperIcon:%d:%d:2:5|t]], size, size)
 	end
 end })
 
