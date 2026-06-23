@@ -83,10 +83,17 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 
 	-- Guild online: "|Hplayer:Name|h[Name]|h has come online."
 	-- Guild offline: "Name has gone offline." (plain text, no player link)
+	-- Ascension format: "Name Added as: (Name) has come online."
 	if (ns.db == nil or ns.db.prettifyGuildStatus) then
 		local onlineName = string_match(message, "|Hplayer:([^|]+)|h.-has come online")
 		if (onlineName) then
 			return false, string_format(ns.out.guild_online, onlineName), author, ...
+		end
+
+		-- Ascension-specific "Added as:" format - suppress entirely (already handled above or duplicate)
+		local ascensionOnline = string_match(message, "^(%S+) Added as:")
+		if (ascensionOnline and string_find(message, "has come online")) then
+			return true  -- suppress this message entirely
 		end
 
 		local offlineName = string_match(message, "^(%S+) has gone offline")
