@@ -2,7 +2,7 @@ local _, ns = ...
 
 local Module = ns:NewModule("Money", "LibMoreEvents-1.0")
 
--- GLOBALS: ChatTypeInfo, GetMoney, UnitOnTaxi
+-- GLOBALS: ChatTypeInfo, GetMoney
 -- GLOBALS: AuctionFrame, ClassTrainerFrame, LootFrame, MailFrame, MerchantFrame
 -- Lua API
 local math_abs = math.abs
@@ -280,9 +280,11 @@ Module.OnEvent = function(self, event, ...)
 		-- Money changes are reported immediately as they happen, including while a
 		-- vendor/mail/trainer window is open -- buying and selling each fire
 		-- PLAYER_MONEY, so each transaction prints its own gain/loss line. We still
-		-- suppress the auction house and taxi, where money moves around (deposits,
-		-- bids, flight costs) in ways that would just be noise.
-		if (AuctionHouseFrame and AuctionHouseFrame:IsShown()) or (AuctionFrame and AuctionFrame:IsShown()) or (UnitOnTaxi("player")) then
+		-- suppress the auction house where money moves around (deposits, bids) in
+		-- ways that would just be noise. Flight master costs are shown normally.
+		local atAuction = (AuctionHouseFrame and AuctionHouseFrame:IsShown()) or (AuctionFrame and AuctionFrame:IsShown())
+		-- Suppress only auction house; flight master payments should be visible
+		if atAuction then
 
 			self.playerMoney = currentMoney
 
