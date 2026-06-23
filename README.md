@@ -142,6 +142,10 @@ The immersive chat UI is built on **[Glass](https://www.curseforge.com/wow/addon
 
 The message filtering and reformatting is based on **[ChatCleaner](https://github.com/GoldpawsStuff/ChatCleaner)** by Lars Norberg (Goldpaw / GoldpawsStuff). Like Glass, it has also been **backported** to 3.3.5 — stripped of features and APIs that aren't available on WotLK, cleaned up, and made to work on the 3.3.5 client. Thank you, **Goldpaw**!
 
+### Assets
+
+The coin icons (`Assets/coins.tga`) are from the original **ChatCleaner** addon by Goldpaw.
+
 CleanerChat is an independent project maintained by **migwynkriid**, who bundles backported, cleaned-up builds of both addons into one and is currently the sole maintainer of the project.
 
 ---
