@@ -33,6 +33,7 @@ local emptyTbl = {}
 
 --[[
 	 xpcall safecall implementation
+	 Compatible with Lua 5.1 (WoW 3.3.5) and Lua 5.2+ (Ascension)
 ]]
 local xpcall = xpcall
 
@@ -42,7 +43,9 @@ end
 
 local function safecall(func, ...)
 	if func then
-		return xpcall(func, errorhandler, ...)
+		-- Lua 5.1 compatible: wrap in closure since xpcall(f, err, ...) is 5.2+ only
+		local args = {...}
+		return xpcall(function() return func(unpack(args)) end, errorhandler)
 	end
 end
 
