@@ -110,17 +110,34 @@ function MoverFrameMixin:Init()
     -- (and all its parts) to match. Called LIVE during a corner drag (via
     -- OnSizeChanged) so the chat resizes continuously, not just on release.
     -- The integer-change guards avoid redundant dispatches.
-    local function syncMoverSize()
+    -- Throttled to reduce lag during resize (dispatch at most every 0.1s).
+    local lastDispatchTime = 0
+    local THROTTLE_INTERVAL = 0.1
+
+    local function syncMoverSize(force)
+      local now = GetTime()
+      if (not force) and (now - lastDispatchTime < THROTTLE_INTERVAL) then
+        return -- throttled
+      end
+
       local newWidth = math_floor(self:GetWidth() + 0.5)
       local newHeight = math_floor(self:GetHeight() - editBoxMargin + 0.5)
       if (newWidth < 100) then newWidth = 100 end
       if (newHeight < 1) then newHeight = 1 end
+
+      local changed = false
       if (Core.db.profile.frameWidth ~= newWidth) then
         Core.db.profile.frameWidth = newWidth
-        Core:Dispatch(UpdateConfig("frameWidth"))
+        changed = true
       end
       if (Core.db.profile.frameHeight ~= newHeight) then
         Core.db.profile.frameHeight = newHeight
+        changed = true
+      end
+
+      if (changed) then
+        lastDispatchTime = now
+        Core:Dispatch(UpdateConfig("frameWidth"))
         Core:Dispatch(UpdateConfig("frameHeight"))
       end
     end
@@ -129,7 +146,7 @@ function MoverFrameMixin:Init()
     -- config-driven SetWidth/SetHeight (slider, Init) don't re-trigger it.
     self:SetScript("OnSizeChanged", function ()
       if (self.isSizing) then
-        syncMoverSize()
+        syncMoverSize(false)
       end
     end)
 
@@ -166,7 +183,7 @@ function MoverFrameMixin:Init()
       handle:SetScript("OnMouseUp", function ()
         self:StopMovingOrSizing()
         self.isSizing = false
-        syncMoverSize()
+        syncMoverSize(true) -- force final sync on release
       end)
       handle:SetScript("OnEnter", function ()
         tex:SetVertexColor(1, 1, 1, 1)
