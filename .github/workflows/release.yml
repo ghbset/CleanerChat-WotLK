@@ -1,9 +1,9 @@
-name: Validate & Release
+name: Create Release
 
 on:
   push:
     branches:
-      - '**'  # Run on all branches for validation
+      - main
 
 jobs:
   release:
