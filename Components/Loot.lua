@@ -1,9 +1,6 @@
-local _Addon, ns = ...
+local _, ns = ...
 
 local Module = ns:NewModule("Loot")
-
--- Addon Localization
-local _L = LibStub("AceLocale-3.0"):GetLocale((...))
 
 -- GLOBALS: UnitClass
 -- GLOBALS: MerchantFrame, ChatTypeInfo, DEFAULT_CHAT_FRAME, ChatFrame1
@@ -114,7 +111,7 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 		for _i, pattern in ipairs(self.patterns) do
 
 			-- We use the pattern only as an identifier, not for information.
-			local matchedItem, _matchedCount = string_match(message, pattern)
+			local matchedItem = string_match(message, pattern)
 			if (matchedItem) then
 				-- Note: Currencies don't appear to be the same format as this.
 				-- The patterns above tend to fail on the number,
@@ -369,8 +366,7 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 		end
 
 		-- "Received item: [Item Name]x5"
-		local _unusedCount
-		item, _unusedCount = safeMatch(message, P[G.QUEST_LOG_RECEIVED_ITEM_MULTIPLE])
+		item = safeMatch(message, P[G.QUEST_LOG_RECEIVED_ITEM_MULTIPLE])
 		if (item) then
 			return true
 		end

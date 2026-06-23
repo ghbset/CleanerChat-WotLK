@@ -1,4 +1,4 @@
-local _Addon, ns = ...
+local _, ns = ...
 
 local Module = ns:NewModule("Channels")
 
@@ -6,9 +6,6 @@ local Module = ns:NewModule("Channels")
 local L = LibStub("AceLocale-3.0"):GetLocale((...))
 
 -- Lua API
-local _rawget = rawget
-local _rawset = rawset
-local _setmetatable = setmetatable
 local string_match = string.match
 local string_sub = string.sub
 local string_upper = string.upper

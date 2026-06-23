@@ -238,9 +238,6 @@ end
 -- In 3.3.5, we use SetTexture with solid color files or SetVertexColor
 local frameMeta = getmetatable(CreateFrame("Frame")).__index
 
--- Store original texture methods (reserved for future use)
-local _originalSetTexture = nil
-
 -- Add SetColorTexture method to texture objects
 local function AddSetColorTexture(texture)
   if texture and not texture.SetColorTexture then

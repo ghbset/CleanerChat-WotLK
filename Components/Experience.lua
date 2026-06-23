@@ -1,9 +1,6 @@
-local _Addon, ns = ...
+local _, ns = ...
 
 local Module = ns:NewModule("Experience")
-
--- Addon Localization
-local _L = LibStub("AceLocale-3.0"):GetLocale((...))
 
 -- Lua API
 local next = next

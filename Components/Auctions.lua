@@ -1,9 +1,6 @@
-local _Addon, ns = ...
+local _, ns = ...
 
 local Module = ns:NewModule("Auctions")
-
--- Addon Localization
-local _L = LibStub("AceLocale-3.0"):GetLocale((...))
 
 -- GLOBALS: hooksecurefunc, StartAuction, GetAuctionSellItemInfo
 -- GLOBALS: ITEM_QUALITY_COLORS, ClickAuctionSellItemButton
@@ -12,7 +9,6 @@ local _L = LibStub("AceLocale-3.0"):GetLocale((...))
 local rawget = rawget
 local rawset = rawset
 local setmetatable = setmetatable
-local _string_find = string.find
 local string_format = string.format
 local string_gsub = string.gsub
 local string_match = string.match

@@ -133,7 +133,7 @@ function Hyperlinks:OnEnable()
   end)
 
   Core:Subscribe(HYPERLINK_ENTER, function (payload)
-    local link, _text = unpack(payload)
+    local link = unpack(payload)
     local t = string.match(link, "^(.-):")
 
     if t == "url" then

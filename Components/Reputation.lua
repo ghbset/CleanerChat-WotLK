@@ -1,13 +1,10 @@
-local _Addon, ns = ...
+local _, ns = ...
 
 local Module = ns:NewModule("Reputation")
 
--- Addon Localization
-local _L = LibStub("AceLocale-3.0"):GetLocale((...))
 -- GLOBALS: GetNumFactions, GetFactionInfo, CollapseFactionHeader, ExpandFactionHeader
 
 -- Lua API
-local _ipairs = ipairs
 local next = next
 local rawget = rawget
 local rawset = rawset
@@ -17,7 +14,6 @@ local string_match = string.match
 local table_concat = table.concat
 local table_insert = table.insert
 local tonumber = tonumber
-local _type = type
 
 -- WoW Globals
 local G = {

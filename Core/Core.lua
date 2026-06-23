@@ -8,8 +8,6 @@ ns = LibStub("AceAddon-3.0"):NewAddon(ns, Addon, "LibMoreEvents-1.0", "AceConsol
 local _G = _G
 local ipairs = ipairs
 local next = next
-local _pairs = pairs
-local _rawset = rawset
 local setmetatable = setmetatable
 local string_find = string.find
 local string_format = string.format
@@ -21,7 +19,6 @@ local table_concat = table.concat
 local table_insert = table.insert
 local table_remove = table.remove
 local type = type
-local _unpack = unpack
 
 -- These channels will be ignored by the general parsing.
 -- This does not affect the chat event filters,

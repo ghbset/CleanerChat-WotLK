@@ -31,7 +31,6 @@ local UPDATE_CONFIG = Constants.EVENTS.UPDATE_CONFIG
 -- luacheck: push ignore 113
 local CreateFrame = CreateFrame
 local CreateObjectPool = CreateObjectPool
-local _DEFAULT_CHAT_FRAME = DEFAULT_CHAT_FRAME
 local Mixin = Mixin
 -- luacheck: pop
 

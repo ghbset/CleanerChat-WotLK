@@ -1,4 +1,4 @@
-local _Addon, ns = ...
+local _, ns = ...
 
 local Module = ns:NewModule("Money", "LibMoreEvents-1.0")
 
@@ -8,7 +8,6 @@ local Module = ns:NewModule("Money", "LibMoreEvents-1.0")
 local math_abs = math.abs
 local math_floor = math.floor
 local math_mod = math.fmod
-local _pairs = pairs
 local rawget = rawget
 local rawset = rawset
 local setmetatable = setmetatable
