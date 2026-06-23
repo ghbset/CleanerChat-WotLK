@@ -56,8 +56,11 @@ local function textureProcessor(text)
     if mStart then
       table.insert(parts, strsub(text, cursor, mStart - 1))
       table.insert(parts, adjustTextureYOffset(strsub(text, mStart, mEnd)))
-      -- Always add a space after icons to prevent overlapping into words
-      table.insert(parts, " ")
+      -- Add a space after icon if next char is alphanumeric (prevents icon overlapping into words)
+      local nextChar = strsub(text, mEnd + 1, mEnd + 1)
+      if nextChar ~= "" and nextChar ~= " " and nextChar ~= "|" and nextChar ~= "." and nextChar ~= "," then
+        table.insert(parts, " ")
+      end
       cursor = mEnd + 1
     else
       -- No more matches
