@@ -166,7 +166,7 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 		name, item = safeMatch(message, P[G.LOOT_ROLL_WON])
 		if (name and item) then
 			item = string_gsub(item, "[%[/%]]", "")
-			return false, string_format(ns.out.roll_won_other, item, name), author, ...
+			return false, string_format(ns.out.roll_won_other, name, item), author, ...
 		end
 
 		-- "You have selected Need for: %s"
