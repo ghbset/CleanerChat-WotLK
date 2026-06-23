@@ -261,6 +261,15 @@ Module.OnEvent = function(self, event, ...)
 	if (event == "PLAYER_ENTERING_WORLD") then
 		self.playerMoney = GetMoney()
 
+	elseif (event == "LOOT_OPENED") then
+		-- Track that we're actively looting
+		self.isLooting = true
+
+	elseif (event == "LOOT_CLOSED") then
+		-- Track when loot closed so we can catch money events that fire slightly after
+		self.isLooting = false
+		self.lootClosedTime = GetTime()
+
 	elseif (event == "PLAYER_MONEY") then
 		local currentMoney = GetMoney()
 
@@ -301,11 +310,13 @@ Module.OnEvent = function(self, event, ...)
 					-- Check if we should buffer for one-line quest rewards.
 					-- Skip buffering when vendor/mail/trainer/loot windows are open -- those
 					-- are transactions or mob loot, not quest rewards, and should display immediately.
+					-- Also skip if we recently looted (within 0.5s) since PLAYER_MONEY can fire after loot frame closes.
 					local atVendor = MerchantFrame and MerchantFrame:IsShown()
 					local atMail = MailFrame and MailFrame:IsShown()
 					local atTrainer = ClassTrainerFrame and ClassTrainerFrame:IsShown()
-					local atLoot = LootFrame and LootFrame:IsShown()
-					if (not atVendor) and (not atMail) and (not atTrainer) and (not atLoot) and (ns.db and ns.db.oneLineQuestRewards) then
+					local atLoot = self.isLooting or (LootFrame and LootFrame:IsShown())
+					local recentlyLooted = self.lootClosedTime and (GetTime() - self.lootClosedTime) < 0.5
+					if (not atVendor) and (not atMail) and (not atTrainer) and (not atLoot) and (not recentlyLooted) and (ns.db and ns.db.oneLineQuestRewards) then
 						local chatFrame = DEFAULT_CHAT_FRAME or ChatFrame1
 						if (chatFrame) then
 							local moneyText = formatMoney(g,s,c)
@@ -342,9 +353,13 @@ end
 Module.OnEnable = function(self)
 
 	self.playerMoney = GetMoney()
+	self.isLooting = false
+	self.lootClosedTime = nil
 
 	self:RegisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:RegisterEvent("PLAYER_MONEY", "OnEvent")
+	self:RegisterEvent("LOOT_OPENED", "OnEvent")
+	self:RegisterEvent("LOOT_CLOSED", "OnEvent")
 
 	self:RegisterBlacklistFilter(onAddMessageProxy)
 
@@ -354,9 +369,13 @@ end
 Module.OnDisable = function(self)
 
 	self.playerMoney = 0
+	self.isLooting = false
+	self.lootClosedTime = nil
 
 	self:UnregisterEvent("PLAYER_ENTERING_WORLD", "OnEvent")
 	self:UnregisterEvent("PLAYER_MONEY", "OnEvent")
+	self:UnregisterEvent("LOOT_OPENED", "OnEvent")
+	self:UnregisterEvent("LOOT_CLOSED", "OnEvent")
 
 	self:UnregisterBlacklistFilter(onAddMessageProxy)
 
