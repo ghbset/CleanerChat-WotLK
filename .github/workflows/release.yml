@@ -22,24 +22,38 @@ jobs:
       # ========== VALIDATION CHECKS ==========
       # All checks must pass before release is built
 
-      - name: Install Lua and Luacheck
+      - name: Install Lua
         run: |
           sudo apt-get update
-          sudo apt-get install -y lua5.1 luarocks
-          sudo luarocks install luacheck
+          sudo apt-get install -y lua5.1
 
       - name: Lua syntax check
         run: |
-          echo "Running Luacheck on all Lua files..."
-          # Check for syntax errors only (ignore warnings for WoW globals)
-          # Exit code 0 = pass, 1 = warnings, 2+ = errors
-          find . -name "*.lua" -not -path "./Libs/*" -print0 | xargs -0 luacheck --no-config --codes --no-color --std lua51 --globals _G --only 011 012 013 || {
-            # 011 = syntax error, 012 = undefined variable in syntax, 013 = syntax
-            echo ""
-            echo "❌ Lua syntax errors found! Fix them before release."
+          echo "Running Lua syntax check on all Lua files..."
+          
+          FILES=$(find . -name "*.lua" -not -path "./Libs/*" -type f)
+          if [ -z "$FILES" ]; then
+            echo "No Lua files found outside Libs/"
             exit 1
-          }
-          echo "✅ Lua syntax check passed"
+          fi
+          
+          FILE_COUNT=$(echo "$FILES" | wc -l)
+          echo "Found $FILE_COUNT Lua files to check"
+          
+          ERRORS=0
+          while IFS= read -r file; do
+            # luac -p parses without executing - catches syntax errors only
+            if ! luac5.1 -p "$file" 2>&1; then
+              ERRORS=$((ERRORS + 1))
+            fi
+          done <<< "$FILES"
+          
+          if [ $ERRORS -gt 0 ]; then
+            echo ""
+            echo "❌ Lua syntax errors found in $ERRORS file(s)! Fix them before release."
+            exit 1
+          fi
+          echo "✅ Lua syntax check passed ($FILE_COUNT files)"
 
       - name: TOC file validation
         run: |
