@@ -9,7 +9,7 @@ local _L = LibStub("AceLocale-3.0"):GetLocale((...))
 -- GLOBALS: MerchantFrame, ChatTypeInfo, DEFAULT_CHAT_FRAME, ChatFrame1
 -- GLOBALS: hooksecurefunc, GetContainerItemLink, GetContainerItemInfo
 -- GLOBALS: TakeInboxItem, GetInboxItem, GetInboxItemLink
--- GLOBALS: GetCursorInfo, DeleteCursorItem
+-- GLOBALS: GetCursorInfo, DeleteCursorItem, GetItemInfo
 
 -- Lua API
 local ipairs = ipairs
@@ -334,6 +334,26 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 		end
 
 	elseif (event == "CHAT_MSG_SYSTEM") then
+
+		-- Appearance collection messages (Ascension)
+		-- Format: "|cffff80ff|Happearance:ID|h[Item]|h|r has been added to your appearance collection"
+		local itemLink = string_match(message, "(|c%x+|Happearance:%d+|h%[.-%]|h|r)")
+		if (itemLink) and string_find(message, "appearance collection") then
+			-- Extract just the item name (without brackets) for GetItemInfo lookup
+			local itemName = string_match(itemLink, "|h%[(.-)%]|h")
+			if (itemName) then
+				-- Try to get item info to determine quality color
+				local _, realItemLink = GetItemInfo(itemName)
+				if (realItemLink) then
+					-- Use the real item link which has proper quality color and is clickable
+					local coloredItem = string_gsub(realItemLink, "[%[%]]", "")
+					return false, string_format(ns.out.appearance_added, coloredItem), author, ...
+				else
+					-- Fallback: just show the name without link (item not in cache)
+					return false, string_format(ns.out.appearance_added, itemName), author, ...
+				end
+			end
+		end
 
 		-- 3.3.5 / Ascension quest rewards are announced TWICE: once as a real
 		-- CHAT_MSG_LOOT ("You receive item/currency...") and once as this

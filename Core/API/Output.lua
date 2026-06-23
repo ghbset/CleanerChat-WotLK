@@ -43,6 +43,7 @@ ns.out = setmetatable(ns.out or {}, { __newindex = function(t,k,msg)
 		{ "%*white%*", 		colors.highlight.colorCode },
 		{ "%*offwhite%*", 	colors.offwhite.colorCode },
 		{ "%*palered%*", 	colors.palered.colorCode },
+		{ "%*pink%*", 		colors.pink.colorCode },
 		{ "%*red%*", 		colors.quest.red.colorCode },
 		{ "%*darkorange%*", colors.quality.Legendary.colorCode },
 		{ "%*orange%*", 	colors.quest.orange.colorCode },
@@ -136,3 +137,6 @@ out.glory_progress = "*gray*%d Glory needed to reach the next rank**"
 -- Death message
 out.died = "*red*-** *palered*Died**"
 out.durability_loss = "*red*-** *palered*%d%% Durability**"
+
+-- Appearance collection (Ascension)
+out.appearance_added = "*green*+** *pink*Appearance:** %s"
