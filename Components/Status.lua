@@ -114,14 +114,31 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 
 end
 
+-- Blacklist filter: suppress the raw "Added as:" guild login messages
+-- These are sent directly to AddMessage, bypassing the event system.
+-- We already output prettified versions via CHAT_MSG_SYSTEM filter.
+Module.OnAddMessage = function(self, chatFrame, msg, r, g, b, chatID, ...)
+	if (ns.db == nil or ns.db.prettifyGuildStatus) then
+		if msg and string_find(msg, "Added as:") and (string_find(msg, "online") or string_find(msg, "offline")) then
+			return true -- Suppress the message
+		end
+	end
+end
+
 local onChatEventProxy = function(...)
 	return Module:OnChatEvent(...)
 end
 
+local onAddMessageProxy = function(...)
+	return Module:OnAddMessage(...)
+end
+
 Module.OnEnable = function(self)
+	self:RegisterBlacklistFilter(onAddMessageProxy)
 	self:RegisterMessageEventFilter("CHAT_MSG_SYSTEM", onChatEventProxy)
 end
 
 Module.OnDisable = function(self)
+	self:UnregisterBlacklistFilter(onAddMessageProxy)
 	self:UnregisterMessageEventFilter("CHAT_MSG_SYSTEM", onChatEventProxy)
 end
