@@ -81,6 +81,20 @@ Module.OnChatEvent = function(self, chatFrame, event, message, author, ...)
 		end
 	end
 
+	-- Guild online: "|Hplayer:Name|h[Name]|h has come online."
+	-- Guild offline: "Name has gone offline." (plain text, no player link)
+	if (ns.db == nil or ns.db.prettifyGuildStatus) then
+		local onlineName = string_match(message, "|Hplayer:([^|]+)|h.-has come online")
+		if (onlineName) then
+			return false, string_format(ns.out.guild_online, onlineName), author, ...
+		end
+
+		local offlineName = string_match(message, "^(%S+) has gone offline")
+		if (offlineName) then
+			return false, string_format(ns.out.guild_offline, offlineName), author, ...
+		end
+	end
+
 	-- Glory (Ascension): "|CFF1CB619 You gained 50 Glory for winning a battleground. 5502 Glory needed to reach the next rank|r."
 	-- Strip color codes (both |c and |C formats) before parsing
 	local cleanMessage = string_gsub(message, "|[cC]%x%x%x%x%x%x%x%x", "")

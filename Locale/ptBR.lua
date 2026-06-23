@@ -53,6 +53,8 @@ L["Show Item Destruction"] = "Mostrar destruição de itens"
 L["Display a message when you destroy (delete) an item."] = "Exibe uma mensagem quando você destrói (exclui) um item."
 
 L["Show Vendor Sales"] = "Mostrar vendas ao vendedor"
+L["Prettify Guild Status"] = "Embelezar status da guilda"
+L["Simplify guild online/offline messages to show just the player name."] = "Simplifica as mensagens de online/offline da guilda para mostrar apenas o nome do jogador."
 L["Display a message when you sell an item to a vendor."] = "Exibe uma mensagem quando você vende um item a um vendedor."
 
 L["Chat Debug Capture"] = "Captura de depuração do chat"

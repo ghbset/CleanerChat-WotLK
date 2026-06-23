@@ -243,6 +243,7 @@ local defaults = {
 	oneLineQuestRewards = true, -- combine quest rewards (items, currency, xp) into one line
 	showItemDestruction = true, -- show "- item" when destroying items
 	showVendorSales = true, -- show "- item" when selling to vendors
+	prettifyGuildStatus = true, -- prettify guild online/offline messages
 	filters = {
 		achievements = true,
 		auctions = true,

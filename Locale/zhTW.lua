@@ -51,6 +51,8 @@ L["Show Item Destruction"] = "顯示物品銷毀"
 L["Display a message when you destroy (delete) an item."] = "當你銷毀（刪除）物品時顯示訊息。"
 
 L["Show Vendor Sales"] = "顯示商人出售"
+L["Prettify Guild Status"] = "美化公會狀態"
+L["Simplify guild online/offline messages to show just the player name."] = "簡化公會上線/下線訊息，僅顯示玩家名稱。"
 L["Display a message when you sell an item to a vendor."] = "當你向商人出售物品時顯示訊息。"
 
 L["Chat Debug Capture"] = "聊天除錯擷取"

@@ -91,6 +91,8 @@ L["Show Item Destruction"] = true
 L["Display a message when you destroy (delete) an item."] = true
 
 L["Show Vendor Sales"] = true
+L["Prettify Guild Status"] = true
+L["Simplify guild online/offline messages to show just the player name."] = true
 L["Display a message when you sell an item to a vendor."] = true
 
 -- Glass UI Config Strings

@@ -154,6 +154,15 @@ local optionDB = {
 			type = "toggle",
 			set = function(info,value) ns.db.showVendorSales = value end,
 			get = function(info) return ns.db.showVendorSales end,
+		},
+		prettifyGuildStatus = {
+			order = 109,
+			name = L["Prettify Guild Status"],
+			desc = L["Simplify guild online/offline messages to show just the player name."],
+			width = 1.5,
+			type = "toggle",
+			set = function(info,value) ns.db.prettifyGuildStatus = value end,
+			get = function(info) return ns.db.prettifyGuildStatus end,
 		}
 	}
 }
