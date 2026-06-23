@@ -19,6 +19,99 @@ jobs:
         with:
           fetch-depth: 0  # Fetch all history for changelog generation
 
+      # ========== VALIDATION CHECKS ==========
+      # All checks must pass before release is built
+
+      - name: Install Lua and Luacheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lua5.1 luarocks
+          sudo luarocks install luacheck
+
+      - name: Lua syntax check
+        run: |
+          echo "Running Luacheck on all Lua files..."
+          # Check for syntax errors only (ignore warnings for WoW globals)
+          # Exit code 0 = pass, 1 = warnings, 2+ = errors
+          find . -name "*.lua" -not -path "./Libs/*" -print0 | xargs -0 luacheck --no-config --codes --no-color --std lua51 --globals _G --only 011 012 013 || {
+            # 011 = syntax error, 012 = undefined variable in syntax, 013 = syntax
+            echo ""
+            echo "❌ Lua syntax errors found! Fix them before release."
+            exit 1
+          }
+          echo "✅ Lua syntax check passed"
+
+      - name: TOC file validation
+        run: |
+          echo "Validating TOC file references..."
+          ERRORS=0
+          
+          # Extract file references from TOC (lines not starting with ## or #)
+          while IFS= read -r line; do
+            # Skip comments and empty lines
+            [[ "$line" =~ ^[[:space:]]*# ]] && continue
+            [[ -z "$line" ]] && continue
+            [[ "$line" =~ ^[[:space:]]*$ ]] && continue
+            
+            # Convert backslashes to forward slashes and trim whitespace
+            FILE=$(echo "$line" | tr '\\' '/' | xargs)
+            
+            # Skip if empty after trim
+            [[ -z "$FILE" ]] && continue
+            
+            # Check if file exists
+            if [[ ! -f "$FILE" ]]; then
+              echo "❌ Missing file: $FILE"
+              ERRORS=$((ERRORS + 1))
+            fi
+          done < CleanerChat.toc
+          
+          if [[ $ERRORS -gt 0 ]]; then
+            echo ""
+            echo "❌ TOC validation failed: $ERRORS missing file(s)"
+            exit 1
+          fi
+          echo "✅ TOC file validation passed"
+
+      - name: Locale completeness check
+        run: |
+          echo "Checking locale file completeness..."
+          
+          # Get all keys from the base enUS locale
+          BASE_KEYS=$(grep -oP 'L\["\K[^"]+' Locale/enUS.lua | sort -u)
+          BASE_COUNT=$(echo "$BASE_KEYS" | wc -l)
+          echo "Base locale (enUS) has $BASE_COUNT keys"
+          
+          ERRORS=0
+          for LOCALE_FILE in Locale/*.lua; do
+            [[ "$LOCALE_FILE" == "Locale/enUS.lua" ]] && continue
+            
+            LOCALE_NAME=$(basename "$LOCALE_FILE" .lua)
+            LOCALE_KEYS=$(grep -oP 'L\["\K[^"]+' "$LOCALE_FILE" | sort -u)
+            
+            # Find missing keys
+            MISSING=$(comm -23 <(echo "$BASE_KEYS") <(echo "$LOCALE_KEYS"))
+            MISSING_COUNT=$(echo "$MISSING" | grep -c . || true)
+            
+            if [[ $MISSING_COUNT -gt 0 ]]; then
+              echo "❌ $LOCALE_NAME: missing $MISSING_COUNT key(s):"
+              echo "$MISSING" | head -10
+              [[ $MISSING_COUNT -gt 10 ]] && echo "  ... and $((MISSING_COUNT - 10)) more"
+              ERRORS=$((ERRORS + 1))
+            else
+              echo "✅ $LOCALE_NAME: complete"
+            fi
+          done
+          
+          if [[ $ERRORS -gt 0 ]]; then
+            echo ""
+            echo "❌ Locale check failed: $ERRORS locale file(s) have missing keys"
+            exit 1
+          fi
+          echo "✅ Locale check passed"
+
+      # ========== BUILD RELEASE ==========
+
       - name: Calculate version
         id: version
         run: |
@@ -85,12 +178,12 @@ jobs:
                     --exclude='changelog.txt' \
                     ./ release/CleanerChat/
           
-          # Create the zip file
+          # Create the zip file with constant name for /releases/latest/download/CleanerChat.zip
           cd release
-          zip -r ../CleanerChat-v${{ steps.version.outputs.version }}.zip CleanerChat
+          zip -r ../CleanerChat.zip CleanerChat
           cd ..
           
-          echo "Created: CleanerChat-v${{ steps.version.outputs.version }}.zip"
+          echo "Created: CleanerChat.zip (v${{ steps.version.outputs.version }})"
           ls -la *.zip
 
       - name: Delete old releases
@@ -115,10 +208,12 @@ jobs:
             ${{ steps.changelog.outputs.changelog }}
             
             ### Installation
-            1. Download `CleanerChat-v${{ steps.version.outputs.version }}.zip`
+            1. Download `CleanerChat.zip`
             2. Extract to `Interface\AddOns\`
             3. Restart WoW or `/reload`
-          files: CleanerChat-v${{ steps.version.outputs.version }}.zip
+            
+            **Direct download:** https://github.com/migwynkriid/CleanerChat-WotLK/releases/latest/download/CleanerChat.zip
+          files: CleanerChat.zip
           draft: false
           prerelease: false
         env:
