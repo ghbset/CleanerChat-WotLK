@@ -22,15 +22,13 @@ default chat frame with an immersive, modern chat UI.
 
 ![CleanerChat in action](https://i.imgur.com/8lj13ch.gif)
 
+<img width="1250" height="250" alt="image" src="https://github.com/user-attachments/assets/ac9895d1-5ae3-429b-96fe-c42f061c72d8" />
+
+https://github.com/user-attachments/assets/39dade08-35d7-41ef-b203-68c314116d25
+
 </div>
 
-https://github.com/user-attachments/assets/512a5680-bc6c-49bc-810a-b3ba3c87fcad
-
 <div align="center">
-
-![Cleaned chat example 1](https://media.forgecdn.net/attachments/397/12/wowscrnshot_092421_171744-crop.jpg)
-![Cleaned chat example 2](https://media.forgecdn.net/attachments/397/11/wowscrnshot_092121_183602-crop.jpg)
-![Cleaned chat example 3](https://media.forgecdn.net/attachments/397/13/wowscrnshot_092421_183813-crop.jpg)
 
 </div>
 
