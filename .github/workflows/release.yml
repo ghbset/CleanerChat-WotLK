@@ -22,38 +22,34 @@ jobs:
       # ========== VALIDATION CHECKS ==========
       # All checks must pass before release is built
 
-      - name: Install Lua
+      - name: Install Lua and Luacheck
         run: |
           sudo apt-get update
-          sudo apt-get install -y lua5.1
+          sudo apt-get install -y lua5.1 luarocks
+          sudo luarocks install luacheck
 
-      - name: Lua syntax check
+      - name: Luacheck - Lint Lua files
         run: |
-          echo "Running Lua syntax check on all Lua files..."
+          echo "Running Luacheck on all Lua files..."
+          echo ""
           
-          FILES=$(find . -name "*.lua" -not -path "./Libs/*" -type f)
-          if [ -z "$FILES" ]; then
-            echo "No Lua files found outside Libs/"
-            exit 1
-          fi
-          
-          FILE_COUNT=$(echo "$FILES" | wc -l)
-          echo "Found $FILE_COUNT Lua files to check"
-          
-          ERRORS=0
-          while IFS= read -r file; do
-            # luac -p parses without executing - catches syntax errors only
-            if ! luac5.1 -p "$file" 2>&1; then
-              ERRORS=$((ERRORS + 1))
-            fi
-          done <<< "$FILES"
-          
-          if [ $ERRORS -gt 0 ]; then
+          # Run luacheck with the .luacheckrc config
+          # --codes: show warning codes
+          # --ranges: show column ranges
+          # --no-color: for cleaner CI output
+          if luacheck . --codes --ranges --no-color; then
             echo ""
-            echo "❌ Lua syntax errors found in $ERRORS file(s)! Fix them before release."
-            exit 1
+            echo "✅ Luacheck passed - no issues found"
+          else
+            EXIT_CODE=$?
+            echo ""
+            if [ $EXIT_CODE -eq 1 ]; then
+              echo "❌ Luacheck found warnings! Fix them before release."
+            else
+              echo "❌ Luacheck found errors! Fix them before release."
+            fi
+            exit $EXIT_CODE
           fi
-          echo "✅ Lua syntax check passed ($FILE_COUNT files)"
 
       - name: TOC file validation
         run: |
