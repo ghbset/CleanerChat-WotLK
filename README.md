@@ -35,19 +35,6 @@ https://github.com/user-attachments/assets/39dade08-35d7-41ef-b203-68c314116d25
 
 ---
 
-## Contents
-
-- [What it does](#what-it-does)
-- [Chat cleaning](#chat-cleaning)
-- [Chat overhaul](#chat-overhaul)
-- [Installation](#installation)
-- [Commands](#commands)
-- [Compatibility](#compatibility)
-- [Credits](#credits)
-- [License](#license)
-
----
-
 ## What it does
 
 CleanerChat does two things at once:
