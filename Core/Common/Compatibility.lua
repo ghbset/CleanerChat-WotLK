@@ -95,8 +95,7 @@ if (not _G.C_Timer) then
 					-- Use pcall to protect against buggy callbacks from other addons
 					-- This prevents errors in callbacks (like MRT's nil self) from
 					-- spamming the error log and breaking our timer loop
-					local ok, err = pcall(timer.callback)
-					-- Silently ignore errors - they're from other addons, not our fault
+					pcall(timer.callback)
 				end
 				if (timer.iterations) then
 					timer.iterations = timer.iterations - 1
