@@ -200,6 +200,15 @@ function C:OnEnable()
           type = "group",
           order = 2,
           args = {
+            windowSelector = {
+              name = "Configure Window",
+              desc = "Select which CleanerChat window these settings apply to",
+              type = "select",
+              order = 0,
+              values = GetWindowChoices,
+              get = function() return C.selectedWindowId end,
+              set = function(_, value) C.selectedWindowId = value end,
+            },
             section1 = {
               name = L["Appearance"],
               type = "group",
@@ -364,6 +373,15 @@ function C:OnEnable()
           type = "group",
           order = 3,
           args = {
+            windowSelector = {
+              name = "Configure Window",
+              desc = "Select which CleanerChat window these settings apply to",
+              type = "select",
+              order = 0,
+              values = GetWindowChoices,
+              get = function() return C.selectedWindowId end,
+              set = function(_, value) C.selectedWindowId = value end,
+            },
             section1 = {
               name = L["Appearance"],
               type = "group",
@@ -812,6 +830,15 @@ function C:OnEnable()
           type = "group",
           order = 4,
           args = {
+            windowSelector = {
+              name = "Configure Window",
+              desc = "Select which CleanerChat window these settings apply to",
+              type = "select",
+              order = 0,
+              values = GetWindowChoices,
+              get = function() return C.selectedWindowId end,
+              set = function(_, value) C.selectedWindowId = value end,
+            },
             section1 = {
               name = L["Appearance"],
               type = "group",

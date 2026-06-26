@@ -218,24 +218,25 @@ function ChatTabMixin:Init(slidingMessageFrame)
     -- Get the UIManager module for window operations
     local UIManager = Core:GetModule("UIManager", true)
 
-    -- "Move to new CleanerChat window" - creates a new window with this chat tab
-    if UIManager and self.chatFrame ~= DEFAULT_CHAT_FRAME and not IsCombatLog(self.chatFrame) then
+    -- "New window" — spawn a brand-new CleanerChat window (a new chat frame
+    -- rendered as its own Glass window, copying the current window's settings).
+    -- Available on ANY chat tab that is not the Combat Log.
+    if UIManager and not IsCombatLog(self.chatFrame) then
       local chatFrameIndex = self.chatFrame:GetID()
       local _, currentWindowId = UIManager:GetWindowForChatFrame(chatFrameIndex)
 
-      -- Only show "Move to new window" if this tab is in the main window
-      if currentWindowId == "Main" then
+      info = UIDropDownMenu_CreateInfo()
+      info.text = "New window"
+      info.notCheckable = 1
+      info.func = function()
+        UIManager:SpawnNewWindow(currentWindowId)
+      end
+      UIDropDownMenu_AddButton(info)
+
+      -- "Delete window" — only on non-default (added) windows.
+      if currentWindowId ~= "Main" then
         info = UIDropDownMenu_CreateInfo()
-        info.text = "Move to new CleanerChat window"
-        info.notCheckable = 1
-        info.func = function()
-          UIManager:CreateNewWindow(chatFrameIndex)
-        end
-        UIDropDownMenu_AddButton(info)
-      else
-        -- Show "Delete CleanerChat window" if this tab is in a secondary window
-        info = UIDropDownMenu_CreateInfo()
-        info.text = "Delete CleanerChat window"
+        info.text = "Delete window"
         info.notCheckable = 1
         info.func = function()
           UIManager:DeleteWindow(currentWindowId)
@@ -339,11 +340,17 @@ Core.Components.SelectChatTab = function(selectedTab)
   if not UIManager or not UIManager.state then 
     return 
   end
-  
-  local frames = UIManager.state.frames
-  local tabs = UIManager.state.tabs
-  
-  -- Store selected tab
+
+  -- Operate on the tab's OWNING window, so selecting a tab only changes that
+  -- window's visible chat (multi-window). Falls back to the main render state.
+  local window = selectedTab.slidingMessageFrame and selectedTab.slidingMessageFrame.window
+  local frames = (window and window.frames) or UIManager.state.frames
+  local tabs = (window and window.tabs) or UIManager.state.tabs
+
+  -- Store selected tab (per-window, plus a global "last selected" for sync).
+  if window then
+    window.selectedTab = selectedTab
+  end
   Core.Components.selectedTab = selectedTab
   
   -- Get the chatFrame for the selected tab

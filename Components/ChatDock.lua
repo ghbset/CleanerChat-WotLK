@@ -75,14 +75,17 @@ function ChatDockMixin:Init(parent)
 
   if self.subscriptions == nil then
     self.subscriptions = {
-      Core:Subscribe(MOUSE_ENTER, function ()
+      Core:Subscribe(MOUSE_ENTER, function (window)
+        -- Only react to our own window's hover (nil = legacy global).
+        if window and window ~= self.window then return end
         -- Reveal the tabs while the mouse is over the chat
         self.state.mouseOver = true
-        if Core.db.profile.tabsOnHover then
+        if self.profile.tabsOnHover then
           self:ShowTabs()
         end
       end),
-      Core:Subscribe(MOUSE_LEAVE, function ()
+      Core:Subscribe(MOUSE_LEAVE, function (window)
+        if window and window ~= self.window then return end
         -- Fade the tabs out after the configured delay
         self.state.mouseOver = false
         if Core.db.profile.tabsOnHover then

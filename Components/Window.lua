@@ -49,6 +49,8 @@ local function CreateWindow(opts)
     opts.containerName or ("GlassFrame" .. id), parent, window.profile
   )
   window.container:SetPoint("TOPLEFT", window.moverFrame)
+  -- Back-reference so the container can scope its hover events to this window.
+  window.container.window = window
 
   -- Tab dock and the message-frame pool live inside the container. Each window
   -- owns its own dock (named per window; the main window keeps "GlassChatDock")
@@ -57,6 +59,8 @@ local function CreateWindow(opts)
   window.dock = Core.Components.CreateChatDock(
     window.container, opts.dockName or ("GlassChatDock" .. id), window.profile
   )
+  -- Back-reference so the dock only reacts to its own window's hover events.
+  window.dock.window = window
   window.pool = Core.Components.CreateSlidingMessageFramePool(window.container, window)
 
   return window

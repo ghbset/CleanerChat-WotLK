@@ -1,7 +1,7 @@
 local Core, Constants = unpack(select(2, ...))
 
-local MouseEnter = Constants.ACTIONS.MouseEnter
-local MouseLeave = Constants.ACTIONS.MouseLeave
+local MOUSE_ENTER = Constants.EVENTS.MOUSE_ENTER
+local MOUSE_LEAVE = Constants.EVENTS.MOUSE_LEAVE
 
 local UPDATE_CONFIG = Constants.EVENTS.UPDATE_CONFIG
 
@@ -53,9 +53,10 @@ function MainContainerFrameMixin:OnFrame()
   local isOver = MouseIsOver(self)
   if self.state.mouseOver ~= isOver then
     if not self.state.mouseOver then
-      Core:Dispatch(MouseEnter())
+      -- Scope the hover event to this window so only its messages/tabs react.
+      Core:Dispatch(MOUSE_ENTER, self.window)
     else
-      Core:Dispatch(MouseLeave())
+      Core:Dispatch(MOUSE_LEAVE, self.window)
     end
 
     self.state.mouseOver = not self.state.mouseOver

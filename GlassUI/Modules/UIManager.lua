@@ -153,34 +153,60 @@ function UIManager:OnEnable()
       combatLogFrame:Hide()
       combatLogFrame:SetAlpha(0)
     end
-    
-    local activeTabs = {}
+
+    -- Active tabs grouped by their owning window, so each window's dock lays out
+    -- only the tabs that belong to it.
+    local activeTabsByWindow = {}
+
     for i=1, NUM_CHAT_WINDOWS do
       local chatFrame = _G["ChatFrame"..i]
       local chatTab = _G["ChatFrame"..i.."Tab"]
-      
+
       if chatFrame then
         -- Skip Combat Log (ChatFrame2) - let it use native Blizzard rendering
         -- We still create a tab for it, but don't hide the native frame here
         local isCombatLog = (chatFrame == _G.ChatFrame2)
-        
-        -- Create or get the sliding message frame
-        if not self.state.frames[i] then
-          local smf = self.slidingMessageFramePool:Acquire()
-          smf:Init(chatFrame)
-          self.state.frames[i] = smf
+
+        -- Which window owns this chat frame? (per-window profile.chatFrames,
+        -- defaulting to the main window).
+        local owner = self:GetOwnerWindowForIndex(i)
+
+        -- Reconcile ownership: if any OTHER window currently holds an SMF for
+        -- this index (after a move / spawn / delete), release it so only the
+        -- owner renders this chat frame and we never double-render.
+        for _, w in pairs(self.windows) do
+          if w ~= owner and w.frames[i] then
+            local stale = w.frames[i]
+            w.frames[i] = nil
+            w.tabs[i] = nil
+            if w.pool and w.pool.Release then
+              w.pool:Release(stale)
+            end
+          end
         end
-        
-        local smf = self.state.frames[i]
+
+        -- Create or get the sliding message frame in the owner window's pool.
+        if not owner.frames[i] then
+          local smf = owner.pool:Acquire()
+          smf.window = owner
+          smf:Init(chatFrame)
+          owner.frames[i] = smf
+        end
+
+        local smf = owner.frames[i]
+        smf.window = owner
+        smf.profile = owner.profile
         local isActive = IsChatFrameActive(i)
-        
+
         if isActive then
           local tab = CreateChatTab(smf)
-          self.state.tabs[i] = tab
+          owner.tabs[i] = tab
           if tab then
-            table.insert(activeTabs, tab)
+            tab.glassDock = owner.dock
+            activeTabsByWindow[owner] = activeTabsByWindow[owner] or {}
+            table.insert(activeTabsByWindow[owner], tab)
           end
-          
+
           -- Hide the original Blizzard chat frame visuals so Glass renders
           -- them. Skip Combat Log - it handles its own visibility via SelectChatTab.
           if not isCombatLog then
@@ -192,85 +218,82 @@ function UIManager:OnEnable()
           if chatTab then
             chatTab:Hide()
           end
-          self.state.tabs[i] = nil
+          owner.tabs[i] = nil
         end
       end
     end
 
-    -- Position all active tabs in the dock
+    -- Position each window's active tabs in that window's own dock.
     local UpdateTabPositions = Core.Components.UpdateTabPositions
     if UpdateTabPositions then
-      UpdateTabPositions(activeTabs)
+      for _, tabs in pairs(activeTabsByWindow) do
+        UpdateTabPositions(tabs)
+      end
     end
-    
-    -- Don't auto-select - just show all frames for now
-    -- Tab switching will be handled by click
 
-    -- Only reveal the dock on an explicit initial setup. Re-asserts triggered by
+    -- Only reveal the docks on an explicit initial setup. Re-asserts triggered by
     -- Blizzard's FCF_DockUpdate fire constantly while the combat log streams
     -- during combat; if those forced the dock visible, the idle-faded tabs would
     -- pop back up and then never fade again. On a real reveal we also re-arm the
     -- idle fade-out so the tabs always disappear again when left alone.
-    if reveal and self.dock then
-      self.dock:Show()
-      if self.dock.FadeOutTabs then
-        self.dock:FadeOutTabs()
-      end
-    end
-
-    -- Show exactly one tab's messages. Every active chat frame gets its own
-    -- SlidingMessageFrame anchored at the same spot, so without an explicit
-    -- selection they all render together and different chats appear merged onto
-    -- the first tab. Only (re)assert this on an explicit reveal, so the
-    -- combat-driven re-asserts don't override the user's current tab.
     if reveal then
-      local SelectChatTab = Core.Components.SelectChatTab
-      if SelectChatTab then
-        local tabToSelect = Core.Components.selectedTab or self.state.tabs[1]
-        if tabToSelect then
-          SelectChatTab(tabToSelect)
+      for _, window in pairs(self.windows) do
+        if window.dock then
+          window.dock:Show()
+          if window.dock.FadeOutTabs then
+            window.dock:FadeOutTabs()
+          end
         end
       end
-    end
-  end
-  
-  -- Run setup now, then re-assert it. The Blizzard chat dock
-  -- (GeneralDockManager / FCFDock) finishes initializing after login and can
-  -- re-dock the tabs, pulling them back into the now-hidden dock manager so
-  -- they appear to vanish. Re-running SetupTabs re-parents the tabs into the
-  -- Glass dock and shows them; it is idempotent (frames and tabs are reused).
-  SetupTabs(true)
 
-  -- Move chat frames to their saved windows (multi-window persistence)
-  local function MoveChatFramesToWindows()
-    if not Core.db.profile.windows then return end
-    for windowId, windowProfile in pairs(Core.db.profile.windows) do
-      local window = self.windows[windowId]
-      if window and windowProfile.chatFrames then
-        for _, chatFrameIndex in ipairs(windowProfile.chatFrames) do
-          local smf = self.state.frames[chatFrameIndex]
-          if smf then
-            -- Move SMF to this window
-            smf.window = window
-            smf.profile = window.profile
-            if smf.tab then
-              smf.tab.glassDock = window.dock
+      -- Show exactly one tab's messages PER window. Every active chat frame gets
+      -- its own SlidingMessageFrame anchored at the same spot, so without an
+      -- explicit selection they render together. Each window keeps its own
+      -- selected tab.
+      local SelectChatTab = Core.Components.SelectChatTab
+      if SelectChatTab then
+        for _, window in pairs(self.windows) do
+          local tabToSelect = window.selectedTab
+
+          -- Validate the remembered selection still exists in this window.
+          if tabToSelect then
+            local stillThere = false
+            for _, t in pairs(window.tabs) do
+              if t == tabToSelect then stillThere = true break end
             end
-            -- Transfer from main frames to this window's frames
-            self.state.frames[chatFrameIndex] = nil
-            window.frames[chatFrameIndex] = smf
+            if not stillThere then tabToSelect = nil end
+          end
+
+          -- Otherwise fall back to the first available tab in this window.
+          if not tabToSelect then
+            for _, t in pairs(window.tabs) do
+              if t then tabToSelect = t break end
+            end
+          end
+
+          if tabToSelect then
+            SelectChatTab(tabToSelect)
           end
         end
       end
     end
   end
+  -- Expose so the spawn / delete window helpers can re-run the layout.
+  self._setupTabs = SetupTabs
+
+
+  -- Run setup now, then re-assert it. The Blizzard chat dock
+  -- (GeneralDockManager / FCFDock) finishes initializing after login and can
+  -- re-dock the tabs, pulling them back into the now-hidden dock manager so
+  -- they appear to vanish. Re-running SetupTabs re-parents the tabs into the
+  -- Glass dock and shows them; it is idempotent (frames and tabs are reused).
+  -- SetupTabs is window-aware (it reads each window's profile.chatFrames), so
+  -- restored windows automatically reclaim their saved chat frames.
+  SetupTabs(true)
 
   if (C_Timer and C_Timer.After) then
     C_Timer.After(0.5, function () SetupTabs(true) end)
-    C_Timer.After(2, function ()
-      SetupTabs(true)
-      MoveChatFramesToWindows()
-    end)
+    C_Timer.After(2, function () SetupTabs(true) end)
   end
 
   -- Keep the tabs in the Glass dock whenever Blizzard re-lays out its chat dock.
@@ -492,15 +515,21 @@ function UIManager:OnEnable()
     while (self.timeElapsed > 0.01) do
       self.timeElapsed = self.timeElapsed - 0.01
 
-      self.container:OnFrame()
-
-      -- Use pairs instead of ipairs to handle sparse arrays
-      for _, smf in pairs(self.state.frames) do
-        if smf and smf.OnFrame then
-          smf:OnFrame()
+      -- Tick every window: its container (mouse-over tracking) and all of its
+      -- sliding message frames. The main window is part of self.windows, so this
+      -- covers it too.
+      for _, window in pairs(self.windows) do
+        if window.container and window.container.OnFrame then
+          window.container:OnFrame()
+        end
+        for _, smf in pairs(window.frames) do
+          if smf and smf.OnFrame then
+            smf:OnFrame()
+          end
         end
       end
 
+      -- Temporary frames (whispers, etc.) live on the main window.
       for _, smf in pairs(self.state.temporaryFrames) do
         if smf and smf.OnFrame then
           smf:OnFrame()
@@ -510,92 +539,100 @@ function UIManager:OnEnable()
   end)
 end
 
--- Create a new CleanerChat window and move a chat frame's tab to it.
--- Returns the new window object, or nil if creation failed.
-function UIManager:CreateNewWindow(chatFrameIndex)
-  if not chatFrameIndex then return nil end
-
-  -- Generate a unique window id
-  local nextId = 2
-  while self.windows["Window" .. nextId] do
-    nextId = nextId + 1
+-- Returns the window that owns a given chat-frame index, based on each
+-- secondary window's saved profile.chatFrames list. Defaults to the main window.
+function UIManager:GetOwnerWindowForIndex(chatFrameIndex)
+  if self.windows then
+    for windowId, window in pairs(self.windows) do
+      if windowId ~= "Main" and window.profile and window.profile.chatFrames then
+        for _, idx in ipairs(window.profile.chatFrames) do
+          if idx == chatFrameIndex then
+            return window
+          end
+        end
+      end
+    end
   end
-  local windowId = "Window" .. nextId
+  return self.mainWindow
+end
 
-  -- Create profile for the new window (copy from main)
-  local profile = Core:CreateWindowProfile(windowId, "Main")
+-- Spawn a brand-new CleanerChat window hosting a freshly created chat frame.
+-- Settings are copied from the source window (the tab that was right-clicked).
+-- Returns the new window object, or nil if creation failed.
+function UIManager:SpawnNewWindow(sourceWindowId)
+  sourceWindowId = sourceWindowId or "Main"
+
+  -- Find the first free (inactive) chat frame to spawn. General (1) and Combat
+  -- Log (2) are always in use, so candidates start at 3.
+  local newIndex
+  for i = 3, NUM_CHAT_WINDOWS do
+    local cf = _G["ChatFrame"..i]
+    if cf and not cf:IsShown() and not cf.isDocked then
+      newIndex = i
+      break
+    end
+  end
+  if not newIndex then
+    Utils.notify("No free chat windows available")
+    return nil
+  end
+
+  -- Generate a unique window id + numeric suffix for frame names.
+  local nextNum = 2
+  while self.windows["Window" .. nextNum] do
+    nextNum = nextNum + 1
+  end
+  local windowId = "Window" .. nextNum
+
+  -- Copy settings from the source window onto the new one.
+  local profile = Core:CreateWindowProfile(windowId, sourceWindowId)
   if not profile then return nil end
+  profile.chatFrames = { newIndex }
 
-  -- Create the window frames
+  -- Offset position from the source window so the new one is visible.
+  local srcProfile = Core:GetWindowProfile(sourceWindowId)
+  local srcPos = (srcProfile and srcProfile.positionAnchor) or { point = "BOTTOMLEFT", xOfs = 20, yOfs = 230 }
+  profile.positionAnchor = {
+    point = srcPos.point or "BOTTOMLEFT",
+    xOfs = (srcPos.xOfs or 0) + 40,
+    yOfs = (srcPos.yOfs or 0) - 40,
+  }
+
+  -- Create the Glass window (mover, container, dock, pool).
   local CreateWindow = Core.Components.CreateWindow
   local newWindow = CreateWindow({
     id = windowId,
     parent = UIParent,
-    moverName = "GlassMoverFrame" .. nextId,
-    containerName = "GlassFrame" .. nextId,
-    dockName = "GlassChatDock" .. nextId,
-    primaryChatFrame = _G["ChatFrame" .. chatFrameIndex],
+    moverName = "GlassMoverFrame" .. nextNum,
+    containerName = "GlassFrame" .. nextNum,
+    dockName = "GlassChatDock" .. nextNum,
+    primaryChatFrame = _G["ChatFrame" .. newIndex],
   })
   if not newWindow then
     Core:DeleteWindowProfile(windowId)
     return nil
   end
-
-  -- Register in windows table
   self.windows[windowId] = newWindow
 
-  -- Offset the new window slightly from main so it's visible
-  local mainPos = self.mainWindow.profile.positionAnchor
-  profile.positionAnchor = {
-    point = mainPos.point,
-    xOfs = (mainPos.xOfs or 0) + 30,
-    yOfs = (mainPos.yOfs or 0) - 30,
-  }
+  -- Position the new window's mover.
   newWindow.moverFrame:ClearAllPoints()
   newWindow.moverFrame:SetPoint(
-    profile.positionAnchor.point,
-    UIParent,
-    profile.positionAnchor.point,
-    profile.positionAnchor.xOfs,
-    profile.positionAnchor.yOfs
+    profile.positionAnchor.point, UIParent, profile.positionAnchor.point,
+    profile.positionAnchor.xOfs, profile.positionAnchor.yOfs
   )
 
-  -- Store which chat frames belong to this window
-  profile.chatFrames = profile.chatFrames or {}
-  table.insert(profile.chatFrames, chatFrameIndex)
-
-  -- Move the SMF from mainWindow to newWindow
-  local smf = self.state.frames[chatFrameIndex]
-  if smf then
-    -- Re-parent to new window's container and pool
-    smf.window = newWindow
-    smf.profile = newWindow.profile
-    -- Update the dock reference for the tab
-    if smf.tab then
-      smf.tab.glassDock = newWindow.dock
-    end
-    -- Move from main frames to new window frames
-    self.state.frames[chatFrameIndex] = nil
-    newWindow.frames[chatFrameIndex] = smf
+  -- Actually spawn the Blizzard chat frame (opens ChatFrame<newIndex>).
+  if _G.FCF_OpenNewWindow then
+    _G.FCF_OpenNewWindow()
   end
 
-  -- Refresh tabs in both windows
-  local UpdateTabPositions = Core.Components.UpdateTabPositions
-  if UpdateTabPositions then
-    local mainTabs = {}
-    for _, tab in pairs(self.state.tabs) do
-      if tab then table.insert(mainTabs, tab) end
-    end
-    UpdateTabPositions(mainTabs)
-
-    local newTabs = {}
-    for _, tab in pairs(newWindow.tabs) do
-      if tab then table.insert(newTabs, tab) end
-    end
-    UpdateTabPositions(newTabs)
+  -- Route the new chat frame into this window and lay everything out. SetupTabs
+  -- reads profile.chatFrames, so the freshly opened frame renders in the new
+  -- window's dock rather than the main one.
+  if self._setupTabs then
+    self._setupTabs(true)
   end
 
-  -- Show the new window
   newWindow.moverFrame:Show()
   newWindow.container:Show()
   newWindow.dock:Show()
@@ -603,50 +640,52 @@ function UIManager:CreateNewWindow(chatFrameIndex)
   return newWindow
 end
 
--- Delete a CleanerChat window and move its chat frames back to main.
+-- Delete a (non-default) CleanerChat window. Its chat frames revert to the main
+-- window so nothing is lost.
 function UIManager:DeleteWindow(windowId)
   if not windowId or windowId == "Main" then return end
 
   local window = self.windows[windowId]
   if not window then return end
 
-  -- Move all SMFs back to mainWindow
-  for chatFrameIndex, smf in pairs(window.frames) do
-    smf.window = self.mainWindow
-    smf.profile = self.mainWindow.profile
-    if smf.tab then
-      smf.tab.glassDock = self.mainWindow.dock
+  -- Release this window's SMFs so SetupTabs can re-home its chat frames into the
+  -- main window's pool/dock.
+  for idx, smf in pairs(window.frames) do
+    window.frames[idx] = nil
+    window.tabs[idx] = nil
+    if window.pool and window.pool.Release then
+      window.pool:Release(smf)
     end
-    self.state.frames[chatFrameIndex] = smf
-    window.frames[chatFrameIndex] = nil
   end
 
-  -- Hide and destroy the window's frames
+  -- Hide the window's Glass frames.
   if window.dock then window.dock:Hide() end
   if window.container then window.container:Hide() end
   if window.moverFrame then window.moverFrame:Hide() end
 
-  -- Remove from registry
+  -- Drop the window from the registry and remove its saved settings. Clearing
+  -- its profile (and thus its chatFrames ownership) means the freed chat frames
+  -- have no owner, so the main window reclaims them on the next layout.
   self.windows[windowId] = nil
-
-  -- Delete profile
   Core:DeleteWindowProfile(windowId)
 
-  -- Refresh main window tabs
-  local UpdateTabPositions = Core.Components.UpdateTabPositions
-  if UpdateTabPositions then
-    local mainTabs = {}
-    for _, tab in pairs(self.state.tabs) do
-      if tab then table.insert(mainTabs, tab) end
-    end
-    UpdateTabPositions(mainTabs)
+  -- If the options panel was editing this window, fall back to Main.
+  local Config = Core:GetModule("Config", true)
+  if Config and Config.selectedWindowId == windowId then
+    Config.selectedWindowId = "Main"
+  end
+
+  -- Re-lay out: the freed chat frames now have no owner → main reclaims them.
+  if self._setupTabs then
+    self._setupTabs(true)
   end
 end
 
--- Get the window that owns a specific chat frame index
+-- Get the window that owns a specific chat frame index (and its id).
 function UIManager:GetWindowForChatFrame(chatFrameIndex)
+  local owner = self:GetOwnerWindowForIndex(chatFrameIndex)
   for windowId, window in pairs(self.windows) do
-    if window.frames[chatFrameIndex] then
+    if window == owner then
       return window, windowId
     end
   end

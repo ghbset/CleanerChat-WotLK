@@ -266,7 +266,9 @@ function SlidingMessageFrameMixin:Init(chatFrame)
   -- Listeners
   if self.subscriptions == nil then
     self.subscriptions = {
-      Core:Subscribe(MOUSE_ENTER, function ()
+      Core:Subscribe(MOUSE_ENTER, function (window)
+        -- Only react to our own window's hover (nil = legacy global).
+        if window and window ~= self.window then return end
         -- Don't hide chats when mouse is over
         self.state.mouseOver = true
 
@@ -290,7 +292,8 @@ function SlidingMessageFrameMixin:Init(chatFrame)
           end
         end
       end),
-      Core:Subscribe(MOUSE_LEAVE, function ()
+      Core:Subscribe(MOUSE_LEAVE, function (window)
+        if window and window ~= self.window then return end
         -- Hide chats when mouse leaves
         self.state.mouseOver = false
 
