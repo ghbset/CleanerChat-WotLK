@@ -49,7 +49,7 @@ L["Settings changed - the UI will reload when you close this window."] = true
 
 -- Chat tab right-click menu (CleanerChat multi-window)
 L["CleanerChat settings"] = true
-L["New window"] = true
+L["New detached window"] = true
 L["Delete window"] = true
 
 L["Filter Selection"] = true

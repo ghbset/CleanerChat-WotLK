@@ -2,7 +2,7 @@ local L = LibStub("AceLocale-3.0"):NewLocale((...), "koKR")
 if (not L) then return end
 
 -- CleanerChat multi-window menu / startup message
-L["New window"] = "새 창"
+L["New detached window"] = "새 분리 창"
 L["Delete window"] = "창 삭제"
 L["CleanerChat settings"] = "CleanerChat 설정"
 L["Use %s for settings."] = "설정하려면 %s 을(를) 사용하세요."

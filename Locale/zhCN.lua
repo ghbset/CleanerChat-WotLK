@@ -2,7 +2,7 @@ local L = LibStub("AceLocale-3.0"):NewLocale((...), "zhCN")
 if (not L) then return end
 
 -- CleanerChat multi-window menu / startup message
-L["New window"] = "新建窗口"
+L["New detached window"] = "新建独立窗口"
 L["Delete window"] = "删除窗口"
 L["CleanerChat settings"] = "CleanerChat 设置"
 L["Use %s for settings."] = "使用 %s 打开设置。"

@@ -229,7 +229,7 @@ function ChatTabMixin:Init(slidingMessageFrame)
       local _, currentWindowId = UIManager:GetWindowForChatFrame(chatFrameIndex)
 
       info = UIDropDownMenu_CreateInfo()
-      info.text = L["New window"]
+      info.text = L["New detached window"]
       info.notCheckable = 1
       info.func = function()
         UIManager:SpawnNewWindow(currentWindowId)
@@ -270,8 +270,13 @@ Core.Components.CreateChatTab = function (slidingMessageFrame)
     return nil  -- Tab doesn't exist
   end
   
-  -- If already initialized, just return it
+  -- If already initialized, update its SMF reference (in case the tab was
+  -- re-homed to a different window after deletion) and return it.
   if frame._glassInitialized then
+    frame.slidingMessageFrame = slidingMessageFrame
+    frame.chatFrame = slidingMessageFrame.chatFrame
+    -- Update the dock reference too
+    frame.glassDock = (slidingMessageFrame.window and slidingMessageFrame.window.dock) or _G["GlassChatDock"]
     return frame
   end
   
