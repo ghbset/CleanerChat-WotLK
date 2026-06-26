@@ -1,0 +1,56 @@
+local Core = unpack(select(2, ...))
+
+----
+-- Window
+--
+-- Owns the per-window pieces of a Glass chat window: the mover handle, the
+-- container, the tab dock, the pool of SlidingMessageFrames, and the
+-- frames/tabs currently shown in it.
+--
+-- CleanerChat historically rendered *every* chat frame into a single hard-coded
+-- window. Grouping those pieces behind a Window object is the foundation for
+-- supporting multiple separate windows (one Glass window per Blizzard dock
+-- group). This is the behaviour-preserving foundation: the main window is built
+-- with the original frame names so existing references (e.g.
+-- _G["GlassChatDock"]) and saved settings are unchanged.
+--
+-- opts:
+--   id              - stable window identifier (defaults to "Main")
+--   parent          - parent frame (defaults to UIParent)
+--   primaryChatFrame- the Blizzard ChatFrame this window is anchored to
+--   moverName       - explicit name for the mover frame (else "GlassMoverFrame"<id>)
+--   containerName   - explicit name for the container frame (else "GlassFrame"<id>)
+local function CreateWindow(opts)
+  opts = opts or {}
+
+  local id = opts.id or "Main"
+  local parent = opts.parent or _G.UIParent
+
+  local window = {
+    id = id,
+    primaryChatFrame = opts.primaryChatFrame,
+    -- Render state for this window. `frames`/`tabs` are keyed by chat-frame
+    -- index, matching the existing UIManager state shape.
+    frames = {},
+    tabs = {},
+  }
+
+  -- Mover handle (drag/resize). Self-positions from the profile.
+  window.moverFrame = Core.Components.CreateMoverFrame(
+    opts.moverName or ("GlassMoverFrame" .. id), parent
+  )
+
+  -- Container that everything in this window is anchored to.
+  window.container = Core.Components.CreateMainContainerFrame(
+    opts.containerName or ("GlassFrame" .. id), parent
+  )
+  window.container:SetPoint("TOPLEFT", window.moverFrame)
+
+  -- Tab dock and the message-frame pool live inside the container.
+  window.dock = Core.Components.CreateChatDock(window.container)
+  window.pool = Core.Components.CreateSlidingMessageFramePool(window.container)
+
+  return window
+end
+
+Core.Components.CreateWindow = CreateWindow

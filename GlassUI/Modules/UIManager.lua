@@ -1,13 +1,10 @@
 local Core, _, Utils = unpack(select(2, ...))
 local UIManager = Core:GetModule("UIManager")
 
-local CreateChatDock = Core.Components.CreateChatDock
 local CreateChatTab = Core.Components.CreateChatTab
 local CreateEditBox = Core.Components.CreateEditBox
-local CreateMainContainerFrame = Core.Components.CreateMainContainerFrame
 local CreateMoverDialog = Core.Components.CreateMoverDialog
-local CreateMoverFrame = Core.Components.CreateMoverFrame
-local CreateSlidingMessageFramePool = Core.Components.CreateSlidingMessageFramePool
+local CreateWindow = Core.Components.CreateWindow
 
 -- luacheck: push ignore 113
 local BNToastFrame = BNToastFrame
@@ -57,19 +54,33 @@ function UIManager:OnEnable()
     end
   end
 
-  -- Mover
-  self.moverFrame = CreateMoverFrame("GlassMoverFrame", UIParent)
+  -- Shared "unlock to move" dialog (one for the whole UI).
   self.moverDialog = CreateMoverDialog("GlassMoverDialog", UIParent)
 
-  -- Main Container
-  self.container = CreateMainContainerFrame("GlassFrame", UIParent)
-  self.container:SetPoint("TOPLEFT", self.moverFrame)
+  -- Main window. CleanerChat renders into this single window today; grouping its
+  -- pieces (mover, container, dock, message-frame pool) behind a Window object is
+  -- the foundation for supporting multiple separate windows. The main window keeps
+  -- the original frame names ("GlassMoverFrame"/"GlassFrame"/"GlassChatDock") so
+  -- existing references and saved positions are unchanged.
+  self.mainWindow = CreateWindow({
+    id = "Main",
+    parent = UIParent,
+    moverName = "GlassMoverFrame",
+    containerName = "GlassFrame",
+    primaryChatFrame = _G.ChatFrame1,
+  })
 
-  -- Chat dock
-  self.dock = CreateChatDock(self.container)
+  -- Backwards-compatible aliases so the rest of UIManager and the components keep
+  -- working unchanged while the per-window migration proceeds.
+  self.moverFrame = self.mainWindow.moverFrame
+  self.container = self.mainWindow.container
+  self.dock = self.mainWindow.dock
+  self.slidingMessageFramePool = self.mainWindow.pool
 
-  -- SlidingMessageFrames
-  self.slidingMessageFramePool = CreateSlidingMessageFramePool(self.container)
+  -- Back the shared render state with the main window's frame/tab tables so the
+  -- existing SetupTabs/render loop (which uses self.state.frames) drives it.
+  self.state.frames = self.mainWindow.frames
+  self.state.tabs = self.mainWindow.tabs
 
   -- Helper function to check if a chat frame is actually in use
   local function IsChatFrameActive(index)
