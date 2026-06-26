@@ -551,6 +551,13 @@ function UIManager:SetActiveWindow(window)
   if self.editBox and self.editBox.AttachToWindow then
     self.editBox:AttachToWindow(window.container, window.profile, window)
   end
+  -- Update Blizzard's selection state so chat APIs work correctly.
+  -- Use the window's primary chat frame, or fall back to ChatFrame1.
+  local chatFrame = window.primaryChatFrame or _G.ChatFrame1
+  if chatFrame then
+    _G.SELECTED_CHAT_FRAME = chatFrame
+    _G.SELECTED_DOCK_FRAME = chatFrame
+  end
 end
 
 -- Returns the window that owns a given chat-frame index, based on each
@@ -649,6 +656,18 @@ function UIManager:SpawnNewWindow(sourceWindowId)
   newWindow.moverFrame:Show()
   newWindow.container:Show()
   newWindow.dock:Show()
+
+  -- Sync the new mover's interactive state with whether movers are currently
+  -- unlocked. If the mover dialog is visible, movers are unlocked and we need
+  -- to enable mouse/movable on the new mover. If locked, hide the mover.
+  if self.moverDialog and self.moverDialog:IsShown() then
+    newWindow.moverFrame:EnableMouse(true)
+    newWindow.moverFrame:SetMovable(true)
+  else
+    newWindow.moverFrame:Hide()
+    newWindow.moverFrame:EnableMouse(false)
+    newWindow.moverFrame:SetMovable(false)
+  end
 
   return newWindow
 end
