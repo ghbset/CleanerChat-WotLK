@@ -285,10 +285,22 @@ function ChatTabMixin:Init(slidingMessageFrame)
         end
         
         -- Update skin when tab style settings change for this window
-        if key == "tabStyle" or key == "tabActiveColor" or key == "tabInactiveColor" 
-           or key == "tabBackgroundOpacity" then
+        if key == "tabStyle" or key == "tabCornerStyle" or key == "tabActiveColor" 
+           or key == "tabInactiveColor" or key == "tabBackgroundOpacity" or key == "tabBorderThickness" then
           self:ApplySkin()
           self:UpdateSkinColors()
+        end
+        
+        -- Update tab positions when spacing settings change
+        if key == "tabSpacing" or key == "tabPadding" then
+          local UIManager = Core:GetModule("UIManager")
+          if UIManager and UIManager.windows then
+            for _, window in pairs(UIManager.windows) do
+              if window.tabs then
+                Core.Components.UpdateTabPositions(window.tabs)
+              end
+            end
+          end
         end
       end)
     }
@@ -299,44 +311,96 @@ function ChatTabMixin:Init(slidingMessageFrame)
 end
 
 ---
--- Apply the visual skin style (minimal or modern) to the tab button.
--- Creates background, gradient, and border textures for the "modern" style.
+-- Apply the visual skin style to the tab button.
+-- Supports: minimal (text only), outline (border only)
+-- With corner styles: square or rounded
 function ChatTabMixin:ApplySkin()
   local profile = self.slidingMessageFrame and self.slidingMessageFrame.window and self.slidingMessageFrame.window.profile
   profile = profile or Core.db.profile
   
   local style = profile.tabStyle or "minimal"
+  -- Backward compatibility: old styles map to outline
+  if style == "modern" or style == "filled" then style = "outline" end
   
-  if style == "modern" then
-    -- Create modern skin elements if they don't exist
-    if not self.skinBorder then
-      -- Border (outer edge) - creates the outline effect
-      self.skinBorder = self:CreateTexture(nil, "BACKGROUND", nil, -8)
-      self.skinBorder:SetTexture("Interface\\Buttons\\WHITE8x8")
-      self.skinBorder:SetAllPoints()
+  local cornerStyle = profile.tabCornerStyle or "square"
+  local isRounded = cornerStyle == "rounded"
+  local isOutline = style == "outline"
+  
+  if isOutline then
+    if isRounded then
+      -- ROUNDED CORNERS: Use backdrop-based rendering
+      -- Hide texture-based elements
+      if self.skinBorderTop then self.skinBorderTop:Hide() end
+      if self.skinBorderBottom then self.skinBorderBottom:Hide() end
+      if self.skinBorderLeft then self.skinBorderLeft:Hide() end
+      if self.skinBorderRight then self.skinBorderRight:Hide() end
+      
+      -- Create backdrop frame if needed
+      if not self.skinBackdrop then
+        self.skinBackdrop = CreateFrame("Frame", nil, self)
+        self.skinBackdrop:SetFrameLevel(math.max(1, self:GetFrameLevel() - 1))
+        self.skinBackdrop:SetAllPoints()
+      end
+      
+      -- Set rounded backdrop (tooltip border has natural rounded corners)
+      self.skinBackdrop:SetBackdrop({
+        bgFile = nil, -- No fill, outline only
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = false,
+        tileSize = 0,
+        edgeSize = 14,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+      })
+      self.skinBackdrop:Show()
+      
+    else
+      -- SQUARE CORNERS: Use 4 edge textures for true outline
+      -- Hide backdrop if exists
+      if self.skinBackdrop then self.skinBackdrop:Hide() end
+      
+      local borderThickness = profile.tabBorderThickness or 1
+      
+      -- Create top edge
+      if not self.skinBorderTop then
+        self.skinBorderTop = self:CreateTexture(nil, "BACKGROUND", nil, -8)
+        self.skinBorderTop:SetTexture("Interface\\Buttons\\WHITE8x8")
+        self.skinBorderTop:SetPoint("TOPLEFT", 0, 0)
+        self.skinBorderTop:SetPoint("TOPRIGHT", 0, 0)
+      end
+      self.skinBorderTop:SetHeight(borderThickness)
+      
+      -- Create bottom edge
+      if not self.skinBorderBottom then
+        self.skinBorderBottom = self:CreateTexture(nil, "BACKGROUND", nil, -8)
+        self.skinBorderBottom:SetTexture("Interface\\Buttons\\WHITE8x8")
+        self.skinBorderBottom:SetPoint("BOTTOMLEFT", 0, 0)
+        self.skinBorderBottom:SetPoint("BOTTOMRIGHT", 0, 0)
+      end
+      self.skinBorderBottom:SetHeight(borderThickness)
+      
+      -- Create left edge
+      if not self.skinBorderLeft then
+        self.skinBorderLeft = self:CreateTexture(nil, "BACKGROUND", nil, -8)
+        self.skinBorderLeft:SetTexture("Interface\\Buttons\\WHITE8x8")
+        self.skinBorderLeft:SetPoint("TOPLEFT", 0, 0)
+        self.skinBorderLeft:SetPoint("BOTTOMLEFT", 0, 0)
+      end
+      self.skinBorderLeft:SetWidth(borderThickness)
+      
+      -- Create right edge
+      if not self.skinBorderRight then
+        self.skinBorderRight = self:CreateTexture(nil, "BACKGROUND", nil, -8)
+        self.skinBorderRight:SetTexture("Interface\\Buttons\\WHITE8x8")
+        self.skinBorderRight:SetPoint("TOPRIGHT", 0, 0)
+        self.skinBorderRight:SetPoint("BOTTOMRIGHT", 0, 0)
+      end
+      self.skinBorderRight:SetWidth(borderThickness)
+      
+      self.skinBorderTop:Show()
+      self.skinBorderBottom:Show()
+      self.skinBorderLeft:Show()
+      self.skinBorderRight:Show()
     end
-    
-    if not self.skinBackground then
-      -- Background fill (inset from border to show the border line)
-      self.skinBackground = self:CreateTexture(nil, "BACKGROUND", nil, -7)
-      self.skinBackground:SetTexture("Interface\\Buttons\\WHITE8x8")
-      self.skinBackground:SetPoint("TOPLEFT", 1, -1)
-      self.skinBackground:SetPoint("BOTTOMRIGHT", -1, 1)
-    end
-    
-    if not self.skinGradientTop then
-      -- Top gradient highlight (subtle lighter shade at top)
-      self.skinGradientTop = self:CreateTexture(nil, "BACKGROUND", nil, -6)
-      self.skinGradientTop:SetTexture("Interface\\Buttons\\WHITE8x8")
-      self.skinGradientTop:SetPoint("TOPLEFT", 2, -2)
-      self.skinGradientTop:SetPoint("TOPRIGHT", -2, -2)
-      self.skinGradientTop:SetHeight(math.max(1, (self:GetHeight() or 20) / 3))
-    end
-    
-    -- Show modern skin elements
-    self.skinBorder:Show()
-    self.skinBackground:Show()
-    self.skinGradientTop:Show()
     
     -- Hook hover events for visual feedback (only once)
     if not self._skinHoverHooked then
@@ -348,11 +412,14 @@ function ChatTabMixin:ApplySkin()
         self:UpdateSkinColors(false)
       end)
     end
+    
   else
-    -- Minimal style - hide modern skin elements if they exist
-    if self.skinBorder then self.skinBorder:Hide() end
-    if self.skinBackground then self.skinBackground:Hide() end
-    if self.skinGradientTop then self.skinGradientTop:Hide() end
+    -- Minimal style - hide all decoration elements
+    if self.skinBorderTop then self.skinBorderTop:Hide() end
+    if self.skinBorderBottom then self.skinBorderBottom:Hide() end
+    if self.skinBorderLeft then self.skinBorderLeft:Hide() end
+    if self.skinBorderRight then self.skinBorderRight:Hide() end
+    if self.skinBackdrop then self.skinBackdrop:Hide() end
   end
   
   self:UpdateSkinColors()
@@ -366,7 +433,14 @@ function ChatTabMixin:UpdateSkinColors(isHovered)
   profile = profile or Core.db.profile
   
   local style = profile.tabStyle or "minimal"
-  if style ~= "modern" then return end
+  -- Backward compatibility
+  if style == "modern" or style == "filled" then style = "outline" end
+  
+  local cornerStyle = profile.tabCornerStyle or "square"
+  local isRounded = cornerStyle == "rounded"
+  local isOutline = style == "outline"
+  
+  if not isOutline then return end
   
   local isSelected = (Core.Components.selectedTab == self)
   
@@ -375,7 +449,7 @@ function ChatTabMixin:UpdateSkinColors(isHovered)
   local inactiveColor = profile.tabInactiveColor or { r = 0.4, g = 0.4, b = 0.4 }
   local bgOpacity = profile.tabBackgroundOpacity or 0.7
   
-  -- Determine the base color (used for border and background)
+  -- Determine the base color
   local baseColor = isSelected and activeColor or inactiveColor
   
   -- Apply hover brightening effect
@@ -384,28 +458,33 @@ function ChatTabMixin:UpdateSkinColors(isHovered)
   local g = math.min(1, baseColor.g * hoverMult)
   local b = math.min(1, baseColor.b * hoverMult)
   
-  -- Border uses the same color as background, opacity scaled by bgOpacity
-  local borderOpacityMult = isSelected and 1.0 or (isHovered and 0.85 or 0.7)
-  if self.skinBorder then
-    self.skinBorder:SetVertexColor(r, g, b, bgOpacity * borderOpacityMult)
+  -- Opacity multiplier based on state
+  local opacityMult = isSelected and 1.0 or (isHovered and 0.85 or 0.7)
+  local finalOpacity = bgOpacity * opacityMult
+  
+  if isRounded then
+    -- ROUNDED: Update backdrop colors
+    if self.skinBackdrop then
+      self.skinBackdrop:SetBackdropColor(0, 0, 0, 0) -- Transparent fill
+      self.skinBackdrop:SetBackdropBorderColor(r, g, b, finalOpacity)
+    end
+  else
+    -- SQUARE: Update 4 edge texture colors
+    if self.skinBorderTop then
+      self.skinBorderTop:SetVertexColor(r, g, b, finalOpacity)
+    end
+    if self.skinBorderBottom then
+      self.skinBorderBottom:SetVertexColor(r, g, b, finalOpacity)
+    end
+    if self.skinBorderLeft then
+      self.skinBorderLeft:SetVertexColor(r, g, b, finalOpacity)
+    end
+    if self.skinBorderRight then
+      self.skinBorderRight:SetVertexColor(r, g, b, finalOpacity)
+    end
   end
   
-  -- Background fill (same color and opacity as border for consistency)
-  if self.skinBackground then
-    self.skinBackground:SetVertexColor(r, g, b, bgOpacity * borderOpacityMult)
-  end
-  
-  -- Top gradient (lighter highlight for depth)
-  if self.skinGradientTop then
-    self.skinGradientTop:SetVertexColor(
-      math.min(1, r * 1.3), 
-      math.min(1, g * 1.3), 
-      math.min(1, b * 1.3), 
-      bgOpacity * 0.4
-    )
-  end
-  
-  -- Also update text color for modern style
+  -- Update text color based on style
   local tabText = self.Text or _G[self:GetName().."Text"]
   if tabText then
     if isSelected then
@@ -481,7 +560,12 @@ Core.Components.UpdateTabPositions = function(tabs)
     return 
   end
   
-  local xOffset = 5  -- Small padding from left edge
+  -- Get spacing settings from profile
+  local profile = (ownerWindow and ownerWindow.profile) or Core.db.profile
+  local tabPadding = profile.tabPadding or 5
+  local tabSpacing = profile.tabSpacing or 5
+  
+  local xOffset = tabPadding  -- Padding from left edge
   for i, tab in ipairs(tabs) do
     if tab then
       -- Reparent to our dock
@@ -504,7 +588,7 @@ Core.Components.UpdateTabPositions = function(tabs)
       if tabWidth < 30 then
         tabWidth = 60  -- Default minimum width
       end
-      xOffset = xOffset + tabWidth + 5  -- Add spacing between tabs
+      xOffset = xOffset + tabWidth + tabSpacing  -- Add spacing between tabs
     end
   end
 end
@@ -606,9 +690,11 @@ Core.Components.SelectChatTab = function(selectedTab, isUserClick)
       local profile = tab.slidingMessageFrame and tab.slidingMessageFrame.window and tab.slidingMessageFrame.window.profile
       profile = profile or Core.db.profile
       local style = profile.tabStyle or "minimal"
+      -- Backward compatibility
+      if style == "modern" or style == "filled" then style = "outline" end
       
-      -- Update skin colors for modern style tabs
-      if style == "modern" and tab.UpdateSkinColors then
+      -- Update skin colors for outline style tabs
+      if style == "outline" and tab.UpdateSkinColors then
         tab:UpdateSkinColors()
       else
         -- Minimal style - just update text color directly

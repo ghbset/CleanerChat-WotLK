@@ -94,10 +94,14 @@ Core.defaults = {
     tabsOnHover = true, -- When ON (default), tabs fade out and appear on hover. When OFF, tabs are always visible.
 
     -- Tab button skin style
-    tabStyle = "minimal", -- "minimal" = flat text only (default), "modern" = gradient with outline
+    tabStyle = "minimal", -- "minimal" = text only, "outline" = border only
+    tabCornerStyle = "square", -- "square" or "rounded" (only applies when tabStyle is not minimal)
     tabActiveColor = { r = 223 / 255, g = 186 / 255, b = 105 / 255 }, -- apache (gold) for selected tab
     tabInactiveColor = { r = 0.4, g = 0.4, b = 0.4 }, -- gray for unselected tabs
-    tabBackgroundOpacity = 0.7, -- background fill opacity for modern style
+    tabBackgroundOpacity = 0.7, -- background/border opacity
+    tabSpacing = 5, -- spacing between tabs
+    tabBorderThickness = 1, -- border line thickness (1-5)
+    tabPadding = 5, -- padding from dock edge
 
     indentWordWrap = true,
     mouseOverTooltips = true,

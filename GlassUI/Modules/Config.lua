@@ -952,14 +952,39 @@ function C:OnEnable()
                   order = 1.4,
                   values = {
                     ["minimal"] = L["Minimal"],
-                    ["modern"] = L["Modern (Gradient)"],
+                    ["outline"] = L["Outline"],
                   },
                   get = function (info)
-                    return ProfileFor(info).tabStyle or "minimal"
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    -- Backward compatibility: map old styles to "outline"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    return style
                   end,
                   set = function (info, input)
                     ProfileFor(info).tabStyle = input
                     Core:Dispatch(UpdateConfig("tabStyle", WindowIdFor(info)))
+                  end,
+                },
+                tabCornerStyle = {
+                  name = L["Tab Corner Style"],
+                  desc = L["Shape of tab button corners."],
+                  type = "select",
+                  order = 1.45,
+                  values = {
+                    ["square"] = L["Square"],
+                    ["rounded"] = L["Rounded"],
+                  },
+                  hidden = function (info)
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    return style == "minimal"
+                  end,
+                  get = function (info)
+                    return ProfileFor(info).tabCornerStyle or "square"
+                  end,
+                  set = function (info, input)
+                    ProfileFor(info).tabCornerStyle = input
+                    Core:Dispatch(UpdateConfig("tabCornerStyle", WindowIdFor(info)))
                   end,
                 },
                 tabActiveColor = {
@@ -969,7 +994,9 @@ function C:OnEnable()
                   hasAlpha = false,
                   order = 1.5,
                   hidden = function (info)
-                    return (ProfileFor(info).tabStyle or "minimal") == "minimal"
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    return style == "minimal"
                   end,
                   get = function (info)
                     local c = ProfileFor(info).tabActiveColor
@@ -988,7 +1015,9 @@ function C:OnEnable()
                   hasAlpha = false,
                   order = 1.6,
                   hidden = function (info)
-                    return (ProfileFor(info).tabStyle or "minimal") == "minimal"
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    return style == "minimal"
                   end,
                   get = function (info)
                     local c = ProfileFor(info).tabInactiveColor
@@ -1002,14 +1031,16 @@ function C:OnEnable()
                 },
                 tabBackgroundOpacity = {
                   name = L["Tab background opacity"],
-                  desc = L["Opacity of the tab background fill."],
+                  desc = L["Opacity of the tab background and border."],
                   type = "range",
                   order = 1.9,
                   min = 0,
                   max = 1,
                   step = 0.05,
                   hidden = function (info)
-                    return (ProfileFor(info).tabStyle or "minimal") == "minimal"
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    return style == "minimal"
                   end,
                   get = function (info)
                     return ProfileFor(info).tabBackgroundOpacity or 0.7
@@ -1017,6 +1048,61 @@ function C:OnEnable()
                   set = function (info, input)
                     ProfileFor(info).tabBackgroundOpacity = input
                     Core:Dispatch(UpdateConfig("tabBackgroundOpacity", WindowIdFor(info)))
+                  end,
+                },
+                tabBorderThickness = {
+                  name = L["Tab border thickness"],
+                  desc = L["Thickness of the outline border."],
+                  type = "range",
+                  order = 1.95,
+                  min = 1,
+                  max = 5,
+                  step = 1,
+                  hidden = function (info)
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    local cornerStyle = ProfileFor(info).tabCornerStyle or "square"
+                    -- Only show for outline + square (rounded uses backdrop which has fixed border)
+                    return style == "minimal" or cornerStyle == "rounded"
+                  end,
+                  get = function (info)
+                    return ProfileFor(info).tabBorderThickness or 1
+                  end,
+                  set = function (info, input)
+                    ProfileFor(info).tabBorderThickness = input
+                    Core:Dispatch(UpdateConfig("tabBorderThickness", WindowIdFor(info)))
+                  end,
+                },
+                tabSpacing = {
+                  name = L["Tab spacing"],
+                  desc = L["Horizontal spacing between tab buttons."],
+                  type = "range",
+                  order = 1.96,
+                  min = 0,
+                  max = 20,
+                  step = 1,
+                  get = function (info)
+                    return ProfileFor(info).tabSpacing or 5
+                  end,
+                  set = function (info, input)
+                    ProfileFor(info).tabSpacing = input
+                    Core:Dispatch(UpdateConfig("tabSpacing", WindowIdFor(info)))
+                  end,
+                },
+                tabPadding = {
+                  name = L["Tab padding"],
+                  desc = L["Padding from the dock edge."],
+                  type = "range",
+                  order = 1.97,
+                  min = 0,
+                  max = 20,
+                  step = 1,
+                  get = function (info)
+                    return ProfileFor(info).tabPadding or 5
+                  end,
+                  set = function (info, input)
+                    ProfileFor(info).tabPadding = input
+                    Core:Dispatch(UpdateConfig("tabPadding", WindowIdFor(info)))
                   end,
                 },
               },
