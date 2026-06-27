@@ -283,8 +283,139 @@ function ChatTabMixin:Init(slidingMessageFrame)
         if key == "dockFont" or key == "dockFontSize" or key == "dockFontFlags" then
           self:UpdateFontFromProfile()
         end
+        
+        -- Update skin when tab style settings change for this window
+        if key == "tabStyle" or key == "tabActiveColor" or key == "tabInactiveColor" 
+           or key == "tabBorderColor" or key == "tabBorderOpacity" or key == "tabBackgroundOpacity"
+           or key == "tabCornerRadius" then
+          self:ApplySkin()
+          self:UpdateSkinColors()
+        end
       end)
     }
+  end
+  
+  -- Apply initial skin
+  self:ApplySkin()
+end
+
+---
+-- Apply the visual skin style (minimal or modern) to the tab button.
+-- Creates background, gradient, and border textures for the "modern" style.
+function ChatTabMixin:ApplySkin()
+  local profile = self.slidingMessageFrame and self.slidingMessageFrame.window and self.slidingMessageFrame.window.profile
+  profile = profile or Core.db.profile
+  
+  local style = profile.tabStyle or "minimal"
+  
+  if style == "modern" then
+    -- Create modern skin elements if they don't exist
+    if not self.skinBorder then
+      -- Border (outer edge) - creates the outline effect
+      self.skinBorder = self:CreateTexture(nil, "BACKGROUND", nil, -8)
+      self.skinBorder:SetTexture("Interface\\Buttons\\WHITE8x8")
+      self.skinBorder:SetAllPoints()
+    end
+    
+    if not self.skinBackground then
+      -- Background fill (inset from border to show the border line)
+      self.skinBackground = self:CreateTexture(nil, "BACKGROUND", nil, -7)
+      self.skinBackground:SetTexture("Interface\\Buttons\\WHITE8x8")
+      self.skinBackground:SetPoint("TOPLEFT", 1, -1)
+      self.skinBackground:SetPoint("BOTTOMRIGHT", -1, 1)
+    end
+    
+    if not self.skinGradientTop then
+      -- Top gradient highlight (subtle lighter shade at top)
+      self.skinGradientTop = self:CreateTexture(nil, "BACKGROUND", nil, -6)
+      self.skinGradientTop:SetTexture("Interface\\Buttons\\WHITE8x8")
+      self.skinGradientTop:SetPoint("TOPLEFT", 2, -2)
+      self.skinGradientTop:SetPoint("TOPRIGHT", -2, -2)
+      self.skinGradientTop:SetHeight(math.max(1, (self:GetHeight() or 20) / 3))
+    end
+    
+    -- Show modern skin elements
+    self.skinBorder:Show()
+    self.skinBackground:Show()
+    self.skinGradientTop:Show()
+    
+    -- Hook hover events for visual feedback (only once)
+    if not self._skinHoverHooked then
+      self._skinHoverHooked = true
+      self:HookScript("OnEnter", function()
+        self:UpdateSkinColors(true)
+      end)
+      self:HookScript("OnLeave", function()
+        self:UpdateSkinColors(false)
+      end)
+    end
+  else
+    -- Minimal style - hide modern skin elements if they exist
+    if self.skinBorder then self.skinBorder:Hide() end
+    if self.skinBackground then self.skinBackground:Hide() end
+    if self.skinGradientTop then self.skinGradientTop:Hide() end
+  end
+  
+  self:UpdateSkinColors()
+end
+
+---
+-- Update skin colors based on selection state and hover.
+-- @param isHovered boolean (optional) Whether the tab is being hovered
+function ChatTabMixin:UpdateSkinColors(isHovered)
+  local profile = self.slidingMessageFrame and self.slidingMessageFrame.window and self.slidingMessageFrame.window.profile
+  profile = profile or Core.db.profile
+  
+  local style = profile.tabStyle or "minimal"
+  if style ~= "modern" then return end
+  
+  local isSelected = (Core.Components.selectedTab == self)
+  
+  -- Get colors from profile
+  local activeColor = profile.tabActiveColor or { r = 223/255, g = 186/255, b = 105/255 }
+  local inactiveColor = profile.tabInactiveColor or { r = 0.4, g = 0.4, b = 0.4 }
+  local borderColor = profile.tabBorderColor or { r = 223/255, g = 186/255, b = 105/255 }
+  local borderOpacity = profile.tabBorderOpacity or 0.6
+  local bgOpacity = profile.tabBackgroundOpacity or 0.7
+  
+  -- Determine the base color
+  local baseColor = isSelected and activeColor or inactiveColor
+  
+  -- Apply hover brightening effect
+  local hoverMult = isHovered and 1.3 or 1.0
+  local r = math.min(1, baseColor.r * hoverMult)
+  local g = math.min(1, baseColor.g * hoverMult)
+  local b = math.min(1, baseColor.b * hoverMult)
+  
+  -- Border color (brighter when selected or hovered)
+  local borderMult = (isSelected or isHovered) and 1.0 or 0.5
+  if self.skinBorder then
+    self.skinBorder:SetVertexColor(
+      borderColor.r * borderMult, 
+      borderColor.g * borderMult, 
+      borderColor.b * borderMult, 
+      borderOpacity * (isSelected and 1.0 or (isHovered and 0.9 or 0.6))
+    )
+  end
+  
+  -- Background fill (darker version of base color)
+  if self.skinBackground then
+    self.skinBackground:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, bgOpacity)
+  end
+  
+  -- Top gradient (lighter highlight)
+  if self.skinGradientTop then
+    self.skinGradientTop:SetVertexColor(r * 0.5, g * 0.5, b * 0.5, bgOpacity * 0.6)
+  end
+  
+  -- Also update text color for modern style
+  local tabText = self.Text or _G[self:GetName().."Text"]
+  if tabText then
+    if isSelected then
+      tabText:SetTextColor(1, 1, 1) -- White for selected
+    else
+      tabText:SetTextColor(activeColor.r, activeColor.g, activeColor.b) -- Gold for unselected
+    end
   end
 end
 
@@ -474,14 +605,25 @@ Core.Components.SelectChatTab = function(selectedTab, isUserClick)
       -- Keep all tabs visible
       tab:Show()
       
-      local tabText = tab.Text or _G[tab:GetName().."Text"]
-      if tabText then
-        if tab == selectedTab then
-          -- Selected tab - brighter color
-          tabText:SetTextColor(1, 1, 1)  -- White for selected
-        else
-          -- Unselected tab - use Glass color
-          tabText:SetTextColor(Colors.apache.r, Colors.apache.g, Colors.apache.b)
+      -- Get the profile for skin style check
+      local profile = tab.slidingMessageFrame and tab.slidingMessageFrame.window and tab.slidingMessageFrame.window.profile
+      profile = profile or Core.db.profile
+      local style = profile.tabStyle or "minimal"
+      
+      -- Update skin colors for modern style tabs
+      if style == "modern" and tab.UpdateSkinColors then
+        tab:UpdateSkinColors()
+      else
+        -- Minimal style - just update text color directly
+        local tabText = tab.Text or _G[tab:GetName().."Text"]
+        if tabText then
+          if tab == selectedTab then
+            -- Selected tab - brighter color
+            tabText:SetTextColor(1, 1, 1)  -- White for selected
+          else
+            -- Unselected tab - use Glass color
+            tabText:SetTextColor(Colors.apache.r, Colors.apache.g, Colors.apache.b)
+          end
         end
       end
     end

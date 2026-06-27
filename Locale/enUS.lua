@@ -200,6 +200,24 @@ L["Show tabs on hover"] = true
 L["When enabled, chat tabs fade out when idle and reappear on mouse hover. When disabled, tabs are always visible."] = true
 L["Tab widths refit on /reload."] = true
 
+-- Tab Button Style
+L["Tab Style"] = true
+L["Choose the visual style for chat tab buttons."] = true
+L["Minimal"] = true
+L["Modern (Gradient)"] = true
+L["Tab active color"] = true
+L["Color of the selected/active tab background and text."] = true
+L["Tab inactive color"] = true
+L["Color of unselected tab backgrounds."] = true
+L["Tab border color"] = true
+L["Color of the border outline around tabs (Modern style only)."] = true
+L["Tab border opacity"] = true
+L["Opacity of the tab border outline."] = true
+L["Tab background opacity"] = true
+L["Opacity of the tab background fill."] = true
+L["Tab corner radius"] = true
+L["Roundness of tab corners. 0 = square, higher = more rounded."] = true
+
 -- Timestamps
 L["Show timestamps"] = true
 L["Prepend each message with a timestamp in [HH:MM] format."] = true
