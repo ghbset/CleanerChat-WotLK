@@ -177,6 +177,11 @@ L["Padding from the dock edge."] = "독 가장자리로부터의 여백입니다
 L["Show timestamps"] = "타임스탬프 표시"
 L["Prepend each message with a timestamp in [HH:MM] format."] = "각 메시지 앞에 [HH:MM] 형식의 타임스탬프를 추가합니다."
 
+-- Buttons
+L["Buttons"] = "버튼"
+L["Hide Social button"] = "소셜 버튼 숨기기"
+L["Hide the Social (friends) button that appears to the left of the chat frame."] = "채팅 프레임 왼쪽에 나타나는 소셜(친구) 버튼을 숨깁니다."
+
 -- Channel abbreviations (match slash commands)
 L["BGL"] = "BGL"
 L["BG"] = "BG"

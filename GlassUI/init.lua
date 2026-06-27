@@ -116,6 +116,9 @@ Core.defaults = {
     scrollIndicatorBgOpacity = 0.65, -- slightly transparent
     hideScrollIndicator = false, -- when true, hides the "Unread messages" / "Bring me to the present" indicator
 
+    -- Buttons (native Blizzard chat buttons)
+    hideSocialButton = true, -- when true, hides the Social (friends) button left of chat
+
     -- Per-window settings (multi-window). The default ("Main") window uses the
     -- flat keys above; each additional window stores its own full copy of the
     -- window-scoped style settings here, keyed by window id (see Core:GetWindowProfile).

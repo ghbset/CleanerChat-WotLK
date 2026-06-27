@@ -174,6 +174,11 @@ L["Padding from the dock edge."] = "从停靠栏边缘的距离。"
 L["Show timestamps"] = "显示时间戳"
 L["Prepend each message with a timestamp in [HH:MM] format."] = "在每条消息前添加[HH:MM]格式的时间戳。"
 
+-- Buttons
+L["Buttons"] = "按钮"
+L["Hide Social button"] = "隐藏社交按钮"
+L["Hide the Social (friends) button that appears to the left of the chat frame."] = "隐藏出现在聊天框左侧的社交(好友)按钮。"
+
 -- Channel abbreviations (match slash commands)
 L["BGL"] = "BGL"
 L["BG"] = "BG"

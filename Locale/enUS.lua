@@ -225,3 +225,8 @@ L["Padding from the dock edge."] = true
 -- Timestamps
 L["Show timestamps"] = true
 L["Prepend each message with a timestamp in [HH:MM] format."] = true
+
+-- Buttons
+L["Buttons"] = true
+L["Hide Social button"] = true
+L["Hide the Social (friends) button that appears to the left of the chat frame."] = true

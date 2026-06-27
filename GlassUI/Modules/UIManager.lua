@@ -393,6 +393,43 @@ function UIManager:OnEnable()
       end
     end
   end
+
+  -- Handle the Social (friends) button visibility based on settings
+  -- FriendsMicroButton is the friends/social button in WotLK 3.3.5
+  if not self._socialButtonHooked then
+    self._socialButtonHooked = true
+    local socialButton = _G["FriendsMicroButton"]
+    if socialButton then
+      -- Apply initial state
+      if Core.db.profile.hideSocialButton then
+        socialButton:Hide()
+      else
+        socialButton:Show()
+      end
+      -- Hook to enforce setting when Blizzard tries to show it
+      if _G.hooksecurefunc then
+        _G.hooksecurefunc(socialButton, "Show", function(b)
+          if Core.db.profile.hideSocialButton then
+            b:Hide()
+          end
+        end)
+      end
+    end
+    -- Listen for setting changes
+    Core:Subscribe(UPDATE_CONFIG, function(payload)
+      local key = type(payload) == "table" and payload.key or payload
+      if key == "hideSocialButton" then
+        local btn = _G["FriendsMicroButton"]
+        if btn then
+          if Core.db.profile.hideSocialButton then
+            btn:Hide()
+          else
+            btn:Show()
+          end
+        end
+      end
+    end)
+  end
   
   -- Hide Blizzard chat frame backgrounds and scroll buttons
   for i = 1, NUM_CHAT_WINDOWS do

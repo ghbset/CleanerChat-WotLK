@@ -178,6 +178,11 @@ L["Padding from the dock edge."] = "Marge depuis le bord du dock."
 L["Show timestamps"] = "Afficher les horodatages"
 L["Prepend each message with a timestamp in [HH:MM] format."] = "Préfixe chaque message avec un horodatage au format [HH:MM]."
 
+-- Buttons
+L["Buttons"] = "Boutons"
+L["Hide Social button"] = "Masquer le bouton Social"
+L["Hide the Social (friends) button that appears to the left of the chat frame."] = "Masque le bouton Social (amis) qui apparaît à gauche de la fenêtre de chat."
+
 -- Channel abbreviations (match slash commands)
 L["BGL"] = "BGL"
 L["BG"] = "BG"

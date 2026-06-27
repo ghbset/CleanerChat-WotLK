@@ -178,6 +178,11 @@ L["Padding from the dock edge."] = "Preenchimento a partir da borda do dock."
 L["Show timestamps"] = "Mostrar carimbos de hora"
 L["Prepend each message with a timestamp in [HH:MM] format."] = "Adiciona a cada mensagem um carimbo de hora no formato [HH:MM]."
 
+-- Buttons
+L["Buttons"] = "Botões"
+L["Hide Social button"] = "Ocultar botão Social"
+L["Hide the Social (friends) button that appears to the left of the chat frame."] = "Oculta o botão Social (amigos) que aparece à esquerda da janela de chat."
+
 -- Channel abbreviations (match slash commands)
 L["BGL"] = "BGL"
 L["BG"] = "BG"

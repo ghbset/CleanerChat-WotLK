@@ -1213,6 +1213,32 @@ function C:OnEnable()
             },
           } end),
         },
+        buttons = {
+          name = L["Buttons"],
+          type = "group",
+          order = 5,
+          args = {
+            desc = {
+              name = "CleanerChat hides the native Blizzard chat buttons (Chat Menu, Channel, Voice) by default. Use these options to control additional buttons.",
+              type = "description",
+              order = 0,
+            },
+            hideSocialButton = {
+              name = L["Hide Social button"],
+              desc = L["Hide the Social (friends) button that appears to the left of the chat frame."],
+              type = "toggle",
+              order = 1,
+              width = "full",
+              get = function ()
+                return Core.db.profile.hideSocialButton
+              end,
+              set = function (_, input)
+                Core.db.profile.hideSocialButton = input
+                Core:Dispatch(UpdateConfig("hideSocialButton"))
+              end,
+            },
+          },
+        },
         profile = AceDBOptions:GetOptionsTable(Core.db)
       }
   }
