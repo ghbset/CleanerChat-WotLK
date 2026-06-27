@@ -209,14 +209,8 @@ L["Tab active color"] = true
 L["Color of the selected/active tab background and text."] = true
 L["Tab inactive color"] = true
 L["Color of unselected tab backgrounds."] = true
-L["Tab border color"] = true
-L["Color of the border outline around tabs (Modern style only)."] = true
-L["Tab border opacity"] = true
-L["Opacity of the tab border outline."] = true
 L["Tab background opacity"] = true
 L["Opacity of the tab background fill."] = true
-L["Tab corner radius"] = true
-L["Roundness of tab corners. 0 = square, higher = more rounded."] = true
 
 -- Timestamps
 L["Show timestamps"] = true

@@ -97,10 +97,7 @@ Core.defaults = {
     tabStyle = "minimal", -- "minimal" = flat text only (default), "modern" = gradient with outline
     tabActiveColor = { r = 223 / 255, g = 186 / 255, b = 105 / 255 }, -- apache (gold) for selected tab
     tabInactiveColor = { r = 0.4, g = 0.4, b = 0.4 }, -- gray for unselected tabs
-    tabBorderColor = { r = 223 / 255, g = 186 / 255, b = 105 / 255 }, -- apache (gold) border for modern style
-    tabBorderOpacity = 0.6, -- border transparency for modern style
     tabBackgroundOpacity = 0.7, -- background fill opacity for modern style
-    tabCornerRadius = 0, -- 0 = square, higher = more rounded (max 8)
 
     indentWordWrap = true,
     mouseOverTooltips = true,

@@ -286,8 +286,7 @@ function ChatTabMixin:Init(slidingMessageFrame)
         
         -- Update skin when tab style settings change for this window
         if key == "tabStyle" or key == "tabActiveColor" or key == "tabInactiveColor" 
-           or key == "tabBorderColor" or key == "tabBorderOpacity" or key == "tabBackgroundOpacity"
-           or key == "tabCornerRadius" then
+           or key == "tabBackgroundOpacity" then
           self:ApplySkin()
           self:UpdateSkinColors()
         end
@@ -374,11 +373,9 @@ function ChatTabMixin:UpdateSkinColors(isHovered)
   -- Get colors from profile
   local activeColor = profile.tabActiveColor or { r = 223/255, g = 186/255, b = 105/255 }
   local inactiveColor = profile.tabInactiveColor or { r = 0.4, g = 0.4, b = 0.4 }
-  local borderColor = profile.tabBorderColor or { r = 223/255, g = 186/255, b = 105/255 }
-  local borderOpacity = profile.tabBorderOpacity or 0.6
   local bgOpacity = profile.tabBackgroundOpacity or 0.7
   
-  -- Determine the base color
+  -- Determine the base color (used for border and background)
   local baseColor = isSelected and activeColor or inactiveColor
   
   -- Apply hover brightening effect
@@ -387,25 +384,25 @@ function ChatTabMixin:UpdateSkinColors(isHovered)
   local g = math.min(1, baseColor.g * hoverMult)
   local b = math.min(1, baseColor.b * hoverMult)
   
-  -- Border color (brighter when selected or hovered)
-  local borderMult = (isSelected or isHovered) and 1.0 or 0.5
+  -- Border uses the same color as background, opacity scaled by bgOpacity
+  local borderOpacityMult = isSelected and 1.0 or (isHovered and 0.85 or 0.7)
   if self.skinBorder then
-    self.skinBorder:SetVertexColor(
-      borderColor.r * borderMult, 
-      borderColor.g * borderMult, 
-      borderColor.b * borderMult, 
-      borderOpacity * (isSelected and 1.0 or (isHovered and 0.9 or 0.6))
-    )
+    self.skinBorder:SetVertexColor(r, g, b, bgOpacity * borderOpacityMult)
   end
   
-  -- Background fill (darker version of base color)
+  -- Background fill (same color and opacity as border for consistency)
   if self.skinBackground then
-    self.skinBackground:SetVertexColor(r * 0.3, g * 0.3, b * 0.3, bgOpacity)
+    self.skinBackground:SetVertexColor(r, g, b, bgOpacity * borderOpacityMult)
   end
   
-  -- Top gradient (lighter highlight)
+  -- Top gradient (lighter highlight for depth)
   if self.skinGradientTop then
-    self.skinGradientTop:SetVertexColor(r * 0.5, g * 0.5, b * 0.5, bgOpacity * 0.6)
+    self.skinGradientTop:SetVertexColor(
+      math.min(1, r * 1.3), 
+      math.min(1, g * 1.3), 
+      math.min(1, b * 1.3), 
+      bgOpacity * 0.4
+    )
   end
   
   -- Also update text color for modern style

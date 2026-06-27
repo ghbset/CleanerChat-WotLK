@@ -1000,44 +1000,6 @@ function C:OnEnable()
                     Core:Dispatch(UpdateConfig("tabInactiveColor", WindowIdFor(info)))
                   end,
                 },
-                tabBorderColor = {
-                  name = L["Tab border color"],
-                  desc = L["Color of the border outline around tabs (Modern style only)."],
-                  type = "color",
-                  hasAlpha = false,
-                  order = 1.7,
-                  hidden = function (info)
-                    return (ProfileFor(info).tabStyle or "minimal") == "minimal"
-                  end,
-                  get = function (info)
-                    local c = ProfileFor(info).tabBorderColor
-                    return c.r, c.g, c.b
-                  end,
-                  set = function (info, r, g, b)
-                    local c = ProfileFor(info).tabBorderColor
-                    c.r, c.g, c.b = r, g, b
-                    Core:Dispatch(UpdateConfig("tabBorderColor", WindowIdFor(info)))
-                  end,
-                },
-                tabBorderOpacity = {
-                  name = L["Tab border opacity"],
-                  desc = L["Opacity of the tab border outline."],
-                  type = "range",
-                  order = 1.8,
-                  min = 0,
-                  max = 1,
-                  step = 0.05,
-                  hidden = function (info)
-                    return (ProfileFor(info).tabStyle or "minimal") == "minimal"
-                  end,
-                  get = function (info)
-                    return ProfileFor(info).tabBorderOpacity or 0.6
-                  end,
-                  set = function (info, input)
-                    ProfileFor(info).tabBorderOpacity = input
-                    Core:Dispatch(UpdateConfig("tabBorderOpacity", WindowIdFor(info)))
-                  end,
-                },
                 tabBackgroundOpacity = {
                   name = L["Tab background opacity"],
                   desc = L["Opacity of the tab background fill."],
@@ -1055,25 +1017,6 @@ function C:OnEnable()
                   set = function (info, input)
                     ProfileFor(info).tabBackgroundOpacity = input
                     Core:Dispatch(UpdateConfig("tabBackgroundOpacity", WindowIdFor(info)))
-                  end,
-                },
-                tabCornerRadius = {
-                  name = L["Tab corner radius"],
-                  desc = L["Roundness of tab corners. 0 = square, higher = more rounded."],
-                  type = "range",
-                  order = 1.95,
-                  min = 0,
-                  max = 8,
-                  step = 1,
-                  hidden = function (info)
-                    return (ProfileFor(info).tabStyle or "minimal") == "minimal"
-                  end,
-                  get = function (info)
-                    return ProfileFor(info).tabCornerRadius or 0
-                  end,
-                  set = function (info, input)
-                    ProfileFor(info).tabCornerRadius = input
-                    Core:Dispatch(UpdateConfig("tabCornerRadius", WindowIdFor(info)))
                   end,
                 },
               },
