@@ -1,5 +1,7 @@
-local Core, _, Utils = unpack(select(2, ...))
+local Core, Constants, Utils = unpack(select(2, ...))
 local UIManager = Core:GetModule("UIManager")
+
+local UnlockMover = Constants.ACTIONS.UnlockMover
 
 local CreateChatTab = Core.Components.CreateChatTab
 local CreateEditBox = Core.Components.CreateEditBox
@@ -610,13 +612,11 @@ function UIManager:SpawnNewWindow(sourceWindowId)
   if not profile then return nil end
   profile.chatFrames = { newIndex }
 
-  -- Offset position from the source window so the new one is visible.
-  local srcProfile = Core:GetWindowProfile(sourceWindowId)
-  local srcPos = (srcProfile and srcProfile.positionAnchor) or { point = "BOTTOMLEFT", xOfs = 20, yOfs = 230 }
+  -- Center the new window on screen so it's immediately visible.
   profile.positionAnchor = {
-    point = srcPos.point or "BOTTOMLEFT",
-    xOfs = (srcPos.xOfs or 0) + 40,
-    yOfs = (srcPos.yOfs or 0) - 40,
+    point = "CENTER",
+    xOfs = 0,
+    yOfs = 0,
   }
 
   -- Create the Glass window (mover, container, dock, pool).
@@ -657,17 +657,11 @@ function UIManager:SpawnNewWindow(sourceWindowId)
   newWindow.container:Show()
   newWindow.dock:Show()
 
-  -- Sync the new mover's interactive state with whether movers are currently
-  -- unlocked. If the mover dialog is visible, movers are unlocked and we need
-  -- to enable mouse/movable on the new mover. If locked, hide the mover.
-  if self.moverDialog and self.moverDialog:IsShown() then
-    newWindow.moverFrame:EnableMouse(true)
-    newWindow.moverFrame:SetMovable(true)
-  else
-    newWindow.moverFrame:Hide()
-    newWindow.moverFrame:EnableMouse(false)
-    newWindow.moverFrame:SetMovable(false)
-  end
+  -- Automatically unlock frames so the user can see the new window and
+  -- reposition/resize it immediately. This dispatches UNLOCK_MOVER which
+  -- enables mouse on all mover frames (including the new one) and shows the
+  -- lock/unlock dialog.
+  Core:Dispatch(UnlockMover())
 
   return newWindow
 end
