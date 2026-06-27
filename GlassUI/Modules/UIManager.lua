@@ -3,6 +3,7 @@ local ns = select(2, ...) -- Get raw namespace for ns.Timer access
 local UIManager = Core:GetModule("UIManager")
 
 local UnlockMover = Constants.ACTIONS.UnlockMover
+local UPDATE_CONFIG = Constants.EVENTS.UPDATE_CONFIG
 
 local CreateChatTab = Core.Components.CreateChatTab
 local CreateEditBox = Core.Components.CreateEditBox
