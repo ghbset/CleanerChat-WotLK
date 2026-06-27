@@ -93,6 +93,16 @@ Core.defaults = {
     dockFadeInDuration = 0.3,
     tabsOnHover = true, -- When ON (default), tabs fade out and appear on hover. When OFF, tabs are always visible.
 
+    -- Tab button skin style
+    tabStyle = "minimal", -- "minimal" = text only, "outline" = border only
+    tabCornerStyle = "rounded", -- "square" or "rounded" (only applies when tabStyle is not minimal)
+    tabActiveColor = { r = 1.0, g = 191 / 255, b = 0 }, -- amber for selected tab
+    tabInactiveColor = { r = 1.0, g = 191 / 255, b = 0 }, -- amber for unselected tabs
+    tabBackgroundOpacity = 1.0, -- background/border opacity (full for active, multiplied for inactive)
+    tabSpacing = 5, -- spacing between tabs
+    tabBorderThickness = 1, -- border line thickness (1-5)
+    tabPadding = 5, -- padding from dock edge
+
     indentWordWrap = true,
     mouseOverTooltips = true,
     iconTextureYOffset = 4,
@@ -105,6 +115,10 @@ Core.defaults = {
     scrollIndicatorBgColor = { r = 17 / 255, g = 17 / 255, b = 17 / 255 }, -- codGray (same as chat bg)
     scrollIndicatorBgOpacity = 0.65, -- slightly transparent
     hideScrollIndicator = false, -- when true, hides the "Unread messages" / "Bring me to the present" indicator
+
+    -- Buttons (native Blizzard chat buttons)
+    hideChatMenuButton = true, -- when true, hides the Chat Menu (speech bubble) button
+    hideSocialButton = true, -- when true, hides the Social (friends) button left of chat
 
     -- Per-window settings (multi-window). The default ("Main") window uses the
     -- flat keys above; each additional window stores its own full copy of the

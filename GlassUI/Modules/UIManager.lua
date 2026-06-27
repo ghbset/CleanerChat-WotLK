@@ -3,6 +3,7 @@ local ns = select(2, ...) -- Get raw namespace for ns.Timer access
 local UIManager = Core:GetModule("UIManager")
 
 local UnlockMover = Constants.ACTIONS.UnlockMover
+local UPDATE_CONFIG = Constants.EVENTS.UPDATE_CONFIG
 
 local CreateChatTab = Core.Components.CreateChatTab
 local CreateEditBox = Core.Components.CreateEditBox
@@ -79,6 +80,25 @@ function UIManager:OnEnable()
   self.windows["Main"] = self.mainWindow
 
   -- Restore additional windows from saved profile (multi-window persistence)
+  -- Clean up orphaned windows first (windows with no chat frames assigned)
+  if Core.db.profile.windows then
+    local orphanedWindows = {}
+    for windowId, windowProfile in pairs(Core.db.profile.windows) do
+      if windowId ~= "Main" and type(windowProfile) == "table" then
+        -- Check if this window has any chat frames assigned
+        local hasFrames = windowProfile.chatFrames and #windowProfile.chatFrames > 0
+        if not hasFrames then
+          table.insert(orphanedWindows, windowId)
+        end
+      end
+    end
+    -- Remove orphaned window profiles
+    for _, windowId in ipairs(orphanedWindows) do
+      Core.db.profile.windows[windowId] = nil
+    end
+  end
+  
+  -- Now restore valid windows
   if Core.db.profile.windows then
     local nextNum = 2
     for windowId, windowProfile in pairs(Core.db.profile.windows) do
@@ -353,15 +373,14 @@ function UIManager:OnEnable()
     ChatAlertFrame:SetPoint("BOTTOMLEFT", self.container, "TOPLEFT", 15, 10)
   end
 
-  -- Hide the native chat buttons (chat menu "speech bubble", channel button and
-  -- the voice mute/deafen mic buttons). Blizzard re-shows some of these on chat
-  -- updates, so pin them hidden with a Show hook (installed once).
+  -- Hide the native chat buttons (channel button and the voice mute/deafen mic buttons).
+  -- Blizzard re-shows some of these on chat updates, so pin them hidden with a Show hook.
   -- Note: QuickJoinToastButton doesn't exist in WotLK 3.3.5
+  -- ChatFrameMenuButton is handled separately below as a toggleable option.
   if (not self.chatButtonsHidden) then
     self.chatButtonsHidden = true
     for _, buttonName in ipairs({
       "ChatFrameChannelButton",
-      "ChatFrameMenuButton",
       "ChatFrameToggleVoiceDeafenButton",
       "ChatFrameToggleVoiceMuteButton",
     }) do
@@ -373,6 +392,79 @@ function UIManager:OnEnable()
         end
       end
     end
+  end
+
+  -- Handle the Social (friends) button visibility based on settings
+  -- FriendsMicroButton is the friends/social button in WotLK 3.3.5
+  if not self._socialButtonHooked then
+    self._socialButtonHooked = true
+    local socialButton = _G["FriendsMicroButton"]
+    if socialButton then
+      -- Apply initial state
+      if Core.db.profile.hideSocialButton then
+        socialButton:Hide()
+      else
+        socialButton:Show()
+      end
+      -- Hook to enforce setting when Blizzard tries to show it
+      if _G.hooksecurefunc then
+        _G.hooksecurefunc(socialButton, "Show", function(b)
+          if Core.db.profile.hideSocialButton then
+            b:Hide()
+          end
+        end)
+      end
+    end
+    -- Listen for setting changes
+    Core:Subscribe(UPDATE_CONFIG, function(payload)
+      local key = type(payload) == "table" and payload.key or payload
+      if key == "hideSocialButton" then
+        local btn = _G["FriendsMicroButton"]
+        if btn then
+          if Core.db.profile.hideSocialButton then
+            btn:Hide()
+          else
+            btn:Show()
+          end
+        end
+      end
+    end)
+  end
+
+  -- Handle the Chat Menu button (speech bubble with language/emote options)
+  if not self._chatMenuButtonHooked then
+    self._chatMenuButtonHooked = true
+    local chatMenuButton = _G["ChatFrameMenuButton"]
+    if chatMenuButton then
+      -- Apply initial state
+      if Core.db.profile.hideChatMenuButton then
+        chatMenuButton:Hide()
+      else
+        chatMenuButton:Show()
+      end
+      -- Hook to enforce setting when Blizzard tries to show it
+      if _G.hooksecurefunc then
+        _G.hooksecurefunc(chatMenuButton, "Show", function(b)
+          if Core.db.profile.hideChatMenuButton then
+            b:Hide()
+          end
+        end)
+      end
+    end
+    -- Listen for setting changes
+    Core:Subscribe(UPDATE_CONFIG, function(payload)
+      local key = type(payload) == "table" and payload.key or payload
+      if key == "hideChatMenuButton" then
+        local btn = _G["ChatFrameMenuButton"]
+        if btn then
+          if Core.db.profile.hideChatMenuButton then
+            btn:Hide()
+          else
+            btn:Show()
+          end
+        end
+      end
+    end)
   end
   
   -- Hide Blizzard chat frame backgrounds and scroll buttons

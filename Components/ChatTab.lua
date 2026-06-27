@@ -102,7 +102,10 @@ function ChatTabMixin:Init(slidingMessageFrame)
   -- Set width dynamically based on text width
   if not Hooker:IsHooked(self, "SetWidth") then
     Hooker:RawHook(self, "SetWidth", function (_, width)
-      local textWidth = self:GetTextWidth() or 0
+      local textWidth = 0
+      if self.Text then
+        textWidth = self.Text:GetStringWidth() or 0
+      end
       local newWidth = textWidth + Constants.TEXT_XPADDING * 2
       if newWidth < 40 then
         newWidth = 60  -- Minimum width
@@ -119,6 +122,22 @@ function ChatTabMixin:Init(slidingMessageFrame)
       else
         Hooker.hooks[tabText].SetTextColor(tabText, Colors.apache.r, Colors.apache.g, Colors.apache.b)
       end
+    end, true)
+  end
+
+  -- Hook SetText to recalculate tab width when renamed
+  if tabText and not Hooker:IsHooked(tabText, "SetText") then
+    Hooker:RawHook(tabText, "SetText", function (fontString, text)
+      -- Call original SetText first
+      Hooker.hooks[tabText].SetText(fontString, text)
+      -- Defer width recalculation to next frame so text layout is updated
+      if not self._widthUpdateFrame then
+        self._widthUpdateFrame = CreateFrame("Frame")
+      end
+      self._widthUpdateFrame:SetScript("OnUpdate", function(frame)
+        frame:SetScript("OnUpdate", nil)
+        self:SetWidth()
+      end)
     end, true)
   end
 
@@ -165,6 +184,15 @@ function ChatTabMixin:Init(slidingMessageFrame)
   -- Override context menu
   UIDropDownMenu_Initialize(dropDown, function ()
     local info = UIDropDownMenu_CreateInfo()
+    
+    -- Get the UIManager module for window operations (used for multi-window features)
+    local UIManager = Core:GetModule("UIManager", true)
+    local chatFrameIndex = self.chatFrame:GetID()
+    local currentWindowId = nil
+    if UIManager then
+      local _
+      _, currentWindowId = UIManager:GetWindowForChatFrame(chatFrameIndex)
+    end
 
     if self.chatFrame == DEFAULT_CHAT_FRAME then
       -- Unlock chat window
@@ -193,8 +221,9 @@ function ChatTabMixin:Init(slidingMessageFrame)
     info.notCheckable = 1
     UIDropDownMenu_AddButton(info)
 
-    -- Close chat window
-    if self.chatFrame ~= DEFAULT_CHAT_FRAME and not IsCombatLog(self.chatFrame) then
+    -- Close chat window (for non-default, non-combat-log frames in Main window only)
+    -- For detached CleanerChat windows, "Delete window" handles closing
+    if self.chatFrame ~= DEFAULT_CHAT_FRAME and not IsCombatLog(self.chatFrame) and (not currentWindowId or currentWindowId == "Main") then
       info = UIDropDownMenu_CreateInfo()
       info.text = CLOSE_CHAT_WINDOW
       info.func = FCF_PopInWindow
@@ -231,16 +260,10 @@ function ChatTabMixin:Init(slidingMessageFrame)
     end
     UIDropDownMenu_AddButton(info)
 
-    -- Get the UIManager module for window operations
-    local UIManager = Core:GetModule("UIManager", true)
-
     -- "New window" — spawn a brand-new CleanerChat window (a new chat frame
     -- rendered as its own Glass window, copying the current window's settings).
     -- Available on ANY chat tab that is not the Combat Log.
     if UIManager and not IsCombatLog(self.chatFrame) then
-      local chatFrameIndex = self.chatFrame:GetID()
-      local _, currentWindowId = UIManager:GetWindowForChatFrame(chatFrameIndex)
-
       info = UIDropDownMenu_CreateInfo()
       info.text = L["New detached window"]
       info.notCheckable = 1
@@ -283,8 +306,215 @@ function ChatTabMixin:Init(slidingMessageFrame)
         if key == "dockFont" or key == "dockFontSize" or key == "dockFontFlags" then
           self:UpdateFontFromProfile()
         end
+        
+        -- Update skin when tab style settings change for this window
+        if key == "tabStyle" or key == "tabCornerStyle" or key == "tabActiveColor" 
+           or key == "tabInactiveColor" or key == "tabBackgroundOpacity" or key == "tabBorderThickness" then
+          self:ApplySkin()
+          self:UpdateSkinColors()
+        end
+        
+        -- Update tab positions when spacing settings change
+        if key == "tabSpacing" or key == "tabPadding" then
+          local UIManager = Core:GetModule("UIManager")
+          if UIManager and UIManager.windows then
+            for _, window in pairs(UIManager.windows) do
+              if window.tabs then
+                Core.Components.UpdateTabPositions(window.tabs)
+              end
+            end
+          end
+        end
       end)
     }
+  end
+  
+  -- Apply initial skin
+  self:ApplySkin()
+end
+
+---
+-- Apply the visual skin style to the tab button.
+-- Supports: minimal (text only), outline (border only)
+-- With corner styles: square or rounded
+function ChatTabMixin:ApplySkin()
+  local profile = self.slidingMessageFrame and self.slidingMessageFrame.window and self.slidingMessageFrame.window.profile
+  profile = profile or Core.db.profile
+  
+  local style = profile.tabStyle or "minimal"
+  -- Backward compatibility: old styles map to outline
+  if style == "modern" or style == "filled" then style = "outline" end
+  
+  local cornerStyle = profile.tabCornerStyle or "square"
+  local isRounded = cornerStyle == "rounded"
+  local isOutline = style == "outline"
+  
+  if isOutline then
+    if isRounded then
+      -- ROUNDED CORNERS: Use backdrop-based rendering
+      -- Hide texture-based elements
+      if self.skinBorderTop then self.skinBorderTop:Hide() end
+      if self.skinBorderBottom then self.skinBorderBottom:Hide() end
+      if self.skinBorderLeft then self.skinBorderLeft:Hide() end
+      if self.skinBorderRight then self.skinBorderRight:Hide() end
+      
+      -- Create backdrop frame if needed
+      if not self.skinBackdrop then
+        self.skinBackdrop = CreateFrame("Frame", nil, self)
+        self.skinBackdrop:SetFrameLevel(math.max(1, self:GetFrameLevel() - 1))
+        self.skinBackdrop:SetAllPoints()
+      end
+      
+      -- Set rounded backdrop (tooltip border has natural rounded corners)
+      self.skinBackdrop:SetBackdrop({
+        bgFile = nil, -- No fill, outline only
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = false,
+        tileSize = 0,
+        edgeSize = 14,
+        insets = { left = 4, right = 4, top = 4, bottom = 4 }
+      })
+      self.skinBackdrop:Show()
+      
+    else
+      -- SQUARE CORNERS: Use 4 edge textures for true outline
+      -- Hide backdrop if exists
+      if self.skinBackdrop then self.skinBackdrop:Hide() end
+      
+      local borderThickness = profile.tabBorderThickness or 1
+      
+      -- Create top edge
+      if not self.skinBorderTop then
+        self.skinBorderTop = self:CreateTexture(nil, "BACKGROUND", nil, -8)
+        self.skinBorderTop:SetTexture("Interface\\Buttons\\WHITE8x8")
+        self.skinBorderTop:SetPoint("TOPLEFT", 0, 0)
+        self.skinBorderTop:SetPoint("TOPRIGHT", 0, 0)
+      end
+      self.skinBorderTop:SetHeight(borderThickness)
+      
+      -- Create bottom edge
+      if not self.skinBorderBottom then
+        self.skinBorderBottom = self:CreateTexture(nil, "BACKGROUND", nil, -8)
+        self.skinBorderBottom:SetTexture("Interface\\Buttons\\WHITE8x8")
+        self.skinBorderBottom:SetPoint("BOTTOMLEFT", 0, 0)
+        self.skinBorderBottom:SetPoint("BOTTOMRIGHT", 0, 0)
+      end
+      self.skinBorderBottom:SetHeight(borderThickness)
+      
+      -- Create left edge
+      if not self.skinBorderLeft then
+        self.skinBorderLeft = self:CreateTexture(nil, "BACKGROUND", nil, -8)
+        self.skinBorderLeft:SetTexture("Interface\\Buttons\\WHITE8x8")
+        self.skinBorderLeft:SetPoint("TOPLEFT", 0, 0)
+        self.skinBorderLeft:SetPoint("BOTTOMLEFT", 0, 0)
+      end
+      self.skinBorderLeft:SetWidth(borderThickness)
+      
+      -- Create right edge
+      if not self.skinBorderRight then
+        self.skinBorderRight = self:CreateTexture(nil, "BACKGROUND", nil, -8)
+        self.skinBorderRight:SetTexture("Interface\\Buttons\\WHITE8x8")
+        self.skinBorderRight:SetPoint("TOPRIGHT", 0, 0)
+        self.skinBorderRight:SetPoint("BOTTOMRIGHT", 0, 0)
+      end
+      self.skinBorderRight:SetWidth(borderThickness)
+      
+      self.skinBorderTop:Show()
+      self.skinBorderBottom:Show()
+      self.skinBorderLeft:Show()
+      self.skinBorderRight:Show()
+    end
+    
+    -- Hook hover events for visual feedback (only once)
+    if not self._skinHoverHooked then
+      self._skinHoverHooked = true
+      self:HookScript("OnEnter", function()
+        self:UpdateSkinColors(true)
+      end)
+      self:HookScript("OnLeave", function()
+        self:UpdateSkinColors(false)
+      end)
+    end
+    
+  else
+    -- Minimal style - hide all decoration elements
+    if self.skinBorderTop then self.skinBorderTop:Hide() end
+    if self.skinBorderBottom then self.skinBorderBottom:Hide() end
+    if self.skinBorderLeft then self.skinBorderLeft:Hide() end
+    if self.skinBorderRight then self.skinBorderRight:Hide() end
+    if self.skinBackdrop then self.skinBackdrop:Hide() end
+  end
+  
+  self:UpdateSkinColors()
+end
+
+---
+-- Update skin colors based on selection state and hover.
+-- @param isHovered boolean (optional) Whether the tab is being hovered
+function ChatTabMixin:UpdateSkinColors(isHovered)
+  local profile = self.slidingMessageFrame and self.slidingMessageFrame.window and self.slidingMessageFrame.window.profile
+  profile = profile or Core.db.profile
+  
+  local style = profile.tabStyle or "minimal"
+  -- Backward compatibility
+  if style == "modern" or style == "filled" then style = "outline" end
+  
+  local cornerStyle = profile.tabCornerStyle or "square"
+  local isRounded = cornerStyle == "rounded"
+  local isOutline = style == "outline"
+  
+  if not isOutline then return end
+  
+  local isSelected = (Core.Components.selectedTab == self)
+  
+  -- Get colors from profile
+  local activeColor = profile.tabActiveColor or { r = 223/255, g = 186/255, b = 105/255 }
+  local inactiveColor = profile.tabInactiveColor or { r = 0.4, g = 0.4, b = 0.4 }
+  local bgOpacity = profile.tabBackgroundOpacity or 0.7
+  
+  -- Determine the base color
+  local baseColor = isSelected and activeColor or inactiveColor
+  
+  -- Apply hover brightening effect
+  local hoverMult = isHovered and 1.3 or 1.0
+  local r = math.min(1, baseColor.r * hoverMult)
+  local g = math.min(1, baseColor.g * hoverMult)
+  local b = math.min(1, baseColor.b * hoverMult)
+  
+  -- Opacity multiplier based on state
+  local opacityMult = isSelected and 1.0 or (isHovered and 0.5 or 0.3)
+  local finalOpacity = bgOpacity * opacityMult
+  
+  if isRounded then
+    -- ROUNDED: Update backdrop colors
+    if self.skinBackdrop then
+      self.skinBackdrop:SetBackdropColor(0, 0, 0, 0) -- Transparent fill
+      self.skinBackdrop:SetBackdropBorderColor(r, g, b, finalOpacity)
+    end
+  else
+    -- SQUARE: Update 4 edge texture colors
+    if self.skinBorderTop then
+      self.skinBorderTop:SetVertexColor(r, g, b, finalOpacity)
+    end
+    if self.skinBorderBottom then
+      self.skinBorderBottom:SetVertexColor(r, g, b, finalOpacity)
+    end
+    if self.skinBorderLeft then
+      self.skinBorderLeft:SetVertexColor(r, g, b, finalOpacity)
+    end
+    if self.skinBorderRight then
+      self.skinBorderRight:SetVertexColor(r, g, b, finalOpacity)
+    end
+  end
+  
+  -- Update text color based on style
+  local tabText = self.Text or _G[self:GetName().."Text"]
+  if tabText then
+    if isSelected then
+      tabText:SetTextColor(1, 1, 1) -- White for selected
+    else
+      tabText:SetTextColor(activeColor.r, activeColor.g, activeColor.b) -- Gold for unselected
+    end
   end
 end
 
@@ -353,7 +583,12 @@ Core.Components.UpdateTabPositions = function(tabs)
     return 
   end
   
-  local xOffset = 5  -- Small padding from left edge
+  -- Get spacing settings from profile
+  local profile = (ownerWindow and ownerWindow.profile) or Core.db.profile
+  local tabPadding = profile.tabPadding or 5
+  local tabSpacing = profile.tabSpacing or 5
+  
+  local xOffset = tabPadding  -- Padding from left edge
   for i, tab in ipairs(tabs) do
     if tab then
       -- Reparent to our dock
@@ -376,7 +611,7 @@ Core.Components.UpdateTabPositions = function(tabs)
       if tabWidth < 30 then
         tabWidth = 60  -- Default minimum width
       end
-      xOffset = xOffset + tabWidth + 5  -- Add spacing between tabs
+      xOffset = xOffset + tabWidth + tabSpacing  -- Add spacing between tabs
     end
   end
 end
@@ -474,14 +709,27 @@ Core.Components.SelectChatTab = function(selectedTab, isUserClick)
       -- Keep all tabs visible
       tab:Show()
       
-      local tabText = tab.Text or _G[tab:GetName().."Text"]
-      if tabText then
-        if tab == selectedTab then
-          -- Selected tab - brighter color
-          tabText:SetTextColor(1, 1, 1)  -- White for selected
-        else
-          -- Unselected tab - use Glass color
-          tabText:SetTextColor(Colors.apache.r, Colors.apache.g, Colors.apache.b)
+      -- Get the profile for skin style check
+      local profile = tab.slidingMessageFrame and tab.slidingMessageFrame.window and tab.slidingMessageFrame.window.profile
+      profile = profile or Core.db.profile
+      local style = profile.tabStyle or "minimal"
+      -- Backward compatibility
+      if style == "modern" or style == "filled" then style = "outline" end
+      
+      -- Update skin colors for outline style tabs
+      if style == "outline" and tab.UpdateSkinColors then
+        tab:UpdateSkinColors()
+      else
+        -- Minimal style - just update text color directly
+        local tabText = tab.Text or _G[tab:GetName().."Text"]
+        if tabText then
+          if tab == selectedTab then
+            -- Selected tab - brighter color
+            tabText:SetTextColor(1, 1, 1)  -- White for selected
+          else
+            -- Unselected tab - use Glass color
+            tabText:SetTextColor(Colors.apache.r, Colors.apache.g, Colors.apache.b)
+          end
         end
       end
     end

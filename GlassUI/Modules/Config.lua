@@ -939,6 +939,172 @@ function C:OnEnable()
                     Core:Dispatch(UpdateConfig("dockBackgroundColor", WindowIdFor(info)))
                   end,
                 },
+                tabStyleSpacer = {
+                  name = "",
+                  type = "description",
+                  order = 1.35,
+                  width = "full",
+                },
+                tabStyle = {
+                  name = L["Tab Style"],
+                  desc = L["Choose the visual style for chat tab buttons."],
+                  type = "select",
+                  order = 1.4,
+                  values = {
+                    ["minimal"] = L["Minimal"],
+                    ["outline"] = L["Outline"],
+                  },
+                  get = function (info)
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    -- Backward compatibility: map old styles to "outline"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    return style
+                  end,
+                  set = function (info, input)
+                    ProfileFor(info).tabStyle = input
+                    Core:Dispatch(UpdateConfig("tabStyle", WindowIdFor(info)))
+                  end,
+                },
+                tabCornerStyle = {
+                  name = L["Tab Corner Style"],
+                  desc = L["Shape of tab button corners."],
+                  type = "select",
+                  order = 1.45,
+                  values = {
+                    ["square"] = L["Square"],
+                    ["rounded"] = L["Rounded"],
+                  },
+                  hidden = function (info)
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    return style == "minimal"
+                  end,
+                  get = function (info)
+                    return ProfileFor(info).tabCornerStyle or "square"
+                  end,
+                  set = function (info, input)
+                    ProfileFor(info).tabCornerStyle = input
+                    Core:Dispatch(UpdateConfig("tabCornerStyle", WindowIdFor(info)))
+                  end,
+                },
+                tabActiveColor = {
+                  name = L["Tab active color"],
+                  desc = L["Color of the selected/active tab background and text."],
+                  type = "color",
+                  hasAlpha = false,
+                  order = 1.5,
+                  hidden = function (info)
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    return style == "minimal"
+                  end,
+                  get = function (info)
+                    local c = ProfileFor(info).tabActiveColor
+                    return c.r, c.g, c.b
+                  end,
+                  set = function (info, r, g, b)
+                    local c = ProfileFor(info).tabActiveColor
+                    c.r, c.g, c.b = r, g, b
+                    Core:Dispatch(UpdateConfig("tabActiveColor", WindowIdFor(info)))
+                  end,
+                },
+                tabInactiveColor = {
+                  name = L["Tab inactive color"],
+                  desc = L["Color of unselected tab backgrounds."],
+                  type = "color",
+                  hasAlpha = false,
+                  order = 1.6,
+                  hidden = function (info)
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    return style == "minimal"
+                  end,
+                  get = function (info)
+                    local c = ProfileFor(info).tabInactiveColor
+                    return c.r, c.g, c.b
+                  end,
+                  set = function (info, r, g, b)
+                    local c = ProfileFor(info).tabInactiveColor
+                    c.r, c.g, c.b = r, g, b
+                    Core:Dispatch(UpdateConfig("tabInactiveColor", WindowIdFor(info)))
+                  end,
+                },
+                tabBackgroundOpacity = {
+                  name = L["Tab background opacity"],
+                  desc = L["Opacity of the tab background and border."],
+                  type = "range",
+                  order = 1.9,
+                  min = 0,
+                  max = 1,
+                  step = 0.05,
+                  hidden = function (info)
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    return style == "minimal"
+                  end,
+                  get = function (info)
+                    return ProfileFor(info).tabBackgroundOpacity or 0.7
+                  end,
+                  set = function (info, input)
+                    ProfileFor(info).tabBackgroundOpacity = input
+                    Core:Dispatch(UpdateConfig("tabBackgroundOpacity", WindowIdFor(info)))
+                  end,
+                },
+                tabBorderThickness = {
+                  name = L["Tab border thickness"],
+                  desc = L["Thickness of the outline border."],
+                  type = "range",
+                  order = 1.95,
+                  min = 1,
+                  max = 5,
+                  step = 1,
+                  hidden = function (info)
+                    local style = ProfileFor(info).tabStyle or "minimal"
+                    if style == "modern" or style == "filled" then style = "outline" end
+                    local cornerStyle = ProfileFor(info).tabCornerStyle or "square"
+                    -- Only show for outline + square (rounded uses backdrop which has fixed border)
+                    return style == "minimal" or cornerStyle == "rounded"
+                  end,
+                  get = function (info)
+                    return ProfileFor(info).tabBorderThickness or 1
+                  end,
+                  set = function (info, input)
+                    ProfileFor(info).tabBorderThickness = input
+                    Core:Dispatch(UpdateConfig("tabBorderThickness", WindowIdFor(info)))
+                  end,
+                },
+                tabSpacing = {
+                  name = L["Tab spacing"],
+                  desc = L["Horizontal spacing between tab buttons."],
+                  type = "range",
+                  order = 1.96,
+                  min = 0,
+                  max = 20,
+                  step = 1,
+                  get = function (info)
+                    return ProfileFor(info).tabSpacing or 5
+                  end,
+                  set = function (info, input)
+                    ProfileFor(info).tabSpacing = input
+                    Core:Dispatch(UpdateConfig("tabSpacing", WindowIdFor(info)))
+                  end,
+                },
+                tabPadding = {
+                  name = L["Tab padding"],
+                  desc = L["Padding from the dock edge."],
+                  type = "range",
+                  order = 1.97,
+                  min = 0,
+                  max = 20,
+                  step = 1,
+                  get = function (info)
+                    return ProfileFor(info).tabPadding or 5
+                  end,
+                  set = function (info, input)
+                    ProfileFor(info).tabPadding = input
+                    Core:Dispatch(UpdateConfig("tabPadding", WindowIdFor(info)))
+                  end,
+                },
               },
             },
             section2 = {
@@ -1046,6 +1212,41 @@ function C:OnEnable()
               },
             },
           } end),
+        },
+        buttons = {
+          name = L["Buttons"],
+          type = "group",
+          order = 5,
+          args = {
+            hideChatMenuButton = {
+              name = L["Hide Chat Menu button"],
+              desc = L["Hide the Chat Menu (speech bubble) button that provides access to languages and emotes."],
+              type = "toggle",
+              order = 1,
+              width = "full",
+              get = function ()
+                return Core.db.profile.hideChatMenuButton
+              end,
+              set = function (_, input)
+                Core.db.profile.hideChatMenuButton = input
+                Core:Dispatch(UpdateConfig("hideChatMenuButton"))
+              end,
+            },
+            hideSocialButton = {
+              name = L["Hide Social button"],
+              desc = L["Hide the Social (friends) button that appears to the left of the chat frame."],
+              type = "toggle",
+              order = 2,
+              width = "full",
+              get = function ()
+                return Core.db.profile.hideSocialButton
+              end,
+              set = function (_, input)
+                Core.db.profile.hideSocialButton = input
+                Core:Dispatch(UpdateConfig("hideSocialButton"))
+              end,
+            },
+          },
         },
         profile = AceDBOptions:GetOptionsTable(Core.db)
       }

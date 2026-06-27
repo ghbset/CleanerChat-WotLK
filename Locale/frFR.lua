@@ -153,8 +153,37 @@ L["Chat tabs never fade out -- they stay on screen permanently. Overrides the fa
 L["Show tabs on hover"] = "Afficher les onglets au survol"
 L["When enabled, chat tabs fade out when idle and reappear on mouse hover. When disabled, tabs are always visible."] = "Lorsqu'activé, les onglets du chat disparaissent au repos et réapparaissent au survol de la souris. Lorsque désactivé, les onglets sont toujours visibles."
 L["Tab widths refit on /reload."] = "Les largeurs des onglets se réajustent avec /reload."
+
+-- Tab Button Style
+L["Tab Style"] = "Style d'onglet"
+L["Choose the visual style for chat tab buttons."] = "Choisissez le style visuel pour les boutons d'onglet du chat."
+L["Minimal"] = "Minimal"
+L["Tab Corner Style"] = "Style des coins d'onglet"
+L["Shape of tab button corners."] = "Forme des coins des boutons d'onglet."
+L["Square"] = "Carré"
+L["Rounded"] = "Arrondi"
+L["Tab active color"] = "Couleur onglet actif"
+L["Color of the selected/active tab background and text."] = "Couleur du fond et du texte de l'onglet sélectionné/actif."
+L["Tab inactive color"] = "Couleur onglet inactif"
+L["Color of unselected tab backgrounds."] = "Couleur des fonds des onglets non sélectionnés."
+L["Tab background opacity"] = "Opacité du fond d'onglet"
+L["Opacity of the tab background and border."] = "Opacité du fond et de la bordure de l'onglet."
+L["Tab spacing"] = "Espacement des onglets"
+L["Horizontal spacing between tab buttons."] = "Espacement horizontal entre les boutons d'onglet."
+L["Tab border thickness"] = "Épaisseur de la bordure d'onglet"
+L["Thickness of the outline border."] = "Épaisseur de la bordure du contour."
+L["Tab padding"] = "Marge intérieure d'onglet"
+L["Padding from the dock edge."] = "Marge depuis le bord du dock."
+
 L["Show timestamps"] = "Afficher les horodatages"
 L["Prepend each message with a timestamp in [HH:MM] format."] = "Préfixe chaque message avec un horodatage au format [HH:MM]."
+
+-- Buttons
+L["Buttons"] = "Boutons"
+L["Hide Chat Menu button"] = "Masquer le bouton Menu de Chat"
+L["Hide the Chat Menu (speech bubble) button that provides access to languages and emotes."] = "Masque le bouton Menu de Chat (bulle de dialogue) qui donne accès aux langues et aux emotes."
+L["Hide Social button"] = "Masquer le bouton Social"
+L["Hide the Social (friends) button that appears to the left of the chat frame."] = "Masque le bouton Social (amis) qui apparaît à gauche de la fenêtre de chat."
 
 -- Channel abbreviations (match slash commands)
 L["BGL"] = "BGL"
