@@ -204,6 +204,27 @@ function ChatDockMixin:FadeOutTabs()
   end)
 end
 
+-- Unsubscribe the dock's event-bus listeners and stop any pending fade/timer,
+-- so a deleted window's dock stops reacting to events and never fires its timer.
+function ChatDockMixin:Destroy()
+  if self.subscriptions then
+    for _, unsubscribe in ipairs(self.subscriptions) do
+      if type(unsubscribe) == "function" then
+        unsubscribe()
+      end
+    end
+    self.subscriptions = nil
+  end
+  if self.fadeOutTimer then
+    self.fadeOutTimer:Cancel()
+    self.fadeOutTimer = nil
+  end
+  if self.fadeHandle then
+    LibEasing:StopEasing(self.fadeHandle)
+    self.fadeHandle = nil
+  end
+end
+
 Core.Components.CreateChatDock = function (parent, name, profile)
   local FadingFrameMixin = Core.Components.FadingFrameMixin
   local GradientBackgroundMixin = Core.Components.GradientBackgroundMixin

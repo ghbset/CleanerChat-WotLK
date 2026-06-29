@@ -48,7 +48,7 @@ function MainContainerFrameMixin:Init()
   self.bg:SetAllPoints()
   --@end-debug@]===]
 
-  Core:Subscribe(UPDATE_CONFIG, function (payload)
+  self.subscriptions = { Core:Subscribe(UPDATE_CONFIG, function (payload)
     local key = Core:ResolveConfigKey(payload, self.window and self.window.id or "Main")
     
     if key == nil then return end
@@ -60,7 +60,19 @@ function MainContainerFrameMixin:Init()
     if key == "frameHeight" then
       self:SetHeight(self.profile.frameHeight)
     end
-  end)
+  end) }
+end
+
+-- Unsubscribe the container's event-bus listeners when its window is deleted.
+function MainContainerFrameMixin:Destroy()
+  if self.subscriptions then
+    for _, unsubscribe in ipairs(self.subscriptions) do
+      if type(unsubscribe) == "function" then
+        unsubscribe()
+      end
+    end
+    self.subscriptions = nil
+  end
 end
 
 function MainContainerFrameMixin:OnFrame()
