@@ -74,29 +74,6 @@ local function storeFrameLevel(frame)
 	end
 end
 
--- Store original state for text color
-local function storeTextColor(fontString)
-	if not fontString then return end
-	if not elementStates[fontString] then
-		local r, g, b, a = fontString:GetTextColor()
-		elementStates[fontString] = { textColor = { r, g, b, a } }
-	end
-end
-
--- Store original state for font
-local function storeFontState(fontString)
-	if not fontString or not fontString.GetFont then return end
-	if not elementStates[fontString] then
-		elementStates[fontString] = {}
-	end
-	if not elementStates[fontString].font then
-		local font, size, flags = fontString:GetFont()
-		elementStates[fontString].font = { font, size, flags }
-		local r, g, b, a = fontString:GetTextColor()
-		elementStates[fontString].textColor = { r, g, b, a }
-	end
-end
-
 -- Restore all stored elements to original states
 local function restoreAllStates()
 	for element, states in pairs(elementStates) do
