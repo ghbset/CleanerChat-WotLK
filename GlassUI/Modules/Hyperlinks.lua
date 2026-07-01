@@ -11,7 +11,10 @@ local ShowUIPanel = ShowUIPanel
 local UIParent = UIParent
 local CreateFrame = CreateFrame
 local IsControlKeyDown = IsControlKeyDown
+local IsShiftKeyDown = IsShiftKeyDown
 local DressUpItemLink = DressUpItemLink
+local ChatEdit_InsertLink = ChatEdit_InsertLink
+local ChatEdit_GetActiveWindow = ChatEdit_GetActiveWindow
 -- luacheck: pop
 
 -- WotLK 3.3.5 supported link types
@@ -133,6 +136,29 @@ function Hyperlinks:OnEnable()
 		-- Handle it explicitly here.
 		if IsControlKeyDown() and linkType == "item" then
 			DressUpItemLink(link)
+			return
+		end
+
+		-- Shift-click inserts the link into the active chat editbox.
+		-- SetItemRef normally handles this via IsModifiedClick("CHATLINK"), but
+		-- our custom overlay buttons don't trigger modifier detection correctly.
+		-- Handle it explicitly here for all supported link types.
+		if IsShiftKeyDown() and linkTypes[linkType] then
+			-- Try to insert into active editbox, or open the default one
+			if ChatEdit_GetActiveWindow then
+				local editBox = ChatEdit_GetActiveWindow()
+				if editBox then
+					ChatEdit_InsertLink(text)
+					return
+				end
+			end
+			-- If no editbox is open, open the default one and insert
+			local editBox = _G.ChatFrame1EditBox or _G.DEFAULT_CHAT_FRAME and _G.DEFAULT_CHAT_FRAME.editBox
+			if editBox then
+				editBox:Show()
+				editBox:SetFocus()
+				ChatEdit_InsertLink(text)
+			end
 			return
 		end
 
