@@ -688,13 +688,13 @@ function SlidingMessageFrameMixin:Update(incoming)
 		local chatFrameName = self.chatFrame:GetName()
 		local tabName = chatFrameName .. "Tab"
 		local myTab = _G[tabName]
-		
+
 		-- Check if flashing is enabled in profile (default true)
 		local flashEnabled = true
 		if self.profile and self.profile.flashTabOnMessage == false then
 			flashEnabled = false
 		end
-		
+
 		-- Flash if enabled, tab exists, and is not the selected one
 		if flashEnabled and myTab and Core.Components.selectedTab ~= myTab then
 			if myTab.FlashTab and myTab._glassInitialized then

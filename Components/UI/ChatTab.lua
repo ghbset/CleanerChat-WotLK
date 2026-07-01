@@ -640,16 +640,23 @@ function ChatTabMixin:FlashTab()
 	local activeColor = profile.tabActiveColor or { r = 223 / 255, g = 186 / 255, b = 105 / 255 }
 
 	-- Colors for flash
-	local highlightColor = { r = 1, g = 1, b = 1 }  -- Bright white
-	local dimColor = { r = 0.4, g = 0.4, b = 0.4 }  -- Dim gray for better contrast
+	local highlightColor = { r = 1, g = 1, b = 1 } -- Bright white
+	local dimColor = { r = 0.4, g = 0.4, b = 0.4 } -- Dim gray for better contrast
 
 	-- Helper to set border colors for outline style tabs
 	local function SetBorderColor(r, g, b, a)
 		if isRounded and self.skinBackdrop then
 			self.skinBackdrop:SetBackdropBorderColor(r, g, b, a)
 		else
-			for _, border in ipairs({ self.skinBorderTop, self.skinBorderBottom, self.skinBorderLeft, self.skinBorderRight }) do
-				if border then border:SetVertexColor(r, g, b, a) end
+			for _, border in ipairs({
+				self.skinBorderTop,
+				self.skinBorderBottom,
+				self.skinBorderLeft,
+				self.skinBorderRight,
+			}) do
+				if border then
+					border:SetVertexColor(r, g, b, a)
+				end
 			end
 		end
 	end
@@ -686,10 +693,10 @@ function ChatTabMixin:FlashTab()
 
 	-- Style-specific settings
 	local config = {
-		blink = { duration = 0.25, cycles = 3 },      -- Sharp on/off, 3 cycles
-		pulse = { duration = 1.5, cycles = 2 },       -- Smooth sine wave, 2 cycles
-		glow = { duration = 0.8, cycles = 3 },        -- Bright flash fading out, 3 cycles
-		rapid = { duration = 0.1, cycles = 6 },       -- Fast urgent blinks, 6 cycles
+		blink = { duration = 0.25, cycles = 3 }, -- Sharp on/off, 3 cycles
+		pulse = { duration = 1.5, cycles = 2 }, -- Smooth sine wave, 2 cycles
+		glow = { duration = 0.8, cycles = 3 }, -- Bright flash fading out, 3 cycles
+		rapid = { duration = 0.1, cycles = 6 }, -- Fast urgent blinks, 6 cycles
 	}
 	local cfg = config[flashStyle] or config.blink
 	local maxTime = cfg.duration * cfg.cycles
@@ -722,25 +729,24 @@ function ChatTabMixin:FlashTab()
 				SetTextFlash(dimColor.r, dimColor.g, dimColor.b)
 				SetBorderColor(activeColor.r, activeColor.g, activeColor.b, 0.7)
 			end
-
 		elseif flashStyle == "pulse" then
 			-- Smooth sine-wave fade between dim and bright
 			local cycleProgress = (totalTime % cfg.duration) / cfg.duration
-			local t = (math.sin(cycleProgress * math.pi * 2 - math.pi / 2) + 1) / 2  -- 0 to 1 sine wave
-			r, g, b = LerpColor(t, dimColor.r, dimColor.g, dimColor.b, highlightColor.r, highlightColor.g, highlightColor.b)
-			local a = 0.7 + t * 0.3  -- 0.7 to 1.0
+			local t = (math.sin(cycleProgress * math.pi * 2 - math.pi / 2) + 1) / 2 -- 0 to 1 sine wave
+			r, g, b =
+				LerpColor(t, dimColor.r, dimColor.g, dimColor.b, highlightColor.r, highlightColor.g, highlightColor.b)
+			local a = 0.7 + t * 0.3 -- 0.7 to 1.0
 			SetTextFlash(r, g, b)
 			SetBorderColor(r, g, b, a)
-
 		elseif flashStyle == "glow" then
 			-- Starts bright white, gradually fades to dim, then snaps back
 			local cycleProgress = (totalTime % cfg.duration) / cfg.duration
-			local t = 1 - cycleProgress  -- 1 to 0 (fade out)
-			r, g, b = LerpColor(t, dimColor.r, dimColor.g, dimColor.b, highlightColor.r, highlightColor.g, highlightColor.b)
-			local a = 0.5 + t * 0.5  -- 0.5 to 1.0
+			local t = 1 - cycleProgress -- 1 to 0 (fade out)
+			r, g, b =
+				LerpColor(t, dimColor.r, dimColor.g, dimColor.b, highlightColor.r, highlightColor.g, highlightColor.b)
+			local a = 0.5 + t * 0.5 -- 0.5 to 1.0
 			SetTextFlash(r, g, b)
 			SetBorderColor(r, g, b, a)
-
 		elseif flashStyle == "rapid" then
 			-- Fast urgent blinking
 			local cyclePos = math.floor(totalTime / cfg.duration) % 2
