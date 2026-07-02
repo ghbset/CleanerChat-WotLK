@@ -52,10 +52,15 @@ Module.OnChatEvent = function(_, _, _, message, author, ...)
 	end
 end
 
+-- Proxy function for message event filter
+local onChatEventProxy = function(...)
+	return Module:OnChatEvent(...)
+end
+
 Module.OnEnable = function(self)
-	self:RegisterChatEvent("CHAT_MSG_COMBAT_HONOR_GAIN", "OnChatEvent")
+	self:RegisterMessageEventFilter("CHAT_MSG_COMBAT_HONOR_GAIN", onChatEventProxy)
 end
 
 Module.OnDisable = function(self)
-	self:UnregisterChatEvent("CHAT_MSG_COMBAT_HONOR_GAIN", "OnChatEvent")
+	self:UnregisterMessageEventFilter("CHAT_MSG_COMBAT_HONOR_GAIN", onChatEventProxy)
 end

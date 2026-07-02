@@ -45,12 +45,17 @@ Module.OnChatEvent = function(_, _, _, message)
 	end
 end
 
+-- Proxy function for message event filter
+local onChatEventProxy = function(...)
+	return Module:OnChatEvent(...)
+end
+
 Module.OnEnable = function(self)
 	self:RegisterBlacklistFilter(onAddMessageProxy)
-	self:RegisterChatEvent("CHAT_MSG_SYSTEM", "OnChatEvent")
+	self:RegisterMessageEventFilter("CHAT_MSG_SYSTEM", onChatEventProxy)
 end
 
 Module.OnDisable = function(self)
 	self:UnregisterBlacklistFilter(onAddMessageProxy)
-	self:UnregisterChatEvent("CHAT_MSG_SYSTEM", "OnChatEvent")
+	self:UnregisterMessageEventFilter("CHAT_MSG_SYSTEM", onChatEventProxy)
 end

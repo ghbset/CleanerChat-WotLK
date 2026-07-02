@@ -24,16 +24,21 @@ Module.OnChatEvent = function(_, _, event, message, author, ...)
 	end
 end
 
+-- Proxy function for message event filter
+local onChatEventProxy = function(...)
+	return Module:OnChatEvent(...)
+end
+
 Module.OnEnable = function(self)
-	self:RegisterChatEvent("CHAT_MSG_MONSTER_EMOTE", "OnChatEvent")
-	self:RegisterChatEvent("CHAT_MSG_RAID_BOSS_EMOTE", "OnChatEvent")
-	self:RegisterChatEvent("CHAT_MSG_MONSTER_WHISPER", "OnChatEvent")
-	self:RegisterChatEvent("CHAT_MSG_RAID_BOSS_WHISPER", "OnChatEvent")
+	self:RegisterMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", onChatEventProxy)
+	self:RegisterMessageEventFilter("CHAT_MSG_RAID_BOSS_EMOTE", onChatEventProxy)
+	self:RegisterMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", onChatEventProxy)
+	self:RegisterMessageEventFilter("CHAT_MSG_RAID_BOSS_WHISPER", onChatEventProxy)
 end
 
 Module.OnDisable = function(self)
-	self:UnregisterChatEvent("CHAT_MSG_MONSTER_EMOTE", "OnChatEvent")
-	self:UnregisterChatEvent("CHAT_MSG_RAID_BOSS_EMOTE", "OnChatEvent")
-	self:UnregisterChatEvent("CHAT_MSG_MONSTER_WHISPER", "OnChatEvent")
-	self:UnregisterChatEvent("CHAT_MSG_RAID_BOSS_WHISPER", "OnChatEvent")
+	self:UnregisterMessageEventFilter("CHAT_MSG_MONSTER_EMOTE", onChatEventProxy)
+	self:UnregisterMessageEventFilter("CHAT_MSG_RAID_BOSS_EMOTE", onChatEventProxy)
+	self:UnregisterMessageEventFilter("CHAT_MSG_MONSTER_WHISPER", onChatEventProxy)
+	self:UnregisterMessageEventFilter("CHAT_MSG_RAID_BOSS_WHISPER", onChatEventProxy)
 end
