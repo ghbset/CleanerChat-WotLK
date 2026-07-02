@@ -173,11 +173,30 @@ jobs:
           fi
           echo "✅ Locale check passed"
 
+      # ============================================================================
+      # IMPORTANT: LOCALE TRANSLATION POLICY
+      # ============================================================================
+      # All locale strings MUST have real translations - NOT fallbacks (= true).
+      # Using `= true` as a fallback is NOT accepted except for short channel
+      # abbreviations (BGL, BG, PL, P, RL, R, IL, I, G, O, DG) which are often
+      # the same across languages.
+      #
+      # When adding new locale keys:
+      # 1. Add the English string to Locale/enUS.lua
+      # 2. Provide REAL TRANSLATIONS for ALL other locale files
+      # 3. Do NOT use `= true` as a placeholder - this will fail CI
+      #
+      # AI/developers: Always provide proper translations for all supported
+      # languages when adding new locale strings.
+      # ============================================================================
       - name: Locale fallback check
         run: |
           echo "Checking for untranslated fallbacks (= true)..."
+          echo "NOTE: All locale strings must have real translations, not '= true' fallbacks."
+          echo ""
           
-          ALLOWED_FALLBACKS="BGL|BG|PL|P|RL|R|IL|I|G|O"
+          # Only these short channel abbreviations may use fallbacks (same across languages)
+          ALLOWED_FALLBACKS="BGL|BG|PL|P|RL|R|IL|I|G|O|DG"
           
           ERRORS=0
           for LOCALE_FILE in Locale/*.lua; do
@@ -201,6 +220,7 @@ jobs:
           if [[ $ERRORS -gt 0 ]]; then
             echo ""
             echo "❌ Fallback check failed: $ERRORS locale file(s) have untranslated strings"
+            echo "All locale strings must have real translations. Do NOT use '= true' as a placeholder."
             exit 1
           fi
           echo "✅ Locale fallback check passed"

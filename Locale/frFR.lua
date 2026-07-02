@@ -69,28 +69,34 @@ L["Learning (Crafting)"] = "Apprentissage (Artisanat)"
 L["Simplify messages about new or improved trade skills."] =
 	"Simplifie les messages concernant les métiers appris ou améliorés."
 
--- New filter keys (fallback to English)
-L["Numbered Channel Style"] = true
-L["How to display numbered channels like General, Trade, LocalDefense. Requires the Chat Channel Names filter."] = true
-L["Group Channel Style"] = true
-L["How to display group channels like Guild, Party, Raid, Officer. Requires the Chat Channel Names filter."] = true
-L['Shortened (e.g. "[G]", "[P]")'] = true
-L['Full name (e.g. "[Guild]", "[Party]")'] = true
-L["Force Class Colors"] = true
+-- New filter translations
+L["Numbered Channel Style"] = "Style des canaux numérotés"
+L["How to display numbered channels like General, Trade, LocalDefense. Requires the Chat Channel Names filter."] =
+	"Comment afficher les canaux numérotés comme Général, Commerce, DéfenseLocale. Nécessite le filtre 'Noms des canaux de discussion'."
+L["Group Channel Style"] = "Style des canaux de groupe"
+L["How to display group channels like Guild, Party, Raid, Officer. Requires the Chat Channel Names filter."] =
+	"Comment afficher les canaux de groupe comme Guilde, Groupe, Raid, Officier. Nécessite le filtre 'Noms des canaux de discussion'."
+L['Shortened (e.g. "[G]", "[P]")'] = 'Abrégé (ex. "[G]", "[G]")'
+L['Full name (e.g. "[Guild]", "[Party]")'] = 'Nom complet (ex. "[Guilde]", "[Groupe]")'
+L["Force Class Colors"] = "Forcer les couleurs de classe"
 L["Enable class-colored names for all chat types (Guild, Party, Raid, Whisper, etc.) on login. This overrides Blizzard's default settings."] =
-	true
-L["Honor"] = true
-L["Simplify PvP honor gain messages."] = true
-L["Opening"] = true
-L["Hide opening and unlocking messages (lockpicking, chests)."] = true
-L["Pet Info"] = true
-L["Hide pet happiness and ability messages."] = true
-L["Misc Info"] = true
-L["Hide miscellaneous combat info like combo points and small power gains."] = true
-L["System Messages"] = true
-L["Hide repetitive system messages like session started."] = true
-L["Boss Messages"] = true
-L["Format boss emotes and whispers with distinct colors."] = true
+	"Active les noms colorés par classe pour tous les types de discussion (Guilde, Groupe, Raid, Murmure, etc.) à la connexion. Cela remplace les paramètres par défaut de Blizzard."
+L["Honor"] = "Honneur"
+L["Simplify PvP honor gain messages."] = "Simplifie les messages de gain d'honneur JcJ."
+L["Opening"] = "Ouverture"
+L["Hide opening and unlocking messages (lockpicking, chests)."] =
+	"Masque les messages d'ouverture et de déverrouillage (crochetage, coffres)."
+L["Pet Info"] = "Info familier"
+L["Hide pet happiness and ability messages."] = "Masque les messages de bonheur et de capacités du familier."
+L["Misc Info"] = "Info diverses"
+L["Hide miscellaneous combat info like combo points and small power gains."] =
+	"Masque les informations de combat diverses comme les points de combo et les petits gains de puissance."
+L["System Messages"] = "Messages système"
+L["Hide repetitive system messages like session started."] =
+	"Masque les messages système répétitifs comme 'session démarrée'."
+L["Boss Messages"] = "Messages de boss"
+L["Format boss emotes and whispers with distinct colors."] =
+	"Formate les émotes et murmures de boss avec des couleurs distinctes."
 
 L["One Line Quest Rewards"] = "Récompenses de quête sur une ligne"
 L["Combine quest rewards (items, currency, experience) into a single line. Reputation gains remain separate per faction."] =

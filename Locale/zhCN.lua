@@ -65,28 +65,31 @@ L["Simplify status messages about AFK, DND and being rested."] =
 L["Learning (Crafting)"] = "学习（制造）"
 L["Simplify messages about new or improved trade skills."] = "简化关于新学或提升专业技能的消息。"
 
--- New filter keys (fallback to English)
-L["Numbered Channel Style"] = true
-L["How to display numbered channels like General, Trade, LocalDefense. Requires the Chat Channel Names filter."] = true
-L["Group Channel Style"] = true
-L["How to display group channels like Guild, Party, Raid, Officer. Requires the Chat Channel Names filter."] = true
-L['Shortened (e.g. "[G]", "[P]")'] = true
-L['Full name (e.g. "[Guild]", "[Party]")'] = true
-L["Force Class Colors"] = true
+-- New filter translations
+L["Numbered Channel Style"] = "编号频道样式"
+L["How to display numbered channels like General, Trade, LocalDefense. Requires the Chat Channel Names filter."] =
+	"如何显示编号频道，如综合、交易、本地防务。需要'聊天频道名称'过滤器。"
+L["Group Channel Style"] = "组队频道样式"
+L["How to display group channels like Guild, Party, Raid, Officer. Requires the Chat Channel Names filter."] =
+	"如何显示组队频道，如公会、小队、团队、官员。需要'聊天频道名称'过滤器。"
+L['Shortened (e.g. "[G]", "[P]")'] = '缩写（如 "[公]", "[队]")'
+L['Full name (e.g. "[Guild]", "[Party]")'] = '全名（如 "[公会]", "[小队]")'
+L["Force Class Colors"] = "强制职业颜色"
 L["Enable class-colored names for all chat types (Guild, Party, Raid, Whisper, etc.) on login. This overrides Blizzard's default settings."] =
-	true
-L["Honor"] = true
-L["Simplify PvP honor gain messages."] = true
-L["Opening"] = true
-L["Hide opening and unlocking messages (lockpicking, chests)."] = true
-L["Pet Info"] = true
-L["Hide pet happiness and ability messages."] = true
-L["Misc Info"] = true
-L["Hide miscellaneous combat info like combo points and small power gains."] = true
-L["System Messages"] = true
-L["Hide repetitive system messages like session started."] = true
-L["Boss Messages"] = true
-L["Format boss emotes and whispers with distinct colors."] = true
+	"登录时为所有聊天类型（公会、小队、团队、密语等）启用职业颜色名称。这将覆盖暴雪的默认设置。"
+L["Honor"] = "荣誉"
+L["Simplify PvP honor gain messages."] = "简化PvP荣誉获取消息。"
+L["Opening"] = "打开中"
+L["Hide opening and unlocking messages (lockpicking, chests)."] = "隐藏打开和解锁消息（开锁、宝箱）。"
+L["Pet Info"] = "宠物信息"
+L["Hide pet happiness and ability messages."] = "隐藏宠物快乐度和技能消息。"
+L["Misc Info"] = "杂项信息"
+L["Hide miscellaneous combat info like combo points and small power gains."] =
+	"隐藏杂项战斗信息，如连击点和少量能量获取。"
+L["System Messages"] = "系统消息"
+L["Hide repetitive system messages like session started."] = "隐藏重复的系统消息，如'会话已开始'。"
+L["Boss Messages"] = "首领消息"
+L["Format boss emotes and whispers with distinct colors."] = "用独特颜色格式化首领表情和密语。"
 
 L["One Line Quest Rewards"] = "任务奖励单行显示"
 L["Combine quest rewards (items, currency, experience) into a single line. Reputation gains remain separate per faction."] =

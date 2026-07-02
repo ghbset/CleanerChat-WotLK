@@ -68,28 +68,34 @@ L["Learning (Crafting)"] = "습득 (제작)"
 L["Simplify messages about new or improved trade skills."] =
 	"새로 배우거나 향상된 전문 기술에 대한 메시지를 간소화합니다."
 
--- New filter keys (fallback to English)
-L["Numbered Channel Style"] = true
-L["How to display numbered channels like General, Trade, LocalDefense. Requires the Chat Channel Names filter."] = true
-L["Group Channel Style"] = true
-L["How to display group channels like Guild, Party, Raid, Officer. Requires the Chat Channel Names filter."] = true
-L['Shortened (e.g. "[G]", "[P]")'] = true
-L['Full name (e.g. "[Guild]", "[Party]")'] = true
-L["Force Class Colors"] = true
+-- New filter translations
+L["Numbered Channel Style"] = "번호 채널 스타일"
+L["How to display numbered channels like General, Trade, LocalDefense. Requires the Chat Channel Names filter."] =
+	"일반, 거래, 지역수비와 같은 번호 채널을 표시하는 방법. '채팅 채널 이름' 필터가 필요합니다."
+L["Group Channel Style"] = "그룹 채널 스타일"
+L["How to display group channels like Guild, Party, Raid, Officer. Requires the Chat Channel Names filter."] =
+	"길드, 파티, 공격대, 관리자와 같은 그룹 채널을 표시하는 방법. '채팅 채널 이름' 필터가 필요합니다."
+L['Shortened (e.g. "[G]", "[P]")'] = '축약 (예: "[길]", "[파]")'
+L['Full name (e.g. "[Guild]", "[Party]")'] = '전체 이름 (예: "[길드]", "[파티]")'
+L["Force Class Colors"] = "직업 색상 강제"
 L["Enable class-colored names for all chat types (Guild, Party, Raid, Whisper, etc.) on login. This overrides Blizzard's default settings."] =
-	true
-L["Honor"] = true
-L["Simplify PvP honor gain messages."] = true
-L["Opening"] = true
-L["Hide opening and unlocking messages (lockpicking, chests)."] = true
-L["Pet Info"] = true
-L["Hide pet happiness and ability messages."] = true
-L["Misc Info"] = true
-L["Hide miscellaneous combat info like combo points and small power gains."] = true
-L["System Messages"] = true
-L["Hide repetitive system messages like session started."] = true
-L["Boss Messages"] = true
-L["Format boss emotes and whispers with distinct colors."] = true
+	"로그인 시 모든 채팅 유형(길드, 파티, 공격대, 귓속말 등)에 직업 색상 이름을 활성화합니다. 블리자드 기본 설정을 재정의합니다."
+L["Honor"] = "명예"
+L["Simplify PvP honor gain messages."] = "PvP 명예 획득 메시지를 간소화합니다."
+L["Opening"] = "열기"
+L["Hide opening and unlocking messages (lockpicking, chests)."] =
+	"열기 및 잠금 해제 메시지를 숨깁니다 (자물쇠 따기, 상자)."
+L["Pet Info"] = "소환수 정보"
+L["Hide pet happiness and ability messages."] = "소환수 행복도 및 능력 메시지를 숨깁니다."
+L["Misc Info"] = "기타 정보"
+L["Hide miscellaneous combat info like combo points and small power gains."] =
+	"연계 점수 및 소량의 자원 획득과 같은 기타 전투 정보를 숨깁니다."
+L["System Messages"] = "시스템 메시지"
+L["Hide repetitive system messages like session started."] =
+	"'세션 시작됨'과 같은 반복적인 시스템 메시지를 숨깁니다."
+L["Boss Messages"] = "보스 메시지"
+L["Format boss emotes and whispers with distinct colors."] =
+	"보스 감정 표현과 귓속말을 독특한 색상으로 포맷합니다."
 
 L["One Line Quest Rewards"] = "퀘스트 보상 한 줄 표시"
 L["Combine quest rewards (items, currency, experience) into a single line. Reputation gains remain separate per faction."] =
