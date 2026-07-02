@@ -217,33 +217,22 @@ jobs:
           echo "Created: CleanerChat.zip"
           ls -la *.zip
 
-      - name: Demote previous releases to old (pre-release)
+      - name: Demote previous latest release
         continue-on-error: true  # Don't fail the release if this step has issues
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Keep older releases instead of deleting them, so their download
-          # counts persist and the native downloads badge keeps accumulating.
-          # Each existing release is marked as a pre-release (adds the ⚠️
-          # triangle marker on GitHub) and renamed to flag it as an old version.
-          # Runs BEFORE the new release is created, so the new full release
-          # below becomes "Latest".
-          echo "Demoting existing releases to old (pre-release)..."
-          gh release list --limit 200 --json tagName --jq '.[].tagName' | while read -r TAG; do
+          # Only demote releases that are NOT already pre-releases (skip already-demoted ones)
+          echo "Checking for releases to demote..."
+          gh release list --limit 50 --json tagName,isPrerelease --jq '.[] | select(.isPrerelease == false) | .tagName' | while read -r TAG; do
             [ -z "$TAG" ] && continue
             echo "  - $TAG -> CleanerChat $TAG (old)"
-            # Retry up to 3 times with a small delay for transient API errors
-            for i in 1 2 3; do
-              if gh release edit "$TAG" \
-                --prerelease \
-                --latest=false \
-                --title "CleanerChat $TAG (old)" 2>/dev/null; then
-                break
-              fi
-              echo "    Retry $i..."
-              sleep 2
-            done || true  # Don't fail if one release fails to update
+            gh release edit "$TAG" \
+              --prerelease \
+              --latest=false \
+              --title "CleanerChat $TAG (old)" 2>/dev/null || true
           done
+          echo "Done"
 
       - name: Build release body
         id: body
