@@ -158,6 +158,7 @@ read_globals = {
   "SendAddonMessage",
   "SendChatMessage",
   "GetChatTypeIndex",
+  "SetChatColorNameByClass",
   "ChatFrame_AddMessageEventFilter",
   "ChatFrame_RemoveMessageEventFilter",
   "FCF_GetCurrentChatFrame",

@@ -136,6 +136,22 @@ local optionDB = {
 				return ns.db.capitalizeNames
 			end,
 		},
+		forceClassColors = {
+			order = 25,
+			name = L["Force Class Colors"],
+			desc = L["Enable class-colored names for all chat types (Guild, Party, Raid, Whisper, etc.) on login. This overrides Blizzard's default settings."],
+			width = "full",
+			type = "toggle",
+			set = function(info, value)
+				ns.db.forceClassColors = value
+				if value then
+					ns:ApplyClassColors()
+				end
+			end,
+			get = function(info)
+				return ns.db.forceClassColors
+			end,
+		},
 		hideOtherCrafts = {
 			order = 30,
 			name = L["Hide Crafting Broadcasts"],

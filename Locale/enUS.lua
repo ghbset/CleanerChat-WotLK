@@ -36,6 +36,10 @@ L["Capitalize the first letter of the channel name or initial. Requires the Chat
 L["Capitalize Player Names"] = true
 L["Capitalize the first letter of player names shown in chat. Requires the Player Names filter."] = true
 
+L["Force Class Colors"] = true
+L["Enable class-colored names for all chat types (Guild, Party, Raid, Whisper, etc.) on login. This overrides Blizzard's default settings."] =
+	true
+
 L["Prettify Money"] = true
 L['Display money gains and losses with coin icons (e.g. "+ 28"). When off, uses the default Blizzard text format.'] =
 	true
