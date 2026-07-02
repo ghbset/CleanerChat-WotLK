@@ -212,10 +212,12 @@ ns:SetDefaultModulePrototype(modulePrototype)
 
 -- Addon default settings.
 local defaults = {
-	channelNameMode = "initial", -- "initial" shows the first letter (e.g. "[G]"), "full" shows the whole name
+	channelNameMode = "initial", -- "initial" shows the first letter (e.g. "[G]"), "full" shows the whole name, "none" for number only
+	groupChannelNameMode = "initial", -- "initial" shows the first letter (e.g. "[G]"), "full" shows the whole name
 	channelNumber = true, -- prefix the channel display with its number, e.g. "1. "
 	channelCapitalize = true, -- capitalize the channel name/initial
 	capitalizeNames = true, -- capitalize the first letter of player names
+	forceClassColors = true, -- force enable class colors for all chat types
 	moneyPrettify = true, -- use spaces in large gold amounts (e.g. "1 234" instead of "1234")
 	hideOtherCrafts = false, -- hide other players' "<name> creates <item>" craft broadcasts
 	hideUIErrors = true, -- hide the server's "UI Error: an interface error occured" chat notification
@@ -228,14 +230,20 @@ local defaults = {
 	filters = {
 		achievements = true,
 		auctions = true,
+		bossmessages = true,
 		channels = true,
 		experience = true,
+		honor = true,
 		loot = true,
+		miscinfo = false,
 		names = true,
+		opening = false,
+		petinfo = false,
 		quests = true,
 		reputation = true,
 		spells = true,
 		status = true,
+		systemmessages = false,
 		tradeskills = true,
 	},
 }
@@ -538,6 +546,42 @@ ns.AddQuestReward = function(self, chatFrame, rewardType, rewardText)
 	return true -- Reward was buffered
 end
 
+-- Chat types that support class-colored names
+local CLASS_COLOR_CHAT_TYPES = {
+	"SAY",
+	"YELL",
+	"EMOTE",
+	"GUILD",
+	"OFFICER",
+	"PARTY",
+	"PARTY_LEADER",
+	"RAID",
+	"RAID_LEADER",
+	"RAID_WARNING",
+	"BATTLEGROUND",
+	"BATTLEGROUND_LEADER",
+	"WHISPER",
+	"CHANNEL",
+	"ACHIEVEMENT",
+	"GUILD_ACHIEVEMENT",
+}
+
+-- Apply class colors to all chat types
+ns.ApplyClassColors = function(self)
+	if not SetChatColorNameByClass then
+		return -- Function not available (shouldn't happen in 3.3.5)
+	end
+
+	for _, chatType in ipairs(CLASS_COLOR_CHAT_TYPES) do
+		SetChatColorNameByClass(chatType, true)
+	end
+
+	-- Also enable class colors for numbered channels (1-10)
+	for i = 1, 10 do
+		SetChatColorNameByClass("CHANNEL" .. i, true)
+	end
+end
+
 ns.OnInitialize = function(self)
 	self.db = self:UpgradeSettings()
 
@@ -581,6 +625,16 @@ ns.OnEnable = function(self)
 	self:GetModule("Blacklist"):Enable()
 	self:GetModule("Empty"):Enable()
 	self:GetModule("VersionCheck"):Enable()
+
+	-- Apply class colors to all chat types if enabled
+	if self.db.forceClassColors then
+		self:ApplyClassColors()
+	end
+
+	-- Initialize filter sync with Blizzard chat settings
+	if ns.FilterSync and ns.FilterSync.Initialize then
+		ns.FilterSync:Initialize()
+	end
 
 	-- Print startup message (delayed so it's visible after login spam)
 	if self.db.showStartupMessage then

@@ -8,10 +8,44 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          # Need token with write access for auto-commit
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install StyLua
+        run: |
+          curl -L https://github.com/JohnnyMorganz/StyLua/releases/latest/download/stylua-linux-x86_64.zip -o stylua.zip
+          unzip stylua.zip
+          chmod +x stylua
+          sudo mv stylua /usr/local/bin/
+
+      - name: Check and fix Lua formatting
+        id: format
+        run: |
+          echo "Checking Lua formatting with StyLua..."
+          if stylua --check .; then
+            echo "✅ Lua formatting check passed"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "Formatting issues found, auto-fixing..."
+            stylua .
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit formatting changes
+        if: steps.format.outputs.changed == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-format with StyLua"
+          commit_user_name: "github-actions[bot]"
+          commit_user_email: "github-actions[bot]@users.noreply.github.com"
 
       - name: Cache Lua tools
         uses: actions/cache@v4
@@ -67,24 +101,6 @@ jobs:
               echo "❌ Luacheck found errors! Fix them before merging."
             fi
             exit $EXIT_CODE
-          fi
-
-      - name: Install StyLua
-        run: |
-          curl -L https://github.com/JohnnyMorganz/StyLua/releases/latest/download/stylua-linux-x86_64.zip -o stylua.zip
-          unzip stylua.zip
-          chmod +x stylua
-          sudo mv stylua /usr/local/bin/
-
-      - name: Check Lua formatting
-        run: |
-          echo "Checking Lua formatting with StyLua..."
-          if stylua --check .; then
-            echo "✅ Lua formatting check passed"
-          else
-            echo ""
-            echo "❌ Lua formatting issues found! Run 'stylua .' locally to fix."
-            exit 1
           fi
 
       - name: Install busted (unit test framework)
@@ -157,11 +173,30 @@ jobs:
           fi
           echo "✅ Locale check passed"
 
+      # ============================================================================
+      # IMPORTANT: LOCALE TRANSLATION POLICY
+      # ============================================================================
+      # All locale strings MUST have real translations - NOT fallbacks (= true).
+      # Using `= true` as a fallback is NOT accepted except for short channel
+      # abbreviations (BGL, BG, PL, P, RL, R, IL, I, G, O, DG) which are often
+      # the same across languages.
+      #
+      # When adding new locale keys:
+      # 1. Add the English string to Locale/enUS.lua
+      # 2. Provide REAL TRANSLATIONS for ALL other locale files
+      # 3. Do NOT use `= true` as a placeholder - this will fail CI
+      #
+      # AI/developers: Always provide proper translations for all supported
+      # languages when adding new locale strings.
+      # ============================================================================
       - name: Locale fallback check
         run: |
           echo "Checking for untranslated fallbacks (= true)..."
+          echo "NOTE: All locale strings must have real translations, not '= true' fallbacks."
+          echo ""
           
-          ALLOWED_FALLBACKS="BGL|BG|PL|P|RL|R|IL|I|G|O"
+          # Only these short channel abbreviations may use fallbacks (same across languages)
+          ALLOWED_FALLBACKS="BGL|BG|PL|P|RL|R|IL|I|G|O|DG"
           
           ERRORS=0
           for LOCALE_FILE in Locale/*.lua; do
@@ -185,6 +220,7 @@ jobs:
           if [[ $ERRORS -gt 0 ]]; then
             echo ""
             echo "❌ Fallback check failed: $ERRORS locale file(s) have untranslated strings"
+            echo "All locale strings must have real translations. Do NOT use '= true' as a placeholder."
             exit 1
           fi
           echo "✅ Locale fallback check passed"
@@ -262,7 +298,7 @@ jobs:
           echo "✅ Orphan translations check passed"
 
       - name: Discord notification on failure
-        if: failure()
+        if: failure() && github.event_name == 'pull_request'
         run: |
           curl -H "Content-Type: application/json" \
                -d "{\"embeds\": [{\"title\": \"❌ CleanerChat Validation Failed\", \"description\": \"The validation workflow failed on PR #${{ github.event.pull_request.number }}\", \"color\": 15158332, \"fields\": [{\"name\": \"PR\", \"value\": \"[#${{ github.event.pull_request.number }}](${{ github.event.pull_request.html_url }})\", \"inline\": true}, {\"name\": \"Branch\", \"value\": \"\`${{ github.head_ref }}\`\", \"inline\": true}, {\"name\": \"Run\", \"value\": \"[View Logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": true}]}]}" \

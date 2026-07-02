@@ -30,6 +30,10 @@ local setter = function(info, val)
 			module:Disable()
 		end
 	end
+	-- Sync with Blizzard's chat filter settings
+	if ns.SyncFilterToBlizzard then
+		ns.SyncFilterToBlizzard(info[#info], val)
+	end
 	Options:UpdateReloadStatus()
 end
 
@@ -44,13 +48,14 @@ local optionDB = {
 	args = {
 		channelNameMode = {
 			order = 10,
-			name = L["Channel Name Style"],
-			desc = L["Choose whether to show the channel's full name or just its first letter. Requires the Chat Channel Names filter."],
+			name = L["Numbered Channel Style"],
+			desc = L["How to display numbered channels like General, Trade, LocalDefense. Requires the Chat Channel Names filter."],
 			width = 1.25,
 			type = "select",
 			values = {
 				initial = L['Shortened (e.g. "[G]")'],
 				full = L['Full name (e.g. "[General]")'],
+				none = L['Number only (e.g. "1.")'],
 			},
 			disabled = function(info)
 				return not ns.db.filters.channels
@@ -61,6 +66,27 @@ local optionDB = {
 			end,
 			get = function(info)
 				return ns.db.channelNameMode
+			end,
+		},
+		groupChannelNameMode = {
+			order = 10.5,
+			name = L["Group Channel Style"],
+			desc = L["How to display group channels like Guild, Party, Raid, Officer. Requires the Chat Channel Names filter."],
+			width = 1.25,
+			type = "select",
+			values = {
+				initial = L['Shortened (e.g. "[G]", "[P]")'],
+				full = L['Full name (e.g. "[Guild]", "[Party]")'],
+			},
+			disabled = function(info)
+				return not ns.db.filters.channels
+			end,
+			set = function(info, value)
+				ns.db.groupChannelNameMode = value
+				Options:UpdateReloadStatus()
+			end,
+			get = function(info)
+				return ns.db.groupChannelNameMode
 			end,
 		},
 		channelNumber = {
@@ -112,6 +138,22 @@ local optionDB = {
 			end,
 			get = function(info)
 				return ns.db.capitalizeNames
+			end,
+		},
+		forceClassColors = {
+			order = 25,
+			name = L["Force Class Colors"],
+			desc = L["Enable class-colored names for all chat types (Guild, Party, Raid, Whisper, etc.) on login. This overrides Blizzard's default settings."],
+			width = "full",
+			type = "toggle",
+			set = function(info, value)
+				ns.db.forceClassColors = value
+				if value then
+					ns:ApplyClassColors()
+				end
+			end,
+			get = function(info)
+				return ns.db.forceClassColors
 			end,
 		},
 		hideOtherCrafts = {
@@ -317,6 +359,54 @@ local filterDB = {
 	tradeskills = {
 		name = L["Learning (Crafting)"],
 		desc = L["Simplify messages about new or improved trade skills."],
+		width = 1.5,
+		type = "toggle",
+		set = setter,
+		get = getter,
+	},
+	honor = {
+		name = L["Honor"],
+		desc = L["Simplify PvP honor gain messages."],
+		width = 1.5,
+		type = "toggle",
+		set = setter,
+		get = getter,
+	},
+	opening = {
+		name = L["Opening"],
+		desc = L["Hide opening and unlocking messages (lockpicking, chests)."],
+		width = 1.5,
+		type = "toggle",
+		set = setter,
+		get = getter,
+	},
+	petinfo = {
+		name = L["Pet Info"],
+		desc = L["Hide pet happiness and ability messages."],
+		width = 1.5,
+		type = "toggle",
+		set = setter,
+		get = getter,
+	},
+	miscinfo = {
+		name = L["Misc Info"],
+		desc = L["Hide miscellaneous combat info like combo points and small power gains."],
+		width = 1.5,
+		type = "toggle",
+		set = setter,
+		get = getter,
+	},
+	systemmessages = {
+		name = L["System Messages"],
+		desc = L["Hide repetitive system messages like session started."],
+		width = 1.5,
+		type = "toggle",
+		set = setter,
+		get = getter,
+	},
+	bossmessages = {
+		name = L["Boss Messages"],
+		desc = L["Format boss emotes and whispers with distinct colors."],
 		width = 1.5,
 		type = "toggle",
 		set = setter,

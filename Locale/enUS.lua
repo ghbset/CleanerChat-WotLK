@@ -15,11 +15,16 @@ L["G"] = true -- Guild
 L["O"] = true -- Officer
 L["DG"] = true -- Dungeon Guide (Ascension)
 
-L["Channel Name Style"] = true
-L["Choose whether to show the channel's full name or just its first letter. Requires the Chat Channel Names filter."] =
-	true
+L["Numbered Channel Style"] = true
+L["How to display numbered channels like General, Trade, LocalDefense. Requires the Chat Channel Names filter."] = true
 L['Shortened (e.g. "[G]")'] = true
 L['Full name (e.g. "[General]")'] = true
+L['Number only (e.g. "1.")'] = true
+
+L["Group Channel Style"] = true
+L["How to display group channels like Guild, Party, Raid, Officer. Requires the Chat Channel Names filter."] = true
+L['Shortened (e.g. "[G]", "[P]")'] = true
+L['Full name (e.g. "[Guild]", "[Party]")'] = true
 
 L["Show Channel Number"] = true
 L['Prefix the channel display with its number, e.g. "1. ". Requires the Chat Channel Names filter.'] = true
@@ -29,6 +34,10 @@ L["Capitalize the first letter of the channel name or initial. Requires the Chat
 
 L["Capitalize Player Names"] = true
 L["Capitalize the first letter of player names shown in chat. Requires the Player Names filter."] = true
+
+L["Force Class Colors"] = true
+L["Enable class-colored names for all chat types (Guild, Party, Raid, Whisper, etc.) on login. This overrides Blizzard's default settings."] =
+	true
 
 L["Prettify Money"] = true
 L['Display money gains and losses with coin icons (e.g. "+ 28"). When off, uses the default Blizzard text format.'] =
@@ -88,6 +97,24 @@ L["Blacklist messages about new or removed spells, typically spammed on speciali
 
 L["Player Status"] = true
 L["Simplify status messages about AFK, DND and being rested."] = true
+
+L["Honor"] = true
+L["Simplify PvP honor gain messages."] = true
+
+L["Opening"] = true
+L["Hide opening and unlocking messages (lockpicking, chests)."] = true
+
+L["Pet Info"] = true
+L["Hide pet happiness and ability messages."] = true
+
+L["Misc Info"] = true
+L["Hide miscellaneous combat info like combo points and small power gains."] = true
+
+L["System Messages"] = true
+L["Hide repetitive system messages like session started."] = true
+
+L["Boss Messages"] = true
+L["Format boss emotes and whispers with distinct colors."] = true
 
 L["Learning (Crafting)"] = true
 L["Simplify messages about new or improved trade skills."] = true

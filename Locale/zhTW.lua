@@ -9,9 +9,6 @@ L["Delete window"] = "刪除視窗"
 L["CleanerChat settings"] = "CleanerChat 設定"
 L["Use %s for settings."] = "使用 %s 開啟設定。"
 
-L["Channel Name Style"] = "頻道名稱樣式"
-L["Choose whether to show the channel's full name or just its first letter. Requires the Chat Channel Names filter."] =
-	"選擇顯示頻道的完整名稱或僅顯示首字母。需要啟用「聊天頻道名稱」過濾器。"
 L['Shortened (e.g. "[G]")'] = '縮寫（例如 "[G]"）'
 L['Full name (e.g. "[General]")'] = '完整名稱（例如 "[General]"）'
 L["Show Channel Number"] = "顯示頻道編號"
@@ -64,6 +61,33 @@ L["Simplify status messages about AFK, DND and being rested."] =
 	"簡化關於暫離、忙碌與充分休息狀態的訊息。"
 L["Learning (Crafting)"] = "學習（製造）"
 L["Simplify messages about new or improved trade skills."] = "簡化關於新學或提升專業技能的訊息。"
+
+-- New filter translations
+L["Numbered Channel Style"] = "編號頻道樣式"
+L["How to display numbered channels like General, Trade, LocalDefense. Requires the Chat Channel Names filter."] =
+	"如何顯示編號頻道，如綜合、交易、本地防務。需要'聊天頻道名稱'過濾器。"
+L["Group Channel Style"] = "組隊頻道樣式"
+L["How to display group channels like Guild, Party, Raid, Officer. Requires the Chat Channel Names filter."] =
+	"如何顯示組隊頻道，如公會、小隊、團隊、官員。需要'聊天頻道名稱'過濾器。"
+L['Shortened (e.g. "[G]", "[P]")'] = '縮寫（如 "[公]", "[隊]")'
+L['Full name (e.g. "[Guild]", "[Party]")'] = '全名（如 "[公會]", "[小隊]")'
+L["Force Class Colors"] = "強制職業顏色"
+L["Enable class-colored names for all chat types (Guild, Party, Raid, Whisper, etc.) on login. This overrides Blizzard's default settings."] =
+	"登入時為所有聊天類型（公會、小隊、團隊、密語等）啟用職業顏色名稱。這將覆蓋暴雪的預設設定。"
+L["Honor"] = "榮譽"
+L["Simplify PvP honor gain messages."] = "簡化PvP榮譽獲取訊息。"
+L["Opening"] = "打開中"
+L["Hide opening and unlocking messages (lockpicking, chests)."] = "隱藏打開和解鎖訊息（開鎖、寶箱）。"
+L["Pet Info"] = "寵物資訊"
+L["Hide pet happiness and ability messages."] = "隱藏寵物快樂度和技能訊息。"
+L["Misc Info"] = "雜項資訊"
+L["Hide miscellaneous combat info like combo points and small power gains."] =
+	"隱藏雜項戰鬥資訊，如連擊點和少量能量獲取。"
+L["System Messages"] = "系統訊息"
+L["Hide repetitive system messages like session started."] = "隱藏重複的系統訊息，如'會話已開始'。"
+L["Boss Messages"] = "首領訊息"
+L["Format boss emotes and whispers with distinct colors."] = "用獨特顏色格式化首領表情和密語。"
+
 L["One Line Quest Rewards"] = "任務獎勵單行顯示"
 L["Combine quest rewards (items, currency, experience) into a single line. Reputation gains remain separate per faction."] =
 	"將任務獎勵（物品、貨幣、經驗）合併為一行。聲望獲取按陣營單獨顯示。"
