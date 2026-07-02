@@ -217,6 +217,7 @@ jobs:
           ls -la *.zip
 
       - name: Demote previous releases to old (pre-release)
+        continue-on-error: true  # Don't fail the release if this step has issues
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -230,10 +231,17 @@ jobs:
           gh release list --limit 200 --json tagName --jq '.[].tagName' | while read -r TAG; do
             [ -z "$TAG" ] && continue
             echo "  - $TAG -> CleanerChat $TAG (old)"
-            gh release edit "$TAG" \
-              --prerelease \
-              --latest=false \
-              --title "CleanerChat $TAG (old)"
+            # Retry up to 3 times with a small delay for transient API errors
+            for i in 1 2 3; do
+              if gh release edit "$TAG" \
+                --prerelease \
+                --latest=false \
+                --title "CleanerChat $TAG (old)" 2>/dev/null; then
+                break
+              fi
+              echo "    Retry $i..."
+              sleep 2
+            done || true  # Don't fail if one release fails to update
           done
 
       - name: Build release body
