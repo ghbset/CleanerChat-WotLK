@@ -40,18 +40,12 @@ jobs:
           fi
 
       - name: Commit formatting changes
-        if: steps.format.outputs.changed == 'true' && github.event_name == 'push'
+        if: steps.format.outputs.changed == 'true'
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "style: auto-format with StyLua"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
-
-      - name: Fail on formatting issues (PR only)
-        if: steps.format.outputs.changed == 'true' && github.event_name == 'pull_request'
-        run: |
-          echo "❌ Lua formatting issues found! Run 'stylua .' locally to fix."
-          exit 1
 
       - name: Cache Lua tools
         uses: actions/cache@v4
