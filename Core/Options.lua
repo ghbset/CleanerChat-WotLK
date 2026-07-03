@@ -173,20 +173,6 @@ local optionDB = {
 				return ns.db.hideOtherCrafts
 			end,
 		},
-		hideUIErrors = {
-			order = 40,
-			name = L["Hide UI Error Messages on Login from CleanerChat"],
-			desc = L['Hide the "UI Error: an interface error occurred" notifications the server prints to chat when a UI error happens.'],
-			width = "full",
-			type = "toggle",
-			set = function(info, value)
-				ns.db.hideUIErrors = value
-				Options:UpdateReloadStatus()
-			end,
-			get = function(info)
-				return ns.db.hideUIErrors
-			end,
-		},
 		showStartupMessage = {
 			order = 45,
 			name = L["Show Startup Message"],
