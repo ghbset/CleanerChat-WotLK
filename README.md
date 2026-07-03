@@ -143,6 +143,8 @@ Built for the **3.3.5a** (WotLK, interface `30300`) client.
 > **Note:** CleanerChat is primarily developed and tested on **[Ascension WoW](https://ascension.gg/)**. While it should work on native 3.3.5a clients, there may be minor differences in styling or behavior. If you encounter any issues on a non-Ascension client, please [open an issue](https://github.com/migwynkriid/CleanerChat-WotLK/issues) — compatibility patches will be provided as needed.
 >
 > **Other customized servers:** Heavily modified private servers (beyond the standard 3.3.5a experience) may or may not work with CleanerChat. Compatibility is not guaranteed for such environments.
+>
+> **Other chat addons:** Running CleanerChat alongside other chat modification addons (such as **Prat**, **ElvUI** chat modules, or similar) is **not fully supported**. These addons often hook the same chat functions and may conflict with CleanerChat's filters or UI replacements. For the best experience, disable other chat-modifying addons when using CleanerChat.
 
 Includes:
 
