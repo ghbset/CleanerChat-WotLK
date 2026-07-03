@@ -124,78 +124,6 @@ jobs:
           cat changelog.txt >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
-      - name: Generate AI summary
-        id: ai_summary
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: |
-          # Skip if no API key configured
-          if [ -z "$GEMINI_API_KEY" ]; then
-            echo "No GEMINI_API_KEY secret configured, skipping AI summary"
-            echo "summary=" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          echo "GEMINI_API_KEY is set, proceeding with AI summary..."
-          
-          # Read the raw changelog
-          COMMITS=$(cat changelog.txt)
-          echo "Commits to summarize:"
-          echo "$COMMITS"
-          
-          # Skip AI if no real changes
-          if [ "$COMMITS" = "- Initial release" ]; then
-            echo "summary=" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          # Create prompt - jq handles escaping
-          PROMPT="You are writing a changelog summary for a WoW addon.
-
-          RULES:
-          - Write like a normal person, not a corporate PR team
-          - NO words like: enhanced, streamlined, robust, seamless, leverage, utilize, optimize, elevate
-          - NO phrases like: we're excited, happy to announce, this release brings
-          - Just say what changed. Plain English. Short sentences.
-          - Max 3-4 bullet points total
-          - Group similar changes together
-          - If it's a fix, just say Fixed X
-          - If it's new, just say Added X
-          - Skip anything boring (version bumps, formatting, CI changes, trigger commits)
-          - Start each bullet with -
-
-          COMMITS:
-          $COMMITS
-
-          Write 2-4 short bullet points summarizing what actually matters to users:"
-          
-          # Use Gemini API (free tier)
-          echo "Calling Gemini API..."
-          RESPONSE=$(curl -s -X POST \
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${GEMINI_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d "$(jq -n --arg prompt "$PROMPT" '{
-              "contents": [{"parts": [{"text": $prompt}]}],
-              "generationConfig": {"maxOutputTokens": 200, "temperature": 0.3}
-            }')")
-          
-          echo "API Response received"
-          
-          # Extract the summary from Gemini response
-          SUMMARY=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text // empty' 2>/dev/null || echo "")
-          
-          if [ -n "$SUMMARY" ]; then
-            echo "AI summary generated successfully:"
-            echo "$SUMMARY"
-            echo "summary<<EOF" >> $GITHUB_OUTPUT
-            echo "$SUMMARY" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
-          else
-            echo "AI summary failed. Response:"
-            echo "$RESPONSE" | head -500
-            echo "summary=" >> $GITHUB_OUTPUT
-          fi
-
       - name: Create addon zip
         run: |
           # Create a clean directory for the addon
@@ -252,24 +180,8 @@ jobs:
             echo ""
             echo "A modern chat UI overhaul with message filtering, animations, and extensive customization for WoW 3.3.5a."
             echo ""
-            
-            # Add AI summary if available
-            AI_SUMMARY='${{ steps.ai_summary.outputs.summary }}'
-            if [ -n "$AI_SUMMARY" ]; then
-              echo "### What's New"
-              echo "$AI_SUMMARY"
-              echo ""
-              echo "<details>"
-              echo "<summary>All commits</summary>"
-              echo ""
-              echo '${{ steps.changelog.outputs.changelog }}'
-              echo ""
-              echo "</details>"
-            else
-              echo "### Changes"
-              echo '${{ steps.changelog.outputs.changelog }}'
-            fi
-            
+            echo "### Changes"
+            echo '${{ steps.changelog.outputs.changelog }}'
             echo ""
             echo "### Installation"
             echo "1. Download \`CleanerChat.zip\`"
