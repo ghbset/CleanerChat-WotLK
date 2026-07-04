@@ -174,6 +174,7 @@ L["Position"] = true
 L["Above"] = true
 L["Below"] = true
 L["Vertical offset"] = true
+L["Horizontal padding"] = true
 L["Behavior"] = true
 L["Show chat on focus"] = true
 L["When enabled, opening the edit box (pressing Enter or clicking) reveals the chat messages."] = true

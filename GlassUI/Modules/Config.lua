@@ -426,7 +426,7 @@ function C:OnEnable()
 								},
 								editBoxAnchorYOfs = {
 									name = L["Vertical offset"],
-									desc = "Default: 5 or -5",
+									desc = "Default: " .. Core.defaults.profile.editBoxAnchor.yOfs,
 									type = "range",
 									order = 2.1,
 									min = -9999,
@@ -442,6 +442,17 @@ function C:OnEnable()
 										Core:Dispatch(UpdateConfig("editBoxAnchor", WindowIdFor(info)))
 									end,
 								},
+								editBoxHorizontalPadding = rangeOption({
+									key = "editBoxHorizontalPadding",
+									name = L["Horizontal padding"],
+									desc = "Default: " .. Core.defaults.profile.editBoxHorizontalPadding,
+									order = 2.3,
+									min = 0,
+									max = 100,
+									softMin = 0,
+									softMax = 50,
+									step = 1,
+								}),
 							},
 						},
 						section3 = {
