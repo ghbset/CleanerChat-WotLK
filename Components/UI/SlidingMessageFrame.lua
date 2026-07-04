@@ -540,7 +540,7 @@ function SlidingMessageFrameMixin:AddMessage(...)
 	if not self.state.rawMessages then
 		self.state.rawMessages = {}
 	end
-	local frame, text, r, g, b = ...
+	local _, text, r, g, b = ...
 	if text then
 		table.insert(self.state.rawMessages, { text = text, r = r or 1, g = g or 1, b = b or 1 })
 		-- Trim to history limit

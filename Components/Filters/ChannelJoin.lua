@@ -29,7 +29,7 @@ end
 
 -- Filter the actual CHAT_MSG_CHANNEL_NOTICE event
 -- In WotLK 3.3.5, message is the notice type like "YOU_JOINED", "YOU_LEFT", "YOU_CHANGED"
-Module.OnChatEvent = function(self, chatFrame, event, message, ...)
+Module.OnChatEvent = function(_, _, _, message)
 	-- Filter all channel join/leave/change notices
 	if message == "YOU_JOINED" or message == "YOU_LEFT" or message == "YOU_CHANGED" then
 		return true
