@@ -244,6 +244,7 @@ function C:OnEnable()
 									name = L["Hide Combat Log tab"],
 									desc = L["Hides the Combat Log tab from the chat dock. Requires a UI reload."],
 									type = "toggle",
+									width = "full",
 									order = 2.2,
 									hidden = function(info)
 										-- Only show for Main window (combat log is only on main)
@@ -489,6 +490,7 @@ function C:OnEnable()
 									name = L["Show chat on focus"],
 									desc = L["When enabled, opening the edit box (pressing Enter or clicking) reveals the chat messages."],
 									type = "toggle",
+									width = "full",
 									order = 3.1,
 									get = function(info)
 										return ProfileFor(info).showOnEditFocus
@@ -617,6 +619,7 @@ function C:OnEnable()
 									name = L["Restore chat on reload"],
 									desc = L["Restores recent chat messages after a UI reload."],
 									type = "toggle",
+									width = "full",
 									order = 1.7,
 									get = function()
 										return Core.db.profile.restoreChatMessages
@@ -637,6 +640,7 @@ function C:OnEnable()
 									name = L["Disable animations"],
 									desc = L["Show messages instantly with no slide or fade -- the chat becomes static. The timing sliders below have no effect while this is on."],
 									type = "toggle",
+									width = "full",
 									order = 2.0,
 									get = function(info)
 										return ProfileFor(info).messageAnimations == false
@@ -650,6 +654,7 @@ function C:OnEnable()
 									name = L["Keep messages visible"],
 									desc = L["Messages never fade out -- they stay on screen permanently. Overrides the fade out delay and duration below."],
 									type = "toggle",
+									width = "full",
 									order = 2.01,
 									get = function(info)
 										return ProfileFor(info).messagesAlwaysVisible
@@ -751,6 +756,7 @@ function C:OnEnable()
 									name = L["Indent on line wrap"],
 									desc = L["Adds an indent when a message wraps beyond a single line."],
 									type = "toggle",
+									width = "full",
 									order = 3.1,
 									get = function(info)
 										return ProfileFor(info).indentWordWrap
@@ -764,6 +770,7 @@ function C:OnEnable()
 									name = L["Mouse over tooltips"],
 									desc = L["Should tooltips appear when hovering over chat links."],
 									type = "toggle",
+									width = "full",
 									order = 3.2,
 									get = function(info)
 										return ProfileFor(info).mouseOverTooltips
@@ -797,6 +804,7 @@ function C:OnEnable()
 									name = L["Show messages on hover"],
 									desc = L["When enabled, hovering over the chat reveals faded messages. When disabled, only scrolling reveals them."],
 									type = "toggle",
+									width = "full",
 									order = 3.3,
 									get = function(info)
 										return ProfileFor(info).messagesOnHover
@@ -810,6 +818,7 @@ function C:OnEnable()
 									name = L["Show timestamps"],
 									desc = L["Prepend each message with a timestamp in [HH:MM] format."],
 									type = "toggle",
+									width = "full",
 									order = 3.35,
 									get = function(info)
 										return ProfileFor(info).showTimestamps
@@ -1167,6 +1176,7 @@ function C:OnEnable()
 									name = L["Flash on new message"],
 									desc = L["Flash inactive tabs when they receive a new message to draw attention."],
 									type = "toggle",
+									width = "full",
 									order = 1.98,
 									hidden = function(info)
 										local style = ProfileFor(info).tabStyle or "minimal"
@@ -1220,6 +1230,7 @@ function C:OnEnable()
 									name = L["Disable animations"],
 									desc = L["Show and hide the top bar instantly with no fade -- the tabs become static. The timing sliders below have no effect while this is on."],
 									type = "toggle",
+									width = "full",
 									order = 2.0,
 									get = function(info)
 										return ProfileFor(info).dockAnimations == false
@@ -1233,6 +1244,7 @@ function C:OnEnable()
 									name = L["Keep tabs visible"],
 									desc = L["Chat tabs never fade out -- they stay on screen permanently. Overrides the fade out delay and duration below."],
 									type = "toggle",
+									width = "full",
 									order = 2.01,
 									get = function(info)
 										return ProfileFor(info).tabsAlwaysVisible
@@ -1307,6 +1319,7 @@ function C:OnEnable()
 									name = L["Show tabs on hover"],
 									desc = L["When enabled, chat tabs fade out when idle and reappear on mouse hover. When disabled, tabs are always visible."],
 									type = "toggle",
+									width = "full",
 									order = 2.02,
 									get = function(info)
 										return ProfileFor(info).tabsOnHover
