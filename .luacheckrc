@@ -500,6 +500,7 @@ read_globals = {
   "TradeFrame",
   "TradeSkillFrame",
   "InterfaceOptionsFrame",
+  "InterfaceOptions_AddCategory",
   "SettingsPanel",
   "VideoOptionsFrame",
 

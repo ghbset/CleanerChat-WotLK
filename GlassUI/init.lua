@@ -45,6 +45,7 @@ Core.defaults = {
 		-- General
 		frameWidth = 520,
 		frameHeight = 340,
+		hideCombatLog = true,
 		positionAnchor = {
 			point = "BOTTOMLEFT",
 			xOfs = 20,
@@ -57,6 +58,7 @@ Core.defaults = {
 		editBoxFontFlags = "OUTLINE",
 		editBoxBackgroundOpacity = 0.6,
 		editBoxBackgroundColor = { r = 17 / 255, g = 17 / 255, b = 17 / 255 }, -- codGray
+		editBoxHorizontalPadding = 1,
 		editBoxAnchor = {
 			position = "BELOW",
 			yOfs = -5,
@@ -75,6 +77,7 @@ Core.defaults = {
 		messageLinePadding = 0.25,
 		messageLeftPadding = 3,
 		messageHistoryLimit = 128,
+		restoreChatMessages = true,
 
 		chatHoldTime = 14,
 		chatFadeInDuration = 0.6,
@@ -127,6 +130,11 @@ Core.defaults = {
 		-- flat keys above; each additional window stores its own full copy of the
 		-- window-scoped style settings here, keyed by window id (see Core:GetWindowProfile).
 		windows = {},
+	},
+	-- Global storage for chat history (persists across profile changes, per-character)
+	global = {
+		chatHistory = {},
+		chatHistoryTime = 0,
 	},
 }
 

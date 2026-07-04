@@ -46,15 +46,16 @@ function EditBoxMixin:Init(parent)
 	-- New styling
 	self:ClearAllPoints()
 
-	self:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 8, self.profile.editBoxAnchor.yOfs)
+	local Xpadding = self.profile.editBoxHorizontalPadding or Constants.EDITBOX_HORIZONTAL_PADDING
+	self:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", Xpadding, self.profile.editBoxAnchor.yOfs)
 
 	if self.profile.editBoxAnchor.position == "ABOVE" then
 		self:ClearAllPoints()
-		self:SetPoint("BOTTOMLEFT", parent, "TOPLEFT", 8, self.profile.editBoxAnchor.yOfs)
+		self:SetPoint("BOTTOMLEFT", parent, "TOPLEFT", Xpadding, self.profile.editBoxAnchor.yOfs)
 	end
 
 	self:SetFontObject("GlassEditBoxFont")
-	self:SetWidth(self.profile.frameWidth - 8 * 2)
+	self:SetWidth(self.profile.frameWidth - Xpadding)
 	self.header:SetFontObject("GlassEditBoxFont")
 	self.header:SetPoint("LEFT", 8, 0)
 
@@ -170,8 +171,18 @@ function EditBoxMixin:Init(parent)
 			self:SetTextInsets()
 		end
 
-		if key == "frameWidth" then
-			self:SetWidth(self.profile.frameWidth - 8 * 2)
+		if key == "frameWidth" or key == "editBoxHorizontalPadding" then
+			local xPad = self.profile.editBoxHorizontalPadding or Constants.EDITBOX_HORIZONTAL_PADDING
+			self:SetWidth(self.profile.frameWidth - xPad)
+			-- Re-anchor with new padding
+			local anchorParent = self:GetParent() or parent
+			if self.profile.editBoxAnchor.position == "ABOVE" then
+				self:ClearAllPoints()
+				self:SetPoint("BOTTOMLEFT", anchorParent, "TOPLEFT", xPad, self.profile.editBoxAnchor.yOfs)
+			else
+				self:ClearAllPoints()
+				self:SetPoint("TOPLEFT", anchorParent, "BOTTOMLEFT", xPad, self.profile.editBoxAnchor.yOfs)
+			end
 		end
 
 		if key == "editBoxBackgroundOpacity" or key == "editBoxBackgroundColor" then
@@ -182,12 +193,13 @@ function EditBoxMixin:Init(parent)
 			-- Anchor relative to whichever window container the box is currently
 			-- attached to (it follows the active window), not the original parent.
 			local anchorParent = self:GetParent() or parent
+			local xPad = self.profile.editBoxHorizontalPadding or Constants.EDITBOX_HORIZONTAL_PADDING
 			if self.profile.editBoxAnchor.position == "ABOVE" then
 				self:ClearAllPoints()
-				self:SetPoint("BOTTOMLEFT", anchorParent, "TOPLEFT", 8, self.profile.editBoxAnchor.yOfs)
+				self:SetPoint("BOTTOMLEFT", anchorParent, "TOPLEFT", xPad, self.profile.editBoxAnchor.yOfs)
 			else
 				self:ClearAllPoints()
-				self:SetPoint("TOPLEFT", anchorParent, "BOTTOMLEFT", 8, self.profile.editBoxAnchor.yOfs)
+				self:SetPoint("TOPLEFT", anchorParent, "BOTTOMLEFT", xPad, self.profile.editBoxAnchor.yOfs)
 			end
 		end
 	end)
@@ -200,14 +212,17 @@ function EditBoxMixin:AttachToWindow(parent, profile, window)
 	self.profile = profile or self.profile
 	self.window = window
 
+	local Xpadding = self.profile.editBoxHorizontalPadding or Constants.EDITBOX_HORIZONTAL_PADDING
 	self:SetParent(parent)
 	self:ClearAllPoints()
 	if self.profile.editBoxAnchor.position == "ABOVE" then
-		self:SetPoint("BOTTOMLEFT", parent, "TOPLEFT", 8, self.profile.editBoxAnchor.yOfs)
+		self:SetPoint("BOTTOMLEFT", parent, "TOPLEFT", Xpadding, self.profile.editBoxAnchor.yOfs)
 	else
-		self:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", 8, self.profile.editBoxAnchor.yOfs)
+		self:SetPoint("TOPLEFT", parent, "BOTTOMLEFT", Xpadding, self.profile.editBoxAnchor.yOfs)
 	end
-	self:SetWidth(self.profile.frameWidth - 8 * 2)
+	self:SetWidth(self.profile.frameWidth - Xpadding)
+	self.header:SetPoint("LEFT", 8, 0)
+	self:SetTextInsets()
 
 	-- Apply the new window's visual settings
 	self:UpdateFontFromProfile()

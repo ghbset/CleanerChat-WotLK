@@ -199,6 +199,11 @@ function UIManager:OnEnable()
 				smf.profile = owner.profile
 				local isActive = IsChatFrameActive(i)
 
+				-- Skip Combat Log tab if hideCombatLog is enabled
+				if isCombatLog and Core.db.profile.hideCombatLog then
+					isActive = false
+				end
+
 				if isActive then
 					local tab = CreateChatTab(smf)
 					owner.tabs[i] = tab
@@ -307,12 +312,20 @@ function UIManager:OnEnable()
 		ns.Timer.After(2, function()
 			SetupTabs(true)
 		end)
+		-- Restore chat messages after 1 second (like Leatrix_Plus)
+		ns.Timer.After(1, function()
+			self:RestoreChatMessages()
+		end)
 	elseif C_Timer and C_Timer.After then
 		C_Timer.After(0.5, function()
 			SetupTabs(true)
 		end)
 		C_Timer.After(2, function()
 			SetupTabs(true)
+		end)
+		-- Restore chat messages after 1 second (like Leatrix_Plus)
+		C_Timer.After(1, function()
+			self:RestoreChatMessages()
 		end)
 	end
 
@@ -560,6 +573,146 @@ function UIManager:SetupTopBarButtonToggles()
 			end
 		end)
 	end
+
+	-- Register PLAYER_LOGOUT and PLAYER_LEAVING_WORLD to save chat history
+	-- PLAYER_LEAVING_WORLD fires on /reload, PLAYER_LOGOUT on actual logout
+	if not self._logoutRegistered then
+		self._logoutRegistered = true
+		local logoutFrame = CreateFrame("Frame")
+		logoutFrame:RegisterEvent("PLAYER_LOGOUT")
+		logoutFrame:RegisterEvent("PLAYER_LEAVING_WORLD")
+		local uiManager = self -- Capture self for closure
+		local hasSaved = false -- Prevent double-save
+		logoutFrame:SetScript("OnEvent", function()
+			if hasSaved then
+				return
+			end
+			hasSaved = true
+			uiManager:SaveChatMessages()
+		end)
+	end
+end
+
+-- Save chat messages to global storage for restore after reload
+-- Uses Blizzard's GetNumMessages/GetMessageInfo APIs to get actual displayed messages
+function UIManager:SaveChatMessages()
+	if not Core.db.profile.restoreChatMessages then
+		-- Clear any stored history if feature is disabled
+		Core.db.global.chatHistory = {}
+		Core.db.global.chatHistoryTime = 0
+		return
+	end
+
+	-- Build chat type index to name mapping for color lookup
+	local chatTypeIndexToName = {}
+	for t in pairs(ChatTypeInfo) do
+		local idx = GetChatTypeIndex(t)
+		if idx then
+			chatTypeIndexToName[idx] = t
+		end
+	end
+
+	-- Helper to wrap message with its chat type color
+	local function WrapWithColor(msg, lineID)
+		if not msg then
+			return nil
+		end
+		-- Strip textures and atlases that can't be serialized well
+		msg = msg:gsub("|T.-|t", "")
+		msg = msg:gsub("|A.-|a", "")
+
+		-- Get color from chat type info
+		local inf = ChatTypeInfo[chatTypeIndexToName[lineID]]
+		local r, g, b = (inf and inf.r) or 1, (inf and inf.g) or 1, (inf and inf.b) or 1
+		local hex = string.format("|cff%02x%02x%02x", r * 255, g * 255, b * 255)
+
+		-- Wrap message with color and handle |r resets
+		return hex .. msg:gsub("|r", "|r" .. hex) .. "|r"
+	end
+
+	Core.db.global.chatHistory = {}
+	Core.db.global.chatHistoryTime = time()
+
+	-- Save from Blizzard chat frames directly (like Leatrix_Plus does)
+	for i = 1, NUM_CHAT_WINDOWS do
+		-- Skip combat log (index 2)
+		if i ~= 2 then
+			local chatFrame = _G["ChatFrame" .. i]
+			if chatFrame and chatFrame.GetNumMessages and chatFrame.GetMessageInfo then
+				local num = chatFrame:GetNumMessages()
+				if num and num > 0 then
+					local historyKey = "ChatFrame" .. i
+					Core.db.global.chatHistory[historyKey] = {}
+
+					-- Only save the last 50 messages
+					local first = (num > 50) and (num - 50 + 1) or 1
+
+					for n = first, num do
+						local txt, _, lineID = chatFrame:GetMessageInfo(n)
+						if txt then
+							local coloredTxt = WrapWithColor(txt, lineID)
+							if coloredTxt then
+								table.insert(Core.db.global.chatHistory[historyKey], coloredTxt)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end
+
+-- Restore chat messages from global storage after reload
+function UIManager:RestoreChatMessages()
+	if self._messagesRestored then
+		return
+	end
+
+	if not Core.db.profile.restoreChatMessages then
+		return
+	end
+
+	-- Only restore if the last save was within 10 seconds (reload detection)
+	local savedTime = Core.db.global.chatHistoryTime or 0
+	if time() - savedTime > 10 then
+		return
+	end
+
+	local chatHistory = Core.db.global.chatHistory
+	if not chatHistory then
+		return
+	end
+
+	-- Mark as restored to prevent multiple calls
+	self._messagesRestored = true
+
+	-- Set flag to prevent restored messages from being re-saved to rawMessages
+	self._restoringMessages = true
+
+	-- Restore messages directly to our SlidingMessageFrames
+	for _, window in pairs(self.windows) do
+		if window.frames then
+			for chatFrameIndex, smf in pairs(window.frames) do
+				-- Skip combat log (index 2)
+				if chatFrameIndex ~= 2 then
+					local historyKey = "ChatFrame" .. chatFrameIndex
+					local messages = chatHistory[historyKey]
+
+					if messages and #messages > 0 and smf.chatFrame then
+						-- Add each saved message directly to our SMF
+						-- Text is already wrapped with colors from save
+						for _, line in ipairs(messages) do
+							if line then
+								smf:AddMessage(smf.chatFrame, line)
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+
+	self._restoringMessages = false
 end
 
 -- Install the defensive Blizzard chat-frame hooks: route temporary (whisper)
