@@ -29,17 +29,22 @@ L["Capitalize the first letter of the channel name or initial. Requires the Chat
 L["Capitalize Player Names"] = true
 L["Capitalize the first letter of player names shown in chat. Requires the Player Names filter."] = true
 L["Force Class Colors"] = true
-L["Enable class-colored names for all chat types (Guild, Party, Raid, Whisper, etc.) on login. This overrides Blizzard's default settings."] = true
+L["Enable class-colored names for all chat types (Guild, Party, Raid, Whisper, etc.) on login. This overrides Blizzard's default settings."] =
+	true
 L["Prettify Money"] = true
-L['Display money gains and losses with coin icons (e.g. "+ 28"). When off, uses the default Blizzard text format.'] = true
+L['Display money gains and losses with coin icons (e.g. "+ 28"). When off, uses the default Blizzard text format.'] =
+	true
 L["Hide Crafting Broadcasts"] = true
-L['Hide the "<name> created: <item>" messages shown when other players craft items nearby. Requires the Learning (Crafting) filter.'] = true
-L['Hide the "UI Error: an interface error occurred" notifications the server prints to chat when a UI error happens.'] = true
+L['Hide the "<name> created: <item>" messages shown when other players craft items nearby. Requires the Learning (Crafting) filter.'] =
+	true
+L['Hide the "UI Error: an interface error occurred" notifications the server prints to chat when a UI error happens.'] =
+	true
 L["Show Startup Message"] = true
 L["Print a message on login showing how to open CleanerChat settings."] = true
 L["Use %s for settings."] = true
 L["Chat Debug Capture"] = true
-L["Print the raw text and underlying event for every chat line, for diagnosing filters (same as /ccdebug). Stays on across /reload."] = true
+L["Print the raw text and underlying event for every chat line, for diagnosing filters (same as /ccdebug). Stays on across /reload."] =
+	true
 L["Settings changed - the UI will reload when you close this window."] = true
 -- Chat tab right-click menu (CleanerChat multi-window)
 L["CleanerChat settings"] = true
@@ -83,7 +88,8 @@ L["Hide channel join, leave, and change notifications (works during gameplay, no
 L["Learning (Crafting)"] = true
 L["Simplify messages about new or improved trade skills."] = true
 L["One Line Quest Rewards"] = true
-L["Combine quest rewards (items, currency, experience) into a single line. Reputation gains remain separate per faction."] = true
+L["Combine quest rewards (items, currency, experience) into a single line. Reputation gains remain separate per faction."] =
+	true
 L["Show Item Destruction"] = true
 L["Display a message when you destroy (delete) an item."] = true
 L["Show Vendor Sales"] = true
@@ -152,7 +158,8 @@ L["Restore chat on reload"] = true
 L["Restores recent chat messages after a UI reload."] = true
 L["Animations"] = true
 L["Disable animations"] = true
-L["Show messages instantly with no slide or fade -- the chat becomes static. The timing sliders below have no effect while this is on."] = true
+L["Show messages instantly with no slide or fade -- the chat becomes static. The timing sliders below have no effect while this is on."] =
+	true
 L["Keep messages visible"] = true
 L["Messages never fade out -- they stay on screen permanently. Overrides the fade out delay and duration below."] = true
 L["Fade out delay"] = true
@@ -184,11 +191,14 @@ L["Opacity of the scroll indicator background."] = true
 L["Top bar"] = true
 L["Add an outline to the chat tab text so it stands out instead of looking flat."] = true
 L["The colour of the top bar background."] = true
-L["Show and hide the top bar instantly with no fade -- the tabs become static. The timing sliders below have no effect while this is on."] = true
+L["Show and hide the top bar instantly with no fade -- the tabs become static. The timing sliders below have no effect while this is on."] =
+	true
 L["Keep tabs visible"] = true
-L["Chat tabs never fade out -- they stay on screen permanently. Overrides the fade out delay and duration below."] = true
+L["Chat tabs never fade out -- they stay on screen permanently. Overrides the fade out delay and duration below."] =
+	true
 L["Show tabs on hover"] = true
-L["When enabled, chat tabs fade out when idle and reappear on mouse hover. When disabled, tabs are always visible."] = true
+L["When enabled, chat tabs fade out when idle and reappear on mouse hover. When disabled, tabs are always visible."] =
+	true
 L["Tab widths refit on /reload."] = true
 -- Tab Button Style
 L["Tab Style"] = true
@@ -232,6 +242,7 @@ L["Hide the Social (friends) button that appears to the left of the chat frame."
 L["About"] = true
 L["Author"] = true
 L["Credits"] = true
-L["CleanerChat stands on the shoulders of two excellent addons. All credit for the original work belongs to their creators."] = true
+L["CleanerChat stands on the shoulders of two excellent addons. All credit for the original work belongs to their creators."] =
+	true
 L["The immersive chat UI is built on Glass by mixxorz. This project keeps the spirit of Glass alive on 3.3.5."] = true
 L["The message filtering is based on ChatCleaner by Lars Norberg (Goldpaw). Backported to 3.3.5."] = true
