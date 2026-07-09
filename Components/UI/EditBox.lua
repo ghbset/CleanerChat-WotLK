@@ -264,7 +264,8 @@ end
 
 Core.Components.CreateEditBox = function(parent, profile)
 	local object = Mixin(_G.ChatFrame1EditBox, EditBoxMixin)
-	AceHook:Embed(object)
+	-- Do NOT embed AceHook here -- use the module-level Hooker table instead.
+	-- See comment at top of file for rationale.
 	object.profile = profile or Core.db.profile
 	object:Init(parent)
 	return object
