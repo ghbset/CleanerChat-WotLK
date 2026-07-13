@@ -682,18 +682,38 @@ function SlidingMessageFrameMixin:Update(incoming)
 		end
 	end
 
+	-- Reset ALL existing message timers so they fade together with new messages.
+	-- This prevents older messages from appearing "detached" by fading earlier.
+	if not self.state.mouseOver and not self.profile.messagesAlwaysVisible then
+		for _, message in ipairs(self.state.messages) do
+			if message.hideTimer then
+				message.hideTimer:Cancel()
+				message.hideTimer = nil
+			end
+			-- Stop any in-progress fade
+			if message.fadeHandle and LibEasing then
+				LibEasing:StopEasing(message.fadeHandle)
+				message.fadeHandle = nil
+			end
+			message:SetAlpha(1)
+		end
+	end
+
 	for _, message in ipairs(newMessages) do
 		message:Show()
-		-- Fade out new messages when mouse is not over, unless messages are pinned.
-		if not self.state.mouseOver and not self.profile.messagesAlwaysVisible then
-			message:HideDelay(self.profile.chatHoldTime)
-		end
 		table.insert(self.state.messages, message)
 
 		-- Queue for a next-frame re-measure so the layout is corrected once the
 		-- engine has laid the text out (fixes overlapping messages).
 		self.state.pendingMeasure = self.state.pendingMeasure or {}
 		table.insert(self.state.pendingMeasure, message)
+	end
+
+	-- Start fade timers for ALL messages together so they fade in sync
+	if not self.state.mouseOver and not self.profile.messagesAlwaysVisible then
+		for _, message in ipairs(self.state.messages) do
+			message:HideDelay(self.profile.chatHoldTime)
+		end
 	end
 
 	-- Release old messages
