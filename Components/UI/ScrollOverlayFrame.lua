@@ -60,11 +60,11 @@ function ScrollOverlayFrame:Init()
 	if self.profile.editBoxAnchor.position == "ABOVE" then
 		-- Edit box is above the chat, so indicator is above the main container
 		self:SetPoint("BOTTOMLEFT", mainContainer, "TOPLEFT", -1, self.profile.editBoxAnchor.yOfs or 5)
-		self:SetPoint("BOTTOMRIGHT", mainContainer, "TOPRIGHT", 0, self.profile.editBoxAnchor.yOfs or 5)
+		self:SetPoint("BOTTOMRIGHT", mainContainer, "TOPRIGHT", -1, self.profile.editBoxAnchor.yOfs or 5)
 	else
 		-- Edit box is below the chat (default), so indicator is below the main container
 		self:SetPoint("TOPLEFT", mainContainer, "BOTTOMLEFT", -1, self.profile.editBoxAnchor.yOfs or -5)
-		self:SetPoint("TOPRIGHT", mainContainer, "BOTTOMRIGHT", 0, self.profile.editBoxAnchor.yOfs or -5)
+		self:SetPoint("TOPRIGHT", mainContainer, "BOTTOMRIGHT", -1, self.profile.editBoxAnchor.yOfs or -5)
 	end
 
 	self:SetFadeInDuration(0.3)
@@ -134,11 +134,11 @@ function ScrollOverlayFrame:UpdatePosition()
 	if self.profile.editBoxAnchor.position == "ABOVE" then
 		-- Edit box is above the chat, so indicator is above the main container
 		self:SetPoint("BOTTOMLEFT", mainContainer, "TOPLEFT", -1, self.profile.editBoxAnchor.yOfs or 5)
-		self:SetPoint("BOTTOMRIGHT", mainContainer, "TOPRIGHT", 0, self.profile.editBoxAnchor.yOfs or 5)
+		self:SetPoint("BOTTOMRIGHT", mainContainer, "TOPRIGHT", -1, self.profile.editBoxAnchor.yOfs or 5)
 	else
 		-- Edit box is below the chat (default), so indicator is below the main container
 		self:SetPoint("TOPLEFT", mainContainer, "BOTTOMLEFT", -1, self.profile.editBoxAnchor.yOfs or -5)
-		self:SetPoint("TOPRIGHT", mainContainer, "BOTTOMRIGHT", 0, self.profile.editBoxAnchor.yOfs or -5)
+		self:SetPoint("TOPRIGHT", mainContainer, "BOTTOMRIGHT", -1, self.profile.editBoxAnchor.yOfs or -5)
 	end
 end
 

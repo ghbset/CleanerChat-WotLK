@@ -117,7 +117,7 @@ Core.defaults = {
 		scrollIndicatorColor = { r = 223 / 255, g = 186 / 255, b = 105 / 255 }, -- apache (gold)
 		scrollIndicatorOpacity = 1, -- fully solid
 		scrollIndicatorBgColor = { r = 17 / 255, g = 17 / 255, b = 17 / 255 }, -- codGray (same as chat bg)
-		scrollIndicatorBgOpacity = 0.65, -- slightly transparent
+		scrollIndicatorBgOpacity = 0.15, -- same as chatBackgroundOpacity
 		hideScrollIndicator = false, -- when true, hides the "Unread messages" / "Bring me to the present" indicator
 		useOverlayMask = false, -- when true, uses the overlay mask texture instead of solid background
 
