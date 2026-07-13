@@ -311,6 +311,21 @@ function SlidingMessageFrameMixin:Init(chatFrame)
 				end
 				self.state.mouseOver = true
 
+				-- Hide the scroll overlay immediately when edit box is focused
+				-- so it doesn't overlap with the edit box. Also set flag to prevent
+				-- it from re-appearing while edit box is open.
+				if self.overlay then
+					self.overlay.editBoxFocused = true
+					self.overlay:QuickHide()
+					-- Also explicitly hide child elements
+					if self.overlay.snapToPresentText then
+						self.overlay.snapToPresentText:Hide()
+					end
+					if self.overlay.newMessageAlertFrame then
+						self.overlay.newMessageAlertFrame:Hide()
+					end
+				end
+
 				-- Cancel all hide timers
 				for _, message in ipairs(self.state.messages) do
 					if message.hideTimer then
@@ -327,9 +342,8 @@ function SlidingMessageFrameMixin:Init(chatFrame)
 					message:FadeIn(fadeDuration)
 				end
 
-				-- If there are unread messages or the overlay is visible (scrolled up),
-				-- snap to the bottom just like clicking the overlay would
-				if self.state.unreadMessages or (self.overlay and self.overlay:IsShown()) then
+				-- If there are unread messages or scrolled up, snap to the bottom
+				if self.state.unreadMessages or not self.state.scrollAtBottom then
 					self:SnapToBottom()
 				end
 			end),
@@ -339,13 +353,16 @@ function SlidingMessageFrameMixin:Init(chatFrame)
 				end
 				self.state.mouseOver = false
 
+				-- Clear the edit box focus flag so overlay can show again
+				if self.overlay then
+					self.overlay.editBoxFocused = false
+				end
+
 				self.overlay:HideDelay(self.profile.chatHoldTime)
 
-				-- Start fade out timers for all messages, unless messages are pinned.
+				-- Start global fade timer for all messages, unless messages are pinned.
 				if not self.profile.messagesAlwaysVisible then
-					for _, message in ipairs(self.state.messages) do
-						message:HideDelay(self.profile.chatHoldTime)
-					end
+					self:StartGlobalFadeTimer(self.profile.chatHoldTime)
 				end
 			end),
 			Core:Subscribe(UPDATE_CONFIG, function(payload)

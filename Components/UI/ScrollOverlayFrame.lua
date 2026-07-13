@@ -170,6 +170,10 @@ function ScrollOverlayFrame:SetScript(name, callback)
 end
 
 function ScrollOverlayFrame:ShowNewMessageAlert()
+	-- Don't show if edit box is focused
+	if self.editBoxFocused then
+		return
+	end
 	-- Unread messages: swap the passive "Bring me to the present" hint for the
 	-- "Unread messages" alert (they share the same slot).
 	if self.snapToPresentText then
@@ -180,16 +184,23 @@ end
 
 function ScrollOverlayFrame:HideNewMessageAlert()
 	self.newMessageAlertFrame:Hide()
+	-- Don't show the default hint if edit box is focused
+	if self.editBoxFocused then
+		return
+	end
 	-- Back to the default hint whenever the overlay is shown without unread.
 	if self.snapToPresentText then
 		self.snapToPresentText:Show()
 	end
 end
 
--- Override Show to respect hideScrollIndicator setting
+-- Override Show to respect hideScrollIndicator setting and edit box focus
 function ScrollOverlayFrame:Show()
 	if self.profile.hideScrollIndicator then
 		return -- Don't show if indicator is disabled
+	end
+	if self.editBoxFocused then
+		return -- Don't show if edit box is focused (it would overlap)
 	end
 	-- Call the FadingFrameMixin's Show implementation directly
 	local FadingFrameMixin = Core.Components.FadingFrameMixin
