@@ -132,7 +132,6 @@ L["Position"] = true
 L["Above"] = true
 L["Below"] = true
 L["Vertical offset"] = true
-L["Horizontal padding"] = true
 L["Hide Combat Log tab"] = true
 L["Hides the Combat Log tab from the chat dock. Requires a UI reload."] = true
 L["Behavior"] = true

@@ -57,7 +57,6 @@ Core.defaults = {
 		editBoxFontFlags = "OUTLINE",
 		editBoxBackgroundOpacity = 0.6,
 		editBoxBackgroundColor = { r = 17 / 255, g = 17 / 255, b = 17 / 255 }, -- codGray
-		editBoxHorizontalPadding = 1,
 		editBoxAnchor = {
 			position = "BELOW",
 			yOfs = -5,

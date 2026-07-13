@@ -467,17 +467,6 @@ function C:OnEnable()
 										Core:Dispatch(UpdateConfig("editBoxAnchor", WindowIdFor(info)))
 									end,
 								},
-								editBoxHorizontalPadding = rangeOption({
-									key = "editBoxHorizontalPadding",
-									name = L["Horizontal padding"],
-									desc = "Default: " .. Core.defaults.profile.editBoxHorizontalPadding,
-									order = 2.3,
-									min = 0,
-									max = 100,
-									softMin = 0,
-									softMax = 50,
-									step = 1,
-								}),
 							},
 						},
 						section3 = {
