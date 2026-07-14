@@ -120,10 +120,12 @@ local function itemIconProcessor(text, profile)
 		local fullLink = colorCode .. itemLink
 		local texture = GetItemIcon(fullLink)
 		if texture then
-			-- Put icon after color code: |cXXX + icon + space + |Hitem...
-			-- The trailing space keeps the icon from overlapping the item name,
-			-- since inline textures reserve no gap of their own.
-			return colorCode .. "|T" .. texture .. ":" .. iconSize .. "|t " .. itemLink
+			-- Glue the icon directly to the item name with no separating space.
+			-- The icon renders inline (see buildDisplayText), so WoW reserves its
+			-- width and keeps it attached to the link's first word when the line
+			-- wraps. A space here would be a wrap point and could strand the icon
+			-- at the end of a line while its name moves to the next.
+			return colorCode .. "|T" .. texture .. ":" .. iconSize .. "|t" .. itemLink
 		end
 		return fullLink
 	end

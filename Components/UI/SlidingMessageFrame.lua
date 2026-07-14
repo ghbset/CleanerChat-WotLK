@@ -360,9 +360,11 @@ function SlidingMessageFrameMixin:Init(chatFrame)
 
 				self.overlay:HideDelay(self.profile.chatHoldTime)
 
-				-- Start global fade timer for all messages, unless messages are pinned.
+				-- Start fade out timers for all messages, unless messages are pinned.
 				if not self.profile.messagesAlwaysVisible then
-					self:StartGlobalFadeTimer(self.profile.chatHoldTime)
+					for _, message in ipairs(self.state.messages) do
+						message:HideDelay(self.profile.chatHoldTime)
+					end
 				end
 			end),
 			Core:Subscribe(UPDATE_CONFIG, function(payload)
