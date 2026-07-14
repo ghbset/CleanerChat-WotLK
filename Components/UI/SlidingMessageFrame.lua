@@ -309,22 +309,24 @@ function SlidingMessageFrameMixin:Init(chatFrame)
 				if window and window ~= self.window then
 					return
 				end
-				self.state.mouseOver = true
 
-				-- Hide the scroll overlay immediately when edit box is focused
-				-- so it doesn't overlap with the edit box. Also set flag to prevent
-				-- it from re-appearing while edit box is open.
+				-- Always hide the scroll overlay (unread / "Bring me to the present"
+				-- indicator) while the edit box is focused so it doesn't overlap the
+				-- input box. This is independent of showOnEditFocus. Hiding the
+				-- overlay frame itself makes its labels invisible while preserving
+				-- their shown-state, so the correct label reappears when it's shown
+				-- again (don't Hide the child labels here, or they stay hidden).
 				if self.overlay then
 					self.overlay.editBoxFocused = true
 					self.overlay:QuickHide()
-					-- Also explicitly hide child elements
-					if self.overlay.snapToPresentText then
-						self.overlay.snapToPresentText:Hide()
-					end
-					if self.overlay.newMessageAlertFrame then
-						self.overlay.newMessageAlertFrame:Hide()
-					end
 				end
+
+				-- Revealing all messages on focus is opt-in via showOnEditFocus.
+				if not self.profile.showOnEditFocus then
+					return
+				end
+
+				self.state.mouseOver = true
 
 				-- Cancel all hide timers
 				for _, message in ipairs(self.state.messages) do
@@ -351,19 +353,33 @@ function SlidingMessageFrameMixin:Init(chatFrame)
 				if window and window ~= self.window then
 					return
 				end
-				self.state.mouseOver = false
 
-				-- Clear the edit box focus flag so overlay can show again
+				-- Clear the edit box focus flag so the overlay can show again.
 				if self.overlay then
 					self.overlay.editBoxFocused = false
 				end
 
-				self.overlay:HideDelay(self.profile.chatHoldTime)
+				if self.profile.showOnEditFocus then
+					self.state.mouseOver = false
 
-				-- Start fade out timers for all messages, unless messages are pinned.
-				if not self.profile.messagesAlwaysVisible then
-					for _, message in ipairs(self.state.messages) do
-						message:HideDelay(self.profile.chatHoldTime)
+					self.overlay:HideDelay(self.profile.chatHoldTime)
+
+					-- Start fade out timers for all messages, unless messages are pinned.
+					if not self.profile.messagesAlwaysVisible then
+						for _, message in ipairs(self.state.messages) do
+							message:HideDelay(self.profile.chatHoldTime)
+						end
+					end
+				elseif self.overlay and (self.state.unreadMessages or not self.state.scrollAtBottom) then
+					-- The overlay was only hidden to avoid overlapping the edit box;
+					-- restore the indicator now that typing is done and the user is
+					-- still scrolled up / has unread messages. We explicitly hid the
+					-- label on focus, so re-show the correct one for the state.
+					self.overlay:Show()
+					if self.state.unreadMessages then
+						self.overlay:ShowNewMessageAlert()
+					else
+						self.overlay:HideNewMessageAlert()
 					end
 				end
 			end),
