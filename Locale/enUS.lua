@@ -46,7 +46,6 @@ L["Settings changed - the UI will reload when you close this window."] = true
 L["CleanerChat settings"] = true
 L["New detached window"] = true
 L["Delete window"] = true
-L["Filter Selection"] = true
 L["Achievements"] = true
 L["Simplify Achievement messages."] = true
 L["Auctions"] = true
