@@ -661,6 +661,7 @@ files = {
   -- Config uses AceConfig callbacks with required `info` parameter
   ["GlassUI/Modules/Config.lua"] = {
     ignore = { "212/info" },  -- AceConfig get/set callbacks require info arg
+    globals = { "StaticPopupDialogs" },  -- registers the profile-change reload prompt
   },
 
   -- UIManager modifies chat frame globals
