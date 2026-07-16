@@ -3,30 +3,14 @@
 
 local _G = _G
 
----
--- BackdropTemplate compatibility
--- In 3.3.5, BackdropTemplate doesn't exist as an XML template (frames have
--- SetBackdrop built-in natively), so CreateFrame calls that inherit
--- "BackdropTemplate" would error. This wrapper strips it out.
-local originalCreateFrame = _G.CreateFrame
-local function GlassCreateFrame(frameType, name, parent, template, id)
-	if template then
-		-- Handle both standalone "BackdropTemplate" and comma-separated lists
-		if template == "BackdropTemplate" then
-			template = nil
-		elseif type(template) == "string" then
-			-- Remove "BackdropTemplate" from comma-separated template list
-			template = template:gsub("BackdropTemplate%s*,%s*", "")
-			template = template:gsub("%s*,%s*BackdropTemplate", "")
-			template = template:gsub("^BackdropTemplate$", "")
-			if template == "" then
-				template = nil
-			end
-		end
-	end
-	return originalCreateFrame(frameType, name, parent, template, id)
-end
-_G.CreateFrame = GlassCreateFrame
+-- NOTE: We used to replace the GLOBAL CreateFrame here to strip the retail-only
+-- "BackdropTemplate" from CreateFrame calls made by the (then retail-versioned)
+-- bundled Ace3 libraries. That global override ran for EVERY addon in the UI and
+-- risked tainting other addons' secure frames (e.g. Shadowed Unit Frames -- see
+-- issue #46). The bundled libraries are now the native 3.3.5 versions and no
+-- longer use "BackdropTemplate", so the override is unnecessary and has been
+-- removed. The BackdropTemplateMixin polyfill below is kept for any code that
+-- references the mixin table directly.
 
 ---
 -- BackdropTemplateMixin polyfill
