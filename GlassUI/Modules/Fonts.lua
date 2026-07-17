@@ -10,7 +10,9 @@ local CreateFont = CreateFont
 -- luacheck: pop
 
 function Fonts:OnInitialize()
-	self.fonts = {}
+	-- Only create the table if it doesn't already exist, so a defensive early
+	-- SetupFonts() call (e.g. from UIManager) can't have its font objects wiped.
+	self.fonts = self.fonts or {}
 	-- Create the shared font objects during initialization so they exist before
 	-- ANY module's OnEnable builds frames that inherit them. Module enable order is
 	-- not guaranteed: when a higher-versioned AceAddon from another addon (e.g. DBM)
