@@ -700,8 +700,8 @@ Options.OnInitialize = function(self)
 				-- globals is exactly what WoW persists on the reload below, so nothing
 				-- survives -- every CleanerChat setting and every saved Glass profile is
 				-- gone, and both addons rebuild from their defaults on next load.
-				_G.CleanerChat_DB = nil
-				_G.GlassDB = nil
+				CleanerChat_DB = nil
+				GlassDB = nil
 				ReloadUI()
 			end,
 			timeout = 0,
