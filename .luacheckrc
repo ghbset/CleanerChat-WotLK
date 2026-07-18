@@ -644,6 +644,7 @@ files = {
   -- Options uses AceConfig callbacks with required `info` parameter
   ["Core/Options.lua"] = {
     ignore = { "212" },  -- AceConfig get/set callbacks require info arg
+    globals = { "StaticPopupDialogs" },  -- registers the reset-profile confirm dialog
   },
 
   -- Private.lua sets up shared state

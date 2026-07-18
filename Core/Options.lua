@@ -687,6 +687,43 @@ Options.OnInitialize = function(self)
 		self:OpenOptionsMenu("")
 	end)
 
+	-- Reset Profile button (sits next to Open Settings). Restores CleanerChat's
+	-- filter settings and the Glass UI (visual) profile to their defaults, then
+	-- reloads so the fresh settings apply cleanly. Guarded by a confirm popup
+	-- since it discards all customisations.
+	if not StaticPopupDialogs["CLEANERCHAT_RESET_PROFILE"] then
+		StaticPopupDialogs["CLEANERCHAT_RESET_PROFILE"] = {
+			text = "CleanerChat: reset all settings to default?\nYour UI will reload.",
+			button1 = "Reset",
+			button2 = "Cancel",
+			OnAccept = function()
+				-- Reset CleanerChat filter settings.
+				if ns.ResetCleanerChatSettings then
+					ns:ResetCleanerChatSettings()
+				end
+				-- Reset the Glass UI (visual) profile. Resetting its AceDB profile also
+				-- fires the OnProfileReset callback wired up in Config.lua.
+				local Glass = _G.Glass
+				if Glass and Glass.db and Glass.db.ResetProfile then
+					Glass.db:ResetProfile()
+				end
+				ReloadUI()
+			end,
+			timeout = 0,
+			whileDead = true,
+			hideOnEscape = true,
+			preferredIndex = 3,
+		}
+	end
+
+	local resetButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+	resetButton:SetSize(150, 25)
+	resetButton:SetPoint("LEFT", button, "RIGHT", 10, 0)
+	resetButton:SetText("Reset Profile")
+	resetButton:SetScript("OnClick", function()
+		StaticPopup_Show("CLEANERCHAT_RESET_PROFILE")
+	end)
+
 	-- Add to Interface Options
 	InterfaceOptions_AddCategory(panel)
 end
